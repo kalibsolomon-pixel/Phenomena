@@ -19,7 +19,39 @@ public record FightRecord(
     List<CombatEvent> events,
     Policy policy,
     List<Evaluation> evaluations,
-    String opponentLabel) {
+    String opponentLabel,
+    MatchEvidence matchEvidence) {
+  public FightRecord(
+      int schemaVersion,
+      String id,
+      long startEpochMillis,
+      long endEpochMillis,
+      long durationNanos,
+      String opponent,
+      Outcome outcome,
+      String reason,
+      Statistics statistics,
+      List<CombatEvent> events,
+      Policy policy,
+      List<Evaluation> evaluations,
+      String opponentLabel) {
+    this(
+        schemaVersion,
+        id,
+        startEpochMillis,
+        endEpochMillis,
+        durationNanos,
+        opponent,
+        outcome,
+        reason,
+        statistics,
+        events,
+        policy,
+        evaluations,
+        opponentLabel,
+        MatchEvidence.unavailable());
+  }
+
   public enum Outcome {
     WIN,
     LOSS,
@@ -33,14 +65,49 @@ public record FightRecord(
       double comboSeconds,
       double jumpWindowMillis,
       double perfectCooldown,
-      double greatCooldown) {
+      double greatCooldown,
+      double perfectReachTarget,
+      double perfectReachTolerance,
+      double timingToleranceTicks,
+      int jumpWindowTicks) {
+    public Policy(
+        double correlationMillis,
+        double comboSeconds,
+        double jumpWindowMillis,
+        double perfectCooldown,
+        double greatCooldown) {
+      this(
+          correlationMillis,
+          comboSeconds,
+          jumpWindowMillis,
+          perfectCooldown,
+          greatCooldown,
+          3,
+          .06,
+          1,
+          4);
+    }
+
+    public Policy {
+      if (perfectReachTarget <= 0) {
+        perfectReachTarget = 3;
+        perfectReachTolerance = .06;
+        timingToleranceTicks = 1;
+        jumpWindowTicks = 4;
+      }
+    }
+
     public static Policy of(Config c) {
       return new Policy(
           c.correlationMillis,
           c.comboSeconds,
           c.jumpWindowMillis,
           c.perfectCooldown,
-          c.greatCooldown);
+          c.greatCooldown,
+          c.perfectReachTarget,
+          c.perfectReachTolerance,
+          c.timingToleranceTicks,
+          c.jumpWindowTicks);
     }
   }
 
@@ -127,12 +194,14 @@ public record FightRecord(
         List.of(),
         policy,
         List.of(),
-        opponentLabel);
+        opponentLabel,
+        matchEvidence);
   }
 
   public FightRecord {
     events = List.copyOf(events);
     if (policy == null) policy = Policy.of(new Config());
     evaluations = evaluations == null ? List.of() : List.copyOf(evaluations);
+    if (matchEvidence == null) matchEvidence = MatchEvidence.unavailable();
   }
 }

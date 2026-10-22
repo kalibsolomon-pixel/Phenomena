@@ -1,0 +1,1256 @@
+{
+  "schemaVersion": 2,
+  "id": "01200000-0000-4000-8000-000000000012",
+  "startEpochMillis": 1792706671000,
+  "endEpochMillis": 1792706689000,
+  "durationNanos": 18000000000,
+  "opponent": "Opponent",
+  "outcome": "WIN",
+  "reason": "Server result / minemen-result",
+  "statistics": {
+    "attempts": 14,
+    "hits": 14,
+    "emptyMisses": 0,
+    "uncertain": 0,
+    "contacts": 14,
+    "criticalConditions": 0,
+    "sprintHits": 5,
+    "jumpCandidates": 2,
+    "currentCombo": 0,
+    "longestCombo": 5,
+    "incoming": 2,
+    "perfectReachHits": 11,
+    "centerAim": 3,
+    "edgeAim": 0,
+    "highAim": 8,
+    "lowAim": 3,
+    "reachDistribution": [
+      0,
+      0,
+      0,
+      14,
+      0,
+      0,
+      0,
+      0
+    ],
+    "recentReach": [
+      3.001349696386611,
+      3.0077898862786276,
+      3.0408222572192543,
+      3.334321520189677,
+      3.001349696386611,
+      3.0077898862786276,
+      3.0408222572192543,
+      3.334321520189677,
+      3.001349696386611,
+      3.0077898862786276,
+      3.0408222572192543,
+      3.334321520189677,
+      3.001349696386611,
+      3.0077898862786276,
+      0.0,
+      0.0
+    ],
+    "recentReachIndex": 14,
+    "recentReachCount": 14,
+    "recentInterval": 0.25,
+    "momentumAt": 17751000000,
+    "reachSum": 43.16198966288775,
+    "maxReach": 3.334321520189677,
+    "cooldownSum": 14.0,
+    "intervalSum": 15.25,
+    "intervalSquared": 26.0425,
+    "reachCount": 14,
+    "intervalCount": 13,
+    "lastHit": 17750000000,
+    "comboStart": 14650000000,
+    "momentum": 0.7753608048577594
+  },
+  "events": [
+    {
+      "sequence": 1,
+      "nanoTime": 2500000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 3.001349696386611,
+        "aimX": 0.5,
+        "aimY": 0.85,
+        "aimZ": 0.0,
+        "sprinting": true,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "sword",
+          "attackSpeed": 1.6,
+          "cooldownTicks": 12.5,
+          "timing": {
+            "grade": "OPENER",
+            "intervalTicks": 0.0,
+            "expectedTicks": 12.5
+          },
+          "eye": {
+            "x": 0.3,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": 0.0,
+            "minY": 0.0,
+            "minZ": 3.0,
+            "maxX": 0.6,
+            "maxY": 1.8,
+            "maxZ": 3.6
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.9,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.85,
+              "z": 0.0
+            },
+            "idealRadius": 0.108,
+            "goodRadius": 0.24,
+            "peripheralRadius": 0.42,
+            "reachable": true
+          },
+          "aimQuality": "IDEAL",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "synthetic melee attempt",
+      "clientTick": 50
+    },
+    {
+      "sequence": 2,
+      "nanoTime": 2501000000,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source",
+      "clientTick": 50
+    },
+    {
+      "sequence": 3,
+      "nanoTime": 3100000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 3.0077898862786276,
+        "aimX": 0.7,
+        "aimY": 0.8,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "sword",
+          "attackSpeed": 1.6,
+          "cooldownTicks": 12.5,
+          "timing": {
+            "grade": "PERFECT",
+            "intervalTicks": 12.0,
+            "expectedTicks": 12.5
+          },
+          "eye": {
+            "x": 0.3,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": 0.0,
+            "minY": 0.0,
+            "minZ": 3.0,
+            "maxX": 0.6,
+            "maxY": 1.8,
+            "maxZ": 3.6
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.9,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.85,
+              "z": 0.0
+            },
+            "idealRadius": 0.108,
+            "goodRadius": 0.24,
+            "peripheralRadius": 0.42,
+            "reachable": true
+          },
+          "aimQuality": "GOOD",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "synthetic melee attempt",
+      "clientTick": 62
+    },
+    {
+      "sequence": 4,
+      "nanoTime": 3101000000,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source",
+      "clientTick": 62
+    },
+    {
+      "sequence": 5,
+      "nanoTime": 3300000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 3.0408222572192543,
+        "aimX": 0.15,
+        "aimY": 0.65,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "sword",
+          "attackSpeed": 1.6,
+          "cooldownTicks": 12.5,
+          "timing": {
+            "grade": "TOO_FAST",
+            "intervalTicks": 4.0,
+            "expectedTicks": 12.5
+          },
+          "eye": {
+            "x": 0.3,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": 0.0,
+            "minY": 0.0,
+            "minZ": 3.0,
+            "maxX": 0.6,
+            "maxY": 1.8,
+            "maxZ": 3.6
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.9,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.85,
+              "z": 0.0
+            },
+            "idealRadius": 0.108,
+            "goodRadius": 0.24,
+            "peripheralRadius": 0.42,
+            "reachable": true
+          },
+          "aimQuality": "PERIPHERAL",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "synthetic melee attempt",
+      "clientTick": 66
+    },
+    {
+      "sequence": 6,
+      "nanoTime": 3301000000,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source",
+      "clientTick": 66
+    },
+    {
+      "sequence": 7,
+      "nanoTime": 4500000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 3.334321520189677,
+        "aimX": 0.15,
+        "aimY": 0.1,
+        "aimZ": 0.0,
+        "sprinting": true,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "sword",
+          "attackSpeed": 1.6,
+          "cooldownTicks": 12.5,
+          "timing": {
+            "grade": "TOO_SLOW",
+            "intervalTicks": 24.0,
+            "expectedTicks": 12.5
+          },
+          "eye": {
+            "x": 0.3,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": 0.0,
+            "minY": 0.0,
+            "minZ": 3.0,
+            "maxX": 0.6,
+            "maxY": 1.8,
+            "maxZ": 3.6
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.9,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.85,
+              "z": 0.0
+            },
+            "idealRadius": 0.108,
+            "goodRadius": 0.24,
+            "peripheralRadius": 0.42,
+            "reachable": true
+          },
+          "aimQuality": "POOR",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "synthetic melee attempt",
+      "clientTick": 90
+    },
+    {
+      "sequence": 8,
+      "nanoTime": 4501000000,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source",
+      "clientTick": 90
+    },
+    {
+      "sequence": 9,
+      "nanoTime": 7500000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 3.001349696386611,
+        "aimX": 0.5,
+        "aimY": 0.85,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "axe",
+          "attackSpeed": 1.0,
+          "cooldownTicks": 20.0,
+          "timing": {
+            "grade": "OPENER",
+            "intervalTicks": 60.0,
+            "expectedTicks": 20.0
+          },
+          "eye": {
+            "x": 0.3,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": 0.0,
+            "minY": 0.0,
+            "minZ": 3.0,
+            "maxX": 0.6,
+            "maxY": 1.8,
+            "maxZ": 3.6
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.9,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.85,
+              "z": 0.0
+            },
+            "idealRadius": 0.108,
+            "goodRadius": 0.24,
+            "peripheralRadius": 0.42,
+            "reachable": true
+          },
+          "aimQuality": "IDEAL",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "synthetic melee attempt",
+      "clientTick": 150
+    },
+    {
+      "sequence": 10,
+      "nanoTime": 7501000000,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source",
+      "clientTick": 150
+    },
+    {
+      "sequence": 11,
+      "nanoTime": 7540000000,
+      "kind": "JUMP_INPUT",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "jump pressed",
+      "clientTick": 150
+    },
+    {
+      "sequence": 12,
+      "nanoTime": 7545000000,
+      "kind": "JUMP",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "actual jump",
+      "clientTick": 150
+    },
+    {
+      "sequence": 13,
+      "nanoTime": 7548000000,
+      "kind": "DAMAGE_IN",
+      "actor": "Opponent",
+      "target": "local",
+      "confidence": "CONFIRMED",
+      "detail": "synthetic server damage",
+      "clientTick": 151
+    },
+    {
+      "sequence": 14,
+      "nanoTime": 8500000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 3.0077898862786276,
+        "aimX": 0.7,
+        "aimY": 0.8,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "axe",
+          "attackSpeed": 1.0,
+          "cooldownTicks": 20.0,
+          "timing": {
+            "grade": "PERFECT",
+            "intervalTicks": 20.0,
+            "expectedTicks": 20.0
+          },
+          "eye": {
+            "x": 0.3,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": 0.0,
+            "minY": 0.0,
+            "minZ": 3.0,
+            "maxX": 0.6,
+            "maxY": 1.8,
+            "maxZ": 3.6
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.9,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.85,
+              "z": 0.0
+            },
+            "idealRadius": 0.108,
+            "goodRadius": 0.24,
+            "peripheralRadius": 0.42,
+            "reachable": true
+          },
+          "aimQuality": "GOOD",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "synthetic melee attempt",
+      "clientTick": 170
+    },
+    {
+      "sequence": 15,
+      "nanoTime": 8501000000,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source",
+      "clientTick": 170
+    },
+    {
+      "sequence": 16,
+      "nanoTime": 10500000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 3.0408222572192543,
+        "aimX": 0.15,
+        "aimY": 0.65,
+        "aimZ": 0.0,
+        "sprinting": true,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "trident",
+          "attackSpeed": 1.1,
+          "cooldownTicks": 18.18181818181818,
+          "timing": {
+            "grade": "OPENER",
+            "intervalTicks": 40.0,
+            "expectedTicks": 18.18181818181818
+          },
+          "eye": {
+            "x": 0.3,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": 0.0,
+            "minY": 0.0,
+            "minZ": 3.0,
+            "maxX": 0.6,
+            "maxY": 1.8,
+            "maxZ": 3.6
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.9,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.85,
+              "z": 0.0
+            },
+            "idealRadius": 0.108,
+            "goodRadius": 0.24,
+            "peripheralRadius": 0.42,
+            "reachable": true
+          },
+          "aimQuality": "PERIPHERAL",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "synthetic melee attempt",
+      "clientTick": 210
+    },
+    {
+      "sequence": 17,
+      "nanoTime": 10501000000,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source",
+      "clientTick": 210
+    },
+    {
+      "sequence": 18,
+      "nanoTime": 11400000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 3.334321520189677,
+        "aimX": 0.15,
+        "aimY": 0.1,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "trident",
+          "attackSpeed": 1.1,
+          "cooldownTicks": 18.18181818181818,
+          "timing": {
+            "grade": "PERFECT",
+            "intervalTicks": 18.0,
+            "expectedTicks": 18.18181818181818
+          },
+          "eye": {
+            "x": 0.3,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": 0.0,
+            "minY": 0.0,
+            "minZ": 3.0,
+            "maxX": 0.6,
+            "maxY": 1.8,
+            "maxZ": 3.6
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.9,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.85,
+              "z": 0.0
+            },
+            "idealRadius": 0.108,
+            "goodRadius": 0.24,
+            "peripheralRadius": 0.42,
+            "reachable": true
+          },
+          "aimQuality": "POOR",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "synthetic melee attempt",
+      "clientTick": 228
+    },
+    {
+      "sequence": 19,
+      "nanoTime": 11401000000,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source",
+      "clientTick": 228
+    },
+    {
+      "sequence": 20,
+      "nanoTime": 13000000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 3.001349696386611,
+        "aimX": 0.5,
+        "aimY": 0.85,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "mace",
+          "attackSpeed": 0.6,
+          "cooldownTicks": 33.333333333333336,
+          "timing": {
+            "grade": "OPENER",
+            "intervalTicks": 32.0,
+            "expectedTicks": 33.333333333333336
+          },
+          "eye": {
+            "x": 0.3,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": 0.0,
+            "minY": 0.0,
+            "minZ": 3.0,
+            "maxX": 0.6,
+            "maxY": 1.8,
+            "maxZ": 3.6
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.9,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.85,
+              "z": 0.0
+            },
+            "idealRadius": 0.108,
+            "goodRadius": 0.24,
+            "peripheralRadius": 0.42,
+            "reachable": true
+          },
+          "aimQuality": "IDEAL",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "synthetic melee attempt",
+      "clientTick": 260
+    },
+    {
+      "sequence": 21,
+      "nanoTime": 13001000000,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source",
+      "clientTick": 260
+    },
+    {
+      "sequence": 22,
+      "nanoTime": 13040000000,
+      "kind": "JUMP_INPUT",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "jump pressed",
+      "clientTick": 260
+    },
+    {
+      "sequence": 23,
+      "nanoTime": 13045000000,
+      "kind": "JUMP",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "actual jump",
+      "clientTick": 260
+    },
+    {
+      "sequence": 24,
+      "nanoTime": 13048000000,
+      "kind": "DAMAGE_IN",
+      "actor": "Opponent",
+      "target": "local",
+      "confidence": "CONFIRMED",
+      "detail": "synthetic server damage",
+      "clientTick": 260
+    },
+    {
+      "sequence": 25,
+      "nanoTime": 14650000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 3.0077898862786276,
+        "aimX": 0.7,
+        "aimY": 0.8,
+        "aimZ": 0.0,
+        "sprinting": true,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "mace",
+          "attackSpeed": 0.6,
+          "cooldownTicks": 33.333333333333336,
+          "timing": {
+            "grade": "PERFECT",
+            "intervalTicks": 33.0,
+            "expectedTicks": 33.333333333333336
+          },
+          "eye": {
+            "x": 0.3,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": 0.0,
+            "minY": 0.0,
+            "minZ": 3.0,
+            "maxX": 0.6,
+            "maxY": 1.8,
+            "maxZ": 3.6
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.9,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.85,
+              "z": 0.0
+            },
+            "idealRadius": 0.108,
+            "goodRadius": 0.24,
+            "peripheralRadius": 0.42,
+            "reachable": true
+          },
+          "aimQuality": "GOOD",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "synthetic melee attempt",
+      "clientTick": 293
+    },
+    {
+      "sequence": 26,
+      "nanoTime": 14651000000,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source",
+      "clientTick": 293
+    },
+    {
+      "sequence": 27,
+      "nanoTime": 16500000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 3.0408222572192543,
+        "aimX": 0.15,
+        "aimY": 0.65,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "fist",
+          "attackSpeed": 4.0,
+          "cooldownTicks": 5.0,
+          "timing": {
+            "grade": "OPENER",
+            "intervalTicks": 37.0,
+            "expectedTicks": 5.0
+          },
+          "eye": {
+            "x": 0.3,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": 0.0,
+            "minY": 0.0,
+            "minZ": 3.0,
+            "maxX": 0.6,
+            "maxY": 1.8,
+            "maxZ": 3.6
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.9,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.85,
+              "z": 0.0
+            },
+            "idealRadius": 0.108,
+            "goodRadius": 0.24,
+            "peripheralRadius": 0.42,
+            "reachable": true
+          },
+          "aimQuality": "PERIPHERAL",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "synthetic melee attempt",
+      "clientTick": 330
+    },
+    {
+      "sequence": 28,
+      "nanoTime": 16501000000,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source",
+      "clientTick": 330
+    },
+    {
+      "sequence": 29,
+      "nanoTime": 16750000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 3.334321520189677,
+        "aimX": 0.15,
+        "aimY": 0.1,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "fist",
+          "attackSpeed": 4.0,
+          "cooldownTicks": 5.0,
+          "timing": {
+            "grade": "PERFECT",
+            "intervalTicks": 5.0,
+            "expectedTicks": 5.0
+          },
+          "eye": {
+            "x": 0.3,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": 0.0,
+            "minY": 0.0,
+            "minZ": 3.0,
+            "maxX": 0.6,
+            "maxY": 1.8,
+            "maxZ": 3.6
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.9,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.85,
+              "z": 0.0
+            },
+            "idealRadius": 0.108,
+            "goodRadius": 0.24,
+            "peripheralRadius": 0.42,
+            "reachable": true
+          },
+          "aimQuality": "POOR",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "synthetic melee attempt",
+      "clientTick": 335
+    },
+    {
+      "sequence": 30,
+      "nanoTime": 16751000000,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source",
+      "clientTick": 335
+    },
+    {
+      "sequence": 31,
+      "nanoTime": 17500000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 3.001349696386611,
+        "aimX": 0.5,
+        "aimY": 0.85,
+        "aimZ": 0.0,
+        "sprinting": true,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "ordinary_item",
+          "attackSpeed": 4.0,
+          "cooldownTicks": 5.0,
+          "timing": {
+            "grade": "OPENER",
+            "intervalTicks": 15.0,
+            "expectedTicks": 5.0
+          },
+          "eye": {
+            "x": 0.3,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": 0.0,
+            "minY": 0.0,
+            "minZ": 3.0,
+            "maxX": 0.6,
+            "maxY": 1.8,
+            "maxZ": 3.6
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.9,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.85,
+              "z": 0.0
+            },
+            "idealRadius": 0.108,
+            "goodRadius": 0.24,
+            "peripheralRadius": 0.42,
+            "reachable": true
+          },
+          "aimQuality": "IDEAL",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "synthetic melee attempt",
+      "clientTick": 350
+    },
+    {
+      "sequence": 32,
+      "nanoTime": 17501000000,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source",
+      "clientTick": 350
+    },
+    {
+      "sequence": 33,
+      "nanoTime": 17750000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 3.0077898862786276,
+        "aimX": 0.7,
+        "aimY": 0.8,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "ordinary_item",
+          "attackSpeed": 4.0,
+          "cooldownTicks": 5.0,
+          "timing": {
+            "grade": "PERFECT",
+            "intervalTicks": 5.0,
+            "expectedTicks": 5.0
+          },
+          "eye": {
+            "x": 0.3,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": 0.0,
+            "minY": 0.0,
+            "minZ": 3.0,
+            "maxX": 0.6,
+            "maxY": 1.8,
+            "maxZ": 3.6
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.9,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.85,
+              "z": 0.0
+            },
+            "idealRadius": 0.108,
+            "goodRadius": 0.24,
+            "peripheralRadius": 0.42,
+            "reachable": true
+          },
+          "aimQuality": "GOOD",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "synthetic melee attempt",
+      "clientTick": 355
+    },
+    {
+      "sequence": 34,
+      "nanoTime": 17751000000,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source",
+      "clientTick": 355
+    }
+  ],
+  "policy": {
+    "correlationMillis": 250.0,
+    "comboSeconds": 3.0,
+    "jumpWindowMillis": 150.0,
+    "perfectCooldown": 0.95,
+    "greatCooldown": 0.85,
+    "perfectReachTarget": 3.0,
+    "perfectReachTolerance": 0.06,
+    "timingToleranceTicks": 1.0,
+    "jumpWindowTicks": 4
+  },
+  "evaluations": [
+    {
+      "attackSequence": 1,
+      "evidenceSequence": 2,
+      "confidence": "INFERRED",
+      "combo": 1,
+      "momentum": 0.2
+    },
+    {
+      "attackSequence": 3,
+      "evidenceSequence": 4,
+      "confidence": "INFERRED",
+      "combo": 2,
+      "momentum": 0.3637461506155964
+    },
+    {
+      "attackSequence": 5,
+      "evidenceSequence": 6,
+      "confidence": "INFERRED",
+      "combo": 3,
+      "momentum": 0.5402870646792534
+    },
+    {
+      "attackSequence": 7,
+      "evidenceSequence": 8,
+      "confidence": "INFERRED",
+      "combo": 4,
+      "momentum": 0.5621652500682576
+    },
+    {
+      "attackSequence": 9,
+      "evidenceSequence": 10,
+      "confidence": "INFERRED",
+      "combo": 5,
+      "momentum": 0.40680903804111473
+    },
+    {
+      "attackSequence": 14,
+      "evidenceSequence": 15,
+      "confidence": "INFERRED",
+      "combo": 1,
+      "momentum": 0.30953007240479513
+    },
+    {
+      "attackSequence": 16,
+      "evidenceSequence": 17,
+      "confidence": "INFERRED",
+      "combo": 2,
+      "momentum": 0.3589180380280195
+    },
+    {
+      "attackSequence": 18,
+      "evidenceSequence": 19,
+      "confidence": "INFERRED",
+      "combo": 3,
+      "momentum": 0.4658930223024906
+    },
+    {
+      "attackSequence": 20,
+      "evidenceSequence": 21,
+      "confidence": "INFERRED",
+      "combo": 4,
+      "momentum": 0.47331438022985906
+    },
+    {
+      "attackSequence": 25,
+      "evidenceSequence": 26,
+      "confidence": "INFERRED",
+      "combo": 1,
+      "momentum": 0.3265636752950044
+    },
+    {
+      "attackSequence": 27,
+      "evidenceSequence": 28,
+      "confidence": "INFERRED",
+      "combo": 2,
+      "momentum": 0.3762596667346155
+    },
+    {
+      "attackSequence": 29,
+      "evidenceSequence": 30,
+      "confidence": "INFERRED",
+      "combo": 3,
+      "momentum": 0.5461756048294737
+    },
+    {
+      "attackSequence": 31,
+      "evidenceSequence": 32,
+      "confidence": "INFERRED",
+      "combo": 4,
+      "momentum": 0.6253619887356923
+    },
+    {
+      "attackSequence": 33,
+      "evidenceSequence": 34,
+      "confidence": "INFERRED",
+      "combo": 5,
+      "momentum": 0.7753608048577594
+    }
+  ],
+  "matchEvidence": {
+    "roundId": "b2391009-a037-4438-9acf-bbf0a5ff1c2c",
+    "confidence": "CONFIRMED",
+    "entries": [
+      {
+        "nanoTime": 0,
+        "kind": "START",
+        "rule": "minemen-start",
+        "origin": "SYSTEM",
+        "text": "Announcement text redacted",
+        "accepted": true
+      },
+      {
+        "nanoTime": 18000000000,
+        "kind": "RESULT",
+        "rule": "minemen-result",
+        "origin": "SYSTEM",
+        "text": "Announcement text redacted",
+        "accepted": true
+      }
+    ],
+    "timelineStartNanos": 0
+  }
+}

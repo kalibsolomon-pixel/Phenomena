@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import dev.kwamster.analytics.*;
 import dev.kwamster.combat.events.CombatEvent;
 import dev.kwamster.combat.fights.FightRecord;
+import dev.kwamster.combat.fights.MatchEvidence;
 import dev.kwamster.combat.quality.HitQuality.Grade;
 import dev.kwamster.recording.storage.AtomicJson;
 import java.io.*;
@@ -20,7 +21,7 @@ import java.util.*;
  */
 public final class ReportExporter {
   public static final String PLACEHOLDER = "__KWAMSTER_PAYLOAD__";
-  public static final int FORMAT_VERSION = 2;
+  public static final int FORMAT_VERSION = 3;
   private static final Gson COMPACT = new GsonBuilder().disableHtmlEscaping().create();
 
   public record Options(boolean anonymize, boolean includeMotion, boolean reducedMotion) {
@@ -36,6 +37,8 @@ public final class ReportExporter {
 
   public static Path export(Path folder, FightRecord fight, Options options) throws IOException {
     Files.createDirectories(folder);
+    AtomicJson.writeString(
+        folder.resolve(".kwamster-owner"), dev.kwamster.platform.SafePaths.requireUuid(fight.id()));
     FightRecord shared = prepare(fight, options);
     AtomicJson.write(folder.resolve("report.json"), shared);
     String template;
@@ -56,17 +59,18 @@ public final class ReportExporter {
     List<CombatEvent> events = new ArrayList<>();
     for (var e : f.events()) {
       if (!options.includeMotion() && e.kind() == CombatEvent.Kind.MOTION) continue;
-      if (options.anonymize() && opponent != null)
+      if (options.anonymize())
         e =
             new CombatEvent(
                 e.sequence(),
                 e.nanoTime(),
                 e.kind(),
-                opponent.equals(e.actor()) ? "Opponent" : e.actor(),
-                opponent.equals(e.target()) ? "Opponent" : e.target(),
+                e.actor() == null ? null : "local".equals(e.actor()) ? "local" : "Opponent",
+                e.target() == null ? null : "local".equals(e.target()) ? "local" : "Opponent",
                 e.confidence(),
                 e.attack(),
-                e.detail());
+                redact(e.detail(), f),
+                e.clientTick());
       events.add(e);
     }
     return new FightRecord(
@@ -77,12 +81,43 @@ public final class ReportExporter {
         f.durationNanos(),
         options.anonymize() && opponent != null ? "Opponent" : opponent,
         f.outcome(),
-        f.reason(),
+        options.anonymize() ? redact(f.reason(), f) : f.reason(),
         f.statistics(),
         events,
         f.policy(),
         f.evaluations(),
-        options.anonymize() ? null : f.opponentLabel());
+        options.anonymize() ? null : f.opponentLabel(),
+        options.anonymize()
+            ? new MatchEvidence(
+                null,
+                null,
+                f.matchEvidence().roundId(),
+                f.matchEvidence().confidence(),
+                f.matchEvidence().entries().stream()
+                    .map(
+                        e ->
+                            new MatchEvidence.Entry(
+                                e.nanoTime(),
+                                e.kind(),
+                                e.rule(),
+                                e.origin(),
+                                "Announcement text redacted",
+                                e.accepted()))
+                    .toList(),
+                f.matchEvidence().timelineStartNanos())
+            : f.matchEvidence());
+  }
+
+  private static String redact(String text, FightRecord f) {
+    if (text == null) return null;
+    for (String identity :
+        new String[] {
+          f.opponent(),
+          f.opponentLabel(),
+          f.matchEvidence().localPlayer(),
+          f.matchEvidence().server()
+        }) if (identity != null && !identity.isEmpty()) text = text.replace(identity, "[redacted]");
+    return text;
   }
 
   /**
@@ -129,6 +164,7 @@ public final class ReportExporter {
     summary.put("averageInterval", n(Aggregate.ratio(s.intervalSum, s.intervalCount)));
     summary.put("intervalDeviation", s.intervalCount == 0 ? null : s.intervalDeviation());
     summary.put("jumpCandidates", s.jumpCandidates);
+    summary.put("perfectReachHits", full.schemaVersion() >= 2 ? s.perfectReachHits : null);
     summary.put("incoming", s.incoming);
     summary.put("longestCombo", s.longestCombo);
     summary.put("averageCombo", n(a.averageCombo()));
@@ -152,6 +188,8 @@ public final class ReportExporter {
       m.put("critical", h.criticalConditions());
       m.put("combo", h.combo());
       m.put("momentum", h.momentum());
+      m.put("measurement", h.measurement());
+      m.put("perfectReach", full.schemaVersion() >= 2 ? h.perfectReach() : null);
       hits.add(m);
     }
     derived.put("hits", hits);
@@ -161,7 +199,8 @@ public final class ReportExporter {
       m.put("seq", m0.sequence());
       m.put("t", m0.time());
       m.put("empty", m0.empty());
-      m.put("estimatedReach", m0.geometry() && m0.estimatedReach() >= 0 ? m0.estimatedReach() : null);
+      m.put(
+          "estimatedReach", m0.geometry() && m0.estimatedReach() >= 0 ? m0.estimatedReach() : null);
       m.put("contact", m0.rayContact());
       m.put("aimH", m0.rayContact() ? m0.aimHorizontal() : null);
       m.put("aimV", m0.rayContact() ? m0.aimVertical() : null);
@@ -171,6 +210,7 @@ public final class ReportExporter {
     Map<String, Integer> readiness = new LinkedHashMap<>();
     for (var g : Grade.values()) readiness.put(g.name(), a.readiness[g.ordinal()]);
     derived.put("readiness", readiness);
+    derived.put("timings", a.timings);
     derived.put("reachBinSize", FightAnalytics.REACH_BIN);
     derived.put("hitReachBins", a.hitReachBins);
     derived.put("missReachBins", a.missReachBins);
@@ -186,8 +226,15 @@ public final class ReportExporter {
     derived.put("momentum", momentum);
     derived.put("incoming", a.incomingTimes);
     List<Map<String, Object>> jumps = new ArrayList<>();
-    for (var j : a.jumps)
-      jumps.add(Map.of("t", j.time(), "offsetMs", j.offsetMillis(), "candidate", j.candidate()));
+    for (var j : a.jumps) {
+      Map<String, Object> m = new LinkedHashMap<>();
+      m.put("t", j.time());
+      m.put("offsetMs", j.offsetMillis());
+      m.put("candidate", j.candidate());
+      m.put("offsetTicks", j.offsetTicks());
+      m.put("classification", j.classification());
+      jumps.add(m);
+    }
     derived.put("jumps", jumps);
     derived.put("jumpsWithoutDamage", a.jumpsWithoutDamage);
     derived.put("motionSamples", a.motionSamples);

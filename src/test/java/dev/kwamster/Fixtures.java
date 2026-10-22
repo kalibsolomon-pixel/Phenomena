@@ -25,7 +25,14 @@ final class Fixtures {
     engine = new CombatEngine(config, out::add, (e, g) -> {}, id -> label);
   }
 
-  static Attack attack(double cooldown, double reach, double ax, double ay, boolean sprint, boolean crit, boolean contact) {
+  static Attack attack(
+      double cooldown,
+      double reach,
+      double ax,
+      double ay,
+      boolean sprint,
+      boolean crit,
+      boolean contact) {
     return new Attack(cooldown, reach, ax, ay, contact ? .0 : -1, sprint, crit, contact);
   }
 
@@ -45,7 +52,14 @@ final class Fixtures {
   }
 
   Fixtures incoming(double seconds) {
-    emit(seconds, Kind.DAMAGE_IN, TARGET, "local", Confidence.CONFIRMED, null, "server damage event");
+    emit(
+        seconds,
+        Kind.DAMAGE_IN,
+        TARGET,
+        "local",
+        Confidence.CONFIRMED,
+        null,
+        "server damage event");
     return this;
   }
 
@@ -64,8 +78,25 @@ final class Fixtures {
     return attackAt(seconds, a).hurt(seconds + .04);
   }
 
-  private void emit(double seconds, Kind kind, String actor, String target, Confidence c, Attack a, String detail) {
-    engine.accept(new CombatEvent(++seq, 1_000_000_000L + (long) (seconds * 1e9), kind, actor, target, c, a, detail));
+  private void emit(
+      double seconds,
+      Kind kind,
+      String actor,
+      String target,
+      Confidence c,
+      Attack a,
+      String detail) {
+    engine.accept(
+        new CombatEvent(
+            ++seq,
+            1_000_000_000L + (long) (seconds * 1e9),
+            kind,
+            actor,
+            target,
+            c,
+            a,
+            detail,
+            20L + (long) (seconds * 20)));
   }
 
   CombatEngine engine() {

@@ -55,3 +55,23 @@ Export folders are named "Fight vs <opponent> YYYY-MM-DD HH-MM-SS" from the loca
 Schema-1 HUD layout fields (`analytics`, `direction`, `alert`, `summary`, `alertSeconds`, `animate`, `floatingText`, movement colors) are still read and preserved but have no interface. `display` migrates to `chatSummary` (CHAT or BOTH) and is no longer written. `hudOverlay` (default false, not exposed) re-enables the dormant overlay for development measurements only.
 
 Development test clients are muted at the Minecraft master-volume setting. A test-only initializer maintains that preference after Fabric resets options. This does not change the system volume or the user's normal Minecraft installation.
+
+
+## 0.1.2 measurement and recording additions
+
+Configuration schema remains 2; missing new fields take defaults, and existing schema-1 migration remains supported. Recording schema is now 2; readers accept both 1 and 2. Shared report format is 3. Historical weapon intervals, target-relative aim regions and client ticks are explicitly unavailable when not recorded.
+
+| Field | Default | Meaning |
+| --- | --- | --- |
+| perfectReachTarget | 3.0 | Eye-to-ray-contact distance in blocks |
+| perfectReachTolerance | 0.06 | Inclusive plus/minus reach window |
+| perfectReachSound | true | Special sound enable, also gated by sound and feedback[0].audio |
+| feedback[0].sound / volume / pitch | existing Perfect style | Sound used for perfect reach, independent of readiness |
+| timingToleranceTicks | 1 | Attempt interval tolerance around previous effective cooldown |
+| jumpWindowTicks | 4 | Signed tick offsets around damage; zero is an ideal candidate |
+| resultGraceSeconds | 3 | Bounded wait for delayed results after death/world change/end |
+| serverInactivitySeconds | 60 | Fallback for a server-announced round |
+
+Reach and jump policies are frozen in each fight. Legacy readiness thresholds and jumpWindowMillis remain readable for older data; the new classifiers use the new fields. Generic result forms are conservative fallbacks, not claimed as observed log formats. New server adapters implement Announcements.Rules and register during initialization.
+
+Local recording folders always use a known opponent name, regardless of anonymizeExports. Shared folder names and HTML/JSON remove player identifiers by default. Auto-report receipts in kwamster/report-state store hashes and publication ownership for recovery. Automatic saves preserve existing recordings rather than applying destructive retention. Retention still bounds session history; legacy manual saves retain their previous pruning semantics.

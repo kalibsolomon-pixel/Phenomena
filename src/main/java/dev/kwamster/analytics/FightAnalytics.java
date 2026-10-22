@@ -5,12 +5,14 @@ import dev.kwamster.combat.fights.FightRecord;
 import dev.kwamster.combat.metrics.Geometry;
 import dev.kwamster.combat.metrics.Statistics;
 import dev.kwamster.combat.quality.HitQuality.Grade;
+import dev.kwamster.combat.quality.JumpResets;
+import dev.kwamster.combat.quality.PerfectReach;
 import java.util.*;
 
 /**
- * Timeline-derived values for one recorded fight. Built only from stored raw events and the
- * frozen evaluations, so every number can be traced back to a recorded observation. Correlation is
- * not repeated here: an attack is a hit exactly when the engine recorded an evaluation for it.
+ * Timeline-derived values for one recorded fight. Built only from stored raw events and the frozen
+ * evaluations, so every number can be traced back to a recorded observation. Correlation is not
+ * repeated here: an attack is a hit exactly when the engine recorded an evaluation for it.
  *
  * <p>Instances are immutable and independent of Minecraft classes; the in-game GUI and the HTML
  * report both consume them.
@@ -35,7 +37,9 @@ public final class FightAnalytics {
       boolean sprinting,
       boolean criticalConditions,
       int combo,
-      double momentum) {}
+      double momentum,
+      CombatEvent.Measurement measurement,
+      boolean perfectReach) {}
 
   /**
    * An attempt without a correlated server report. Empty swings carry geometry only when a
@@ -52,7 +56,17 @@ public final class FightAnalytics {
       double aimVertical) {}
 
   /** Jump observed after incoming opponent damage; offset is jump time minus damage time. */
-  public record Jump(double time, double offsetMillis, boolean candidate) {}
+  public record Jump(
+      double time,
+      double offsetMillis,
+      boolean candidate,
+      Long offsetTicks,
+      String classification) {}
+
+  public record Timing(long sequence, double time, CombatEvent.Measurement measurement) {}
+
+  public final List<Timing> timings;
+  public final List<JumpResets.Sample> jumpSamples;
 
   public record Point(double time, double value) {}
 
@@ -75,11 +89,28 @@ public final class FightAnalytics {
   private FightAnalytics(FightRecord f) {
     this.fight = f;
     var events = f.events();
-    long base = events.isEmpty() ? 0 : events.getFirst().nanoTime();
+    long base =
+        f.matchEvidence().timelineStartNanos() != null
+            ? f.matchEvidence().timelineStartNanos()
+            : events.isEmpty() ? 0 : events.getFirst().nanoTime();
     duration = Math.max(f.durationNanos() / 1e9, 0);
     Map<Long, CombatEvent> bySequence = new HashMap<>();
     for (var e : events) bySequence.put(e.sequence(), e);
 
+    timings =
+        events.stream()
+            .filter(
+                e ->
+                    e.kind() == CombatEvent.Kind.ATTACK
+                        && e.attack() != null
+                        && e.attack().measurement() != null)
+            .map(
+                e ->
+                    new Timing(e.sequence(), seconds(e.nanoTime(), base), e.attack().measurement()))
+            .toList();
+    jumpSamples = JumpResets.analyze(events, f.policy().jumpWindowTicks());
+    Map<Long, JumpResets.Sample> byJump = new HashMap<>();
+    jumpSamples.forEach(j -> byJump.put(j.jumpSequence(), j));
     List<Hit> hitList = new ArrayList<>();
     Set<Long> hitAttacks = new HashSet<>();
     int c = 0, ed = 0, hi = 0, lo = 0;
@@ -106,10 +137,14 @@ public final class FightAnalytics {
               a.sprinting(),
               a.criticalConditions(),
               ev.combo(),
-              ev.momentum()));
+              ev.momentum(),
+              a.measurement(),
+              PerfectReach.eligible(
+                  a, f.policy().perfectReachTarget(), f.policy().perfectReachTolerance())));
       if (ev.readiness() != null) readiness[ev.readiness().ordinal()]++;
       if (a.reach() >= 0) hitReachBins[reachBin(a.reach())]++;
-      cooldownBins[Math.min(COOLDOWN_BINS - 1, Math.max(0, (int) (a.cooldown() * COOLDOWN_BINS)))]++;
+      cooldownBins[
+          Math.min(COOLDOWN_BINS - 1, Math.max(0, (int) (a.cooldown() * COOLDOWN_BINS)))]++;
       if (a.rayContact()) {
         switch (Geometry.placement(a.aimX(), a.aimY(), a.aimZ())) {
           case "Center" -> c++;
@@ -167,11 +202,26 @@ public final class FightAnalytics {
           lastDamage = t;
         }
         case JUMP -> {
-          if (Double.isNaN(lastDamage) || (t - lastDamage) * 1000 > JUMP_OFFSET_LIMIT_MS)
-            noDamage++;
+          var sample = byJump.get(e.sequence());
+          var nearest =
+              events.stream()
+                  .filter(d -> d.kind() == CombatEvent.Kind.DAMAGE_IN)
+                  .min(Comparator.comparingLong(d -> Math.abs(e.nanoTime() - d.nanoTime())))
+                  .orElse(null);
+          if (nearest == null
+              || (sample.offsetTicks() == null
+                  && Math.abs(e.nanoTime() - nearest.nanoTime()) > 1_000_000_000L)) noDamage++;
           else {
-            double offset = (t - lastDamage) * 1000;
-            jumpList.add(new Jump(t, offset, Math.abs(offset) <= window));
+            boolean candidate =
+                sample.grade() == JumpResets.Grade.IDEAL_CANDIDATE
+                    || sample.grade() == JumpResets.Grade.ATTEMPT_CANDIDATE;
+            jumpList.add(
+                new Jump(
+                    t,
+                    (e.nanoTime() - nearest.nanoTime()) / 1e6,
+                    candidate,
+                    sample.offsetTicks(),
+                    sample.grade().name()));
           }
         }
         case MOTION -> motion++;

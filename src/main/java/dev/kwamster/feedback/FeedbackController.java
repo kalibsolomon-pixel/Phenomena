@@ -3,6 +3,7 @@ package dev.kwamster.feedback;
 import dev.kwamster.KwamsterClient;
 import dev.kwamster.combat.events.CombatEvent;
 import dev.kwamster.combat.quality.HitQuality.Grade;
+import dev.kwamster.combat.quality.PerfectReach;
 import dev.kwamster.combat.tracking.ClientCapture;
 import dev.kwamster.config.Config;
 import net.minecraft.client.Minecraft;
@@ -19,27 +20,37 @@ public final class FeedbackController {
   public static Grade recent;
 
   public static long recentAt;
-  private static long lastSound, lastChat;
+  private static long lastSound, lastChat, lastAttack = -1;
 
   private FeedbackController() {}
 
   public static void hit(CombatEvent event, Grade grade) {
+    if (event.sequence() <= lastAttack) return;
+    lastAttack = event.sequence();
     var c = KwamsterClient.config;
     var mc = Minecraft.getInstance();
     long now = ClientCapture.now();
-    var style = c.feedback[grade.ordinal()];
+    boolean perfectReach =
+        PerfectReach.eligible(event.attack(), c.perfectReachTarget, c.perfectReachTolerance);
+    var style = c.feedback[perfectReach ? 0 : 2];
     if (style.visual) {
       recent = grade;
       recentAt = now;
     }
-    if (c.sound && style.audio && now - lastSound > 120_000_000L && play(style, c.soundChannel))
-      lastSound = now;
+    if (c.sound
+        && c.perfectReachSound
+        && perfectReach
+        && style.audio
+        && now - lastSound > 120_000_000L
+        && play(style, c.soundChannel)) lastSound = now;
     if (c.perHitChat && now - lastChat > 500_000_000L) {
       mc.gui
           .getChat()
           .addMessage(
               Component.literal(
-                  "[KWAMSTER] " + grade + " readiness / server-reported melee contact"));
+                  "[KWAMSTER] "
+                      + (perfectReach ? "Perfect reach" : "Melee contact")
+                      + " / timing is measured separately"));
       lastChat = now;
     }
   }

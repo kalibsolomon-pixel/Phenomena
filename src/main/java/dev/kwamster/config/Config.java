@@ -10,6 +10,10 @@ public final class Config {
       summary = true,
       sound = true;
   public double alertSeconds = 6;
+  public double perfectReachTarget = 3.0, perfectReachTolerance = .06, timingToleranceTicks = 1;
+  public double serverInactivitySeconds = 60, resultGraceSeconds = 3;
+  public int jumpWindowTicks = 4;
+  public boolean perfectReachSound = true;
   public boolean animate = true, floatingText = false;
   public int forwardColor = 0xFF88C8AA, backwardColor = 0xFFE6A278, neutralColor = 0xFF9AA6AC;
   public Feedback[] feedback = {
@@ -38,8 +42,8 @@ public final class Config {
   public boolean chatSummary = false;
 
   /**
-   * Dormant persistent HUD. The dashboard is the primary surface; no interface control enables
-   * this in 0.1.1, and migration from schema 1 leaves it off.
+   * Dormant persistent HUD. The dashboard is the primary surface; no interface control enables this
+   * in 0.1.1, and migration from schema 1 leaves it off.
    */
   public boolean hudOverlay = false;
 
@@ -48,7 +52,6 @@ public final class Config {
   public boolean reducedMotion = false, chartPoints = true, chartGrid = true;
   public int trendWindow = 20;
   public boolean anonymizeExports = true, exportMotion = true, openAfterExport = false;
-
   public int accent = 0xFF88C8AA, retention = 100;
   public double inactivitySeconds = 8,
       correlationMillis = 250,
@@ -144,6 +147,12 @@ public final class Config {
       if (feedback[i].sound == null) feedback[i].sound = "minecraft:entity.experience_orb.pickup";
     }
     alertSeconds = clamp(alertSeconds, 1, 30);
+    perfectReachTarget = clamp(perfectReachTarget, .1, 10);
+    perfectReachTolerance = clamp(perfectReachTolerance, 0, .5);
+    timingToleranceTicks = clamp(timingToleranceTicks, 0, 2);
+    jumpWindowTicks = Math.max(0, Math.min(10, jumpWindowTicks));
+    serverInactivitySeconds = clamp(serverInactivitySeconds, 15, 300);
+    resultGraceSeconds = clamp(resultGraceSeconds, .5, 5);
     analytics.validate();
     direction.validate();
     alert.validate();

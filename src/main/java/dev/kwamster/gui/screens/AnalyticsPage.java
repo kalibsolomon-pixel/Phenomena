@@ -89,7 +89,8 @@ final class AnalyticsPage implements KwamsterScreen.Page {
 
   private String[] fightLabels(Aggregate a) {
     String[] labels = new String[a.chronological.size()];
-    for (int i = 0; i < labels.length; i++) labels[i] = shortDate(a.chronological.get(i).startEpochMillis());
+    for (int i = 0; i < labels.length; i++)
+      labels[i] = shortDate(a.chronological.get(i).startEpochMillis());
     return labels;
   }
 
@@ -112,8 +113,17 @@ final class AnalyticsPage implements KwamsterScreen.Page {
     c.block(
         c.chartHeight(),
         new Chart(
-            List.of(new Series("Accuracy", null, a.trend(TrendMetric.ACCURACY), Theme.SERIES_1, Mark.LINE)),
-            0, 100, "%", "", fightLabels(a), grid(), points(), "No attempts recorded"));
+            List.of(
+                new Series(
+                    "Accuracy", null, a.trend(TrendMetric.ACCURACY), Theme.SERIES_1, Mark.LINE)),
+            0,
+            100,
+            "%",
+            "",
+            fightLabels(a),
+            grid(),
+            points(),
+            "No attempts recorded"));
     c.note(
         "Empty swings are the only confirmed misses. An entity attack without a matching server"
             + " damage report is uncertain: the server may have rejected it, or the report may have"
@@ -123,22 +133,47 @@ final class AnalyticsPage implements KwamsterScreen.Page {
   private void reach(Content c, Aggregate a, String coverage) {
     c.heading("Reach", coverage);
     double[] hitReach = a.hitSamples.stream().mapToDouble(FightAnalytics.Hit::reach).toArray();
-    long estimated = a.missSamples.stream().filter(m -> m.geometry() && m.estimatedReach() >= 0).count();
+    long estimated =
+        a.missSamples.stream().filter(m -> m.geometry() && m.estimatedReach() >= 0).count();
     c.stats(
         List.of(
             stat("averageReach", meters(a.averageReach()), a.reachCount + " hit samples"),
             stat("maxReach", meters(a.maxReachOrNaN()), "correlated hits"),
-            new Stat("Estimated miss distance", Long.toString(estimated), "attempt samples",
+            new Stat(
+                "Estimated miss distance",
+                Long.toString(estimated),
+                "attempt samples",
                 "Observed: distance on attempts with no correlated hit. Not hit distance.")));
+    int perfect =
+        a.chronological.stream()
+            .filter(f -> f.schemaVersion() >= 2)
+            .mapToInt(f -> f.statistics().perfectReachHits)
+            .sum();
+    c.text(
+        "Perfect-reach hits: "
+            + perfect
+            + " (new recordings; source-correlated ray contacts inside the recorded reach"
+            + " window).");
     c.heading("Distribution", "0.5 m bins");
     int n = FightAnalytics.REACH_BINS + 1;
     String[] labels = new String[n];
     for (int i = 0; i < n; i++)
-      labels[i] = i == n - 1 ? number(FightAnalytics.REACH_MAX, 0) + "+" : number(i * FightAnalytics.REACH_BIN, 1);
+      labels[i] =
+          i == n - 1
+              ? number(FightAnalytics.REACH_MAX, 0) + "+"
+              : number(i * FightAnalytics.REACH_BIN, 1);
     c.block(
         c.chartHeight(),
-        new Bars(labels, a.hitReachBins, "Hit distance", Theme.SERIES_1, a.missReachBins,
-            "Estimated, no hit", Theme.SERIES_2, null, "No reach samples in loaded timelines"));
+        new Bars(
+            labels,
+            a.hitReachBins,
+            "Hit distance",
+            Theme.SERIES_1,
+            a.missReachBins,
+            "Estimated, no hit",
+            Theme.SERIES_2,
+            null,
+            "No reach samples in loaded timelines"));
     c.heading("Reach over time", "each hit, oldest to newest");
     double[] missIdx = new double[(int) estimated];
     double[] missReach = new double[(int) estimated];
@@ -158,56 +193,135 @@ final class AnalyticsPage implements KwamsterScreen.Page {
             List.of(
                 new Series("Hit distance", null, hitReach, Theme.SERIES_1, Mark.LINE),
                 new Series("Estimated, no hit", missIdx, missReach, Theme.SERIES_2, Mark.HOLLOW)),
-            0, Double.NaN, "m", "hit #", null, grid(), points(), "No reach samples"));
+            0,
+            Double.NaN,
+            "m",
+            "hit #",
+            null,
+            grid(),
+            points(),
+            "No reach samples"));
     c.heading("Per-hit values", "latest 50");
     List<String[]> rows = new ArrayList<>();
     for (int i = hits.size() - 1; i >= 0 && rows.size() < 50; i--) {
       var h = hits.get(i);
-      rows.add(new String[] {
-        "#" + (i + 1), meters(h.reach()), h.rayContact() ? "ray contact" : "nearest box",
-        number(h.cooldown(), 2), h.readiness() == null ? NONE : title(h.readiness().name())
-      });
+      rows.add(
+          new String[] {
+            "#" + (i + 1),
+            meters(h.reach()),
+            h.rayContact() ? "ray contact" : "nearest box",
+            number(h.cooldown(), 2),
+            h.measurement() == null || h.measurement().timing() == null
+                ? NONE
+                : h.measurement().timing().grade().name()
+          });
     }
     c.block(
         Table.height(rows.size()),
-        new Table(new String[] {"Hit", "Reach", "Measured by", "Cooldown", "Readiness"},
-            new float[] {1, 1.2f, 1.6f, 1.2f, 1.2f}, new boolean[] {false, true, false, true, false}, rows));
+        new Table(
+            new String[] {"Hit", "Reach", "Measured by", "Strength scale", "Attempt timing"},
+            new float[] {1, 1.2f, 1.6f, 1.2f, 1.2f},
+            new boolean[] {false, true, false, true, false},
+            rows));
     c.note(
         "Reach is the client-side distance from your eye to the target's interpolated hitbox. It"
-            + " cannot account for server position history or latency and is never a reach verdict.");
+            + " cannot account for server position history or latency and is never a reach"
+            + " verdict.");
   }
 
   private void aim(Content c, Aggregate a, String coverage) {
-    c.heading("Aim placement", coverage);
+    c.heading("Melee aim", coverage);
+    int[] quality = new int[4];
+    for (var h : a.hitSamples)
+      if (h.measurement() != null
+          && h.measurement().aimQuality() != null
+          && h.measurement().aimQuality().ordinal() < 4)
+        quality[h.measurement().aimQuality().ordinal()]++;
+    c.block(
+        c.compact ? 80 : 96,
+        new Bars(
+            new String[] {"Ideal", "Good", "Peripheral", "Poor"},
+            quality,
+            "Client geometry",
+            Theme.SERIES_1,
+            null,
+            null,
+            0,
+            new int[] {0xFF56B4E9, 0xFF009E73, 0xFFE69F00, 0xFFCC79A7},
+            "Aim quality unavailable for historical recordings"));
+    c.note(
+        "Ideal alignment follows the nearest reachable surface with an edge inset. Elevation and"
+            + " target pose change this region; opponent eye level is not a universal target."
+            + " Colors indicate a geometry heuristic, not damage quality. Browser reports show the"
+            + " surface regions for each hit.");
+    c.heading("Raw placement", "normalized coordinates retained separately");
     int contacts = a.center + a.edge + a.high + a.low;
     c.stats(
         List.of(
-            new Stat("Center", Integer.toString(a.center), pct(a.center, contacts), "Middle of the face, between the quartiles."),
-            new Stat("Edge", Integer.toString(a.edge), pct(a.edge, contacts), "Outer 15% of the face width."),
-            new Stat("High", Integer.toString(a.high), pct(a.high, contacts), "Top quartile of the box."),
-            new Stat("Low", Integer.toString(a.low), pct(a.low, contacts), "Bottom quartile of the box.")));
+            new Stat(
+                "Center",
+                Integer.toString(a.center),
+                pct(a.center, contacts),
+                "Middle of the face, between the quartiles."),
+            new Stat(
+                "Edge",
+                Integer.toString(a.edge),
+                pct(a.edge, contacts),
+                "Outer 15% of the face width."),
+            new Stat(
+                "High",
+                Integer.toString(a.high),
+                pct(a.high, contacts),
+                "Top quartile of the box."),
+            new Stat(
+                "Low",
+                Integer.toString(a.low),
+                pct(a.low, contacts),
+                "Bottom quartile of the box.")));
     var modes =
         new AbstractWidget[] {
-          new KButton("aim:markers", KButton.Style.CHIP, () -> "Individual impacts", () -> {
-                s.state.aimHeatmap = false;
-                s.rebuild();
-              }).selected(() -> !s.state.aimHeatmap).content(),
-          new KButton("aim:heat", KButton.Style.CHIP, () -> "Aggregate density", () -> {
-                s.state.aimHeatmap = true;
-                s.rebuild();
-              }).selected(() -> s.state.aimHeatmap).content()
+          new KButton(
+                  "aim:markers",
+                  KButton.Style.CHIP,
+                  () -> "Individual impacts",
+                  () -> {
+                    s.state.aimHeatmap = false;
+                    s.rebuild();
+                  })
+              .selected(() -> !s.state.aimHeatmap)
+              .content(),
+          new KButton(
+                  "aim:heat",
+                  KButton.Style.CHIP,
+                  () -> "Aggregate density",
+                  () -> {
+                    s.state.aimHeatmap = true;
+                    s.rebuild();
+                  })
+              .selected(() -> s.state.aimHeatmap)
+              .content()
         };
     c.row(modes);
     List<double[]> hp = new ArrayList<>(), op = new ArrayList<>();
-    for (var h : a.hitSamples) if (h.rayContact()) hp.add(new double[] {h.aimHorizontal(), h.aimVertical()});
-    for (var m : a.missSamples) if (m.rayContact()) op.add(new double[] {m.aimHorizontal(), m.aimVertical()});
+    for (var h : a.hitSamples)
+      if (h.rayContact())
+        hp.add(
+            new double[] {
+              h.aimHorizontal(),
+              h.aimVertical(),
+              h.measurement() == null || h.measurement().aimQuality() == null
+                  ? -1
+                  : h.measurement().aimQuality().ordinal()
+            });
+    for (var m : a.missSamples)
+      if (m.rayContact()) op.add(new double[] {m.aimHorizontal(), m.aimVertical()});
     c.block(
         c.compact ? 130 : 160,
         new Hitbox(hp.toArray(double[][]::new), op.toArray(double[][]::new), s.state.aimHeatmap));
     c.note(
-        "Positions are recorded ray intersections, normalized to the target's box (0 to 1 across the"
-            + " contacted face and from feet to head). Attacks without ray contact are not plotted."
-            + " Placement is descriptive: a center hit is not automatically better.");
+        "Positions are recorded ray intersections, normalized to the target's box (0 to 1 across"
+            + " the contacted face and from feet to head). Attacks without ray contact are not"
+            + " plotted. Placement is descriptive: a center hit is not automatically better.");
   }
 
   private static String pct(int v, int total) {
@@ -219,44 +333,67 @@ final class AnalyticsPage implements KwamsterScreen.Page {
   }
 
   private void timing(Content c, Aggregate a, String coverage) {
-    c.heading("Hit timing", coverage);
-    double mean = a.averageInterval(), sd = a.intervalDeviation();
-    c.stats(
-        List.of(
-            stat("averageInterval", seconds(mean), a.intervalCount + " intervals"),
-            stat("intervalDeviation", seconds(sd), "consistency"),
-            new Stat("Variation", Double.isFinite(mean) && mean > 0 ? percent(100 * sd / mean) : NONE,
-                "SD / mean", "Coefficient of variation; lower is more regular."),
-            new Stat("Avg cooldown", a.hits == 0 ? NONE : number(cooldownMean(a), 2),
-                "at correlated hits", "Mean attack-strength scale (0-1) when the hit was made.")));
-    c.heading("Readiness categories", "correlated hits, recorded thresholds");
-    var cfg = KwamsterClient.config;
-    String[] gl = {"Perfect", "Great", "Normal", "Poor"};
-    int[] colors = new int[4];
-    for (int i = 0; i < 4; i++) colors[i] = 0xFF000000 | cfg.feedback[i].color;
-    c.block(
-        c.compact ? 80 : 96,
-        new Bars(gl, a.readiness, "Hits", Theme.SERIES_1, null, null, 0, colors, "No correlated hits in loaded timelines"));
-    c.heading("Cooldown readiness distribution", "attack strength at hit");
-    String[] bins = new String[FightAnalytics.COOLDOWN_BINS];
-    for (int i = 0; i < bins.length; i++) bins[i] = number(i / 10.0, 1);
+    c.heading("Weapon timing", coverage + " / attempted melee attacks");
+    var samples = a.timingSamples;
+    var grades = dev.kwamster.combat.quality.AttackTiming.Grade.values();
+    int[] counts = new int[grades.length];
+    for (var t : samples)
+      if (t.measurement().timing() != null) counts[t.measurement().timing().grade().ordinal()]++;
     c.block(
         c.chartHeight(),
-        new Bars(bins, a.cooldownBins, "Hits", Theme.SERIES_1, null, null, 0, null, "No correlated hits"));
-    c.heading("Intervals", "consecutive correlated hits");
-    double[] iv = a.intervals.stream().mapToDouble(Double::doubleValue).toArray();
+        new Bars(
+            new String[] {"Opener", "Perfect", "Fast", "Slow", "N/A"},
+            counts,
+            "Attempts",
+            Theme.SERIES_1,
+            null,
+            null,
+            0,
+            null,
+            "Historical recordings have no weapon interval data"));
+    List<String[]> rows = new ArrayList<>();
+    for (int i = samples.size() - 1; i >= 0 && rows.size() < 50; i--) {
+      var m = samples.get(i).measurement();
+      var t = m.timing();
+      if (t == null) continue;
+      rows.add(
+          new String[] {
+            m.weapon().split(";")[0],
+            number(m.attackSpeed(), 2),
+            m.cooldownTicks() > 0 ? number(m.cooldownTicks(), 2) : NONE,
+            t.grade() == dev.kwamster.combat.quality.AttackTiming.Grade.OPENER
+                ? NONE
+                : number(t.intervalTicks(), 1),
+            t.grade().name()
+          });
+    }
     c.block(
-        c.chartHeight(),
-        new Chart(List.of(new Series("Interval", null, iv, Theme.SERIES_1, Mark.LINE)),
-            0, Double.NaN, "s", "interval #", null, grid(), points(), "Needs two hits in one fight"));
+        Table.height(rows.size()),
+        new Table(
+            new String[] {"Weapon", "Speed", "Cooldown ticks", "Interval", "Timing"},
+            new float[] {2, 1, 1.5f, 1, 2},
+            new boolean[] {false, true, true, true, false},
+            rows));
     c.note(
-        "Readiness is a transparent cooldown classification (Perfect >= "
-            + number(cfg.perfectCooldown, 2) + ", Great >= " + number(cfg.greatCooldown, 2)
-            + ", Normal >= 0.50 for new fights). It is not an objective skill or damage score.");
+        "Intervals use attempted melee attacks, including empty swings during combat. The previous"
+            + " weapon's effective cooldown defines the next interval. One cooldown is perfect"
+            + " within the recorded tick tolerance; early is too fast, late up to two cooldowns is"
+            + " too slow. A weapon switch or gap beyond two cooldowns resets the sequence. Openers"
+            + " are ungraded. Server cooldown changes are unavailable unless observable in client"
+            + " attributes.");
+    c.heading("Hit intervals", "consecutive source-correlated hits; separate from attempt timing");
+    c.text(
+        "Average "
+            + seconds(a.averageInterval())
+            + "; deviation "
+            + seconds(a.intervalDeviation()));
   }
 
   private static double cooldownMean(Aggregate a) {
-    return a.hitSamples.stream().mapToDouble(FightAnalytics.Hit::cooldown).average().orElse(Double.NaN);
+    return a.hitSamples.stream()
+        .mapToDouble(FightAnalytics.Hit::cooldown)
+        .average()
+        .orElse(Double.NaN);
   }
 
   private void rate(Content c, Aggregate a, String coverage, boolean critical) {
@@ -265,22 +402,41 @@ final class AnalyticsPage implements KwamsterScreen.Page {
     double rate = critical ? a.criticalRate() : a.sprintRate();
     c.stats(
         List.of(
-            new Stat(critical ? "With crit conditions" : "Sprint hits", Integer.toString(count), "correlated hits",
-                critical ? "Observed: cooldown > 0.9, falling, airborne, not sprinting, climbing, swimming or riding."
+            new Stat(
+                critical ? "With crit conditions" : "Sprint hits",
+                Integer.toString(count),
+                "correlated hits",
+                critical
+                    ? "Observed: cooldown > 0.9, falling, airborne, not sprinting, climbing,"
+                        + " swimming or riding."
                     : "Observed: sprint state at the attack."),
             stat(critical ? "criticalRate" : "sprintRate", percent(rate), "of " + a.hits + " hits"),
             stat("hits", Integer.toString(a.hits), "denominator")));
     c.heading("Rate per fight");
-    double[] series =
-        a.perFightHitRate(st -> critical ? st.criticalConditions : st.sprintHits);
+    double[] series = a.perFightHitRate(st -> critical ? st.criticalConditions : st.sprintHits);
     c.block(
         c.chartHeight(),
-        new Chart(List.of(new Series(critical ? "Crit-condition rate" : "Sprint-hit rate", null, series, Theme.SERIES_1, Mark.LINE)),
-            0, 100, "%", "", fightLabels(a), grid(), points(), "No correlated hits"));
+        new Chart(
+            List.of(
+                new Series(
+                    critical ? "Crit-condition rate" : "Sprint-hit rate",
+                    null,
+                    series,
+                    Theme.SERIES_1,
+                    Mark.LINE)),
+            0,
+            100,
+            "%",
+            "",
+            fightLabels(a),
+            grid(),
+            points(),
+            "No correlated hits"));
     c.note(
         critical
             ? "Critical conditions mirror vanilla 1.21.11 eligibility observed on the client. The"
-                + " server's damage report does not include an amount, so the critical multiplier is never confirmed."
+                + " server's damage report does not include an amount, so the critical multiplier"
+                + " is never confirmed."
             : "Sprint state is observed at the attack. Extra knockback is not measured.");
   }
 
@@ -289,33 +445,43 @@ final class AnalyticsPage implements KwamsterScreen.Page {
     c.stats(
         List.of(
             stat("jumpCandidates", Integer.toString(a.jumpCandidates), "inside window"),
-            new Stat("Incoming hits", Integer.toString(a.incoming), "opponent damage", "Confirmed: server damage events against you from the tracked opponent."),
-            new Stat("Reset success", "Unavailable", "not estimated",
+            new Stat(
+                "Incoming hits",
+                Integer.toString(a.incoming),
+                "opponent damage",
+                "Confirmed: server damage events against you from the tracked opponent."),
+            new Stat(
+                "Reset success",
+                "Unavailable",
+                "not estimated",
                 "No knockback baseline exists, so success is not estimated."),
-            new Stat("Motion samples", Integer.toString(a.motionSamples), "10 Hz in fights",
+            new Stat(
+                "Motion samples",
+                Integer.toString(a.motionSamples),
+                "10 Hz in fights",
                 "Velocity traces recorded during engagements for future controlled analysis.")));
-    c.heading("Timing after incoming damage", "jump time minus damage time");
-    int bins = 10;
-    int[] counts = new int[bins];
-    int[] candidates = new int[bins];
-    String[] labels = new String[bins];
-    for (int i = 0; i < bins; i++) labels[i] = (i * 100) + "";
-    for (var j : a.jumps) {
-      int b = Math.max(0, Math.min(bins - 1, (int) (j.offsetMillis() / 100)));
-      if (j.candidate()) candidates[b]++;
-      else counts[b]++;
-    }
+    c.heading("Jump minus incoming damage", "signed client ticks; early is negative");
+    List<String[]> rows = new ArrayList<>();
+    for (var j : a.jumps)
+      rows.add(
+          new String[] {
+            seconds(j.time()),
+            j.offsetTicks() == null ? NONE : Long.toString(j.offsetTicks()),
+            number(j.offsetMillis(), 1),
+            j.classification()
+          });
     c.block(
-        c.chartHeight(),
-        new Bars(labels, candidates, "Candidate", Theme.SERIES_1, counts, "Outside window", Theme.SERIES_2, null,
-            "No jumps within 1 s after incoming damage"));
-    c.text(
-        "Bins are 100 ms after the most recent incoming hit. "
-            + a.jumpsWithoutDamage + " other jump(s) had no incoming hit in the preceding second.");
+        Table.height(rows.size()),
+        new Table(
+            new String[] {"Time", "Tick offset", "ms diagnostic", "Candidate"},
+            new float[] {1, 1, 1.5f, 3},
+            new boolean[] {true, true, true, false},
+            rows));
     c.note(
-        "Jump-reset success is unavailable. A candidate is a ground-to-air jump with the jump key"
-            + " held, inside the configured window after incoming damage. Whether it reduced"
-            + " knockback needs a validated baseline that does not exist yet.",
+        "Same observed tick is an ideal-timing candidate; within the recorded window (default ±4"
+            + " ticks) is an attempt candidate. Only actual jump actions count, once per key press."
+            + " Prevented inputs are separate events. Older recordings without client ticks are"
+            + " unavailable. Knockback cancellation remains unverified.",
         Theme.WARN);
   }
 
@@ -325,7 +491,11 @@ final class AnalyticsPage implements KwamsterScreen.Page {
         List.of(
             stat("longestCombo", Integer.toString(a.longestCombo), "all fights in scope"),
             stat("averageCombo", number(a.averageCombo(), 2), a.comboLengths.size() + " chains"),
-            new Stat("Incoming hits", Integer.toString(a.incoming), "break combos", "Retaliation by the tracked opponent resets the combo.")));
+            new Stat(
+                "Incoming hits",
+                Integer.toString(a.incoming),
+                "break combos",
+                "Retaliation by the tracked opponent resets the combo.")));
     var latest = a.latestTimeline;
     if (latest == null) {
       c.note("Combo progression needs a loaded fight timeline.");
@@ -336,17 +506,35 @@ final class AnalyticsPage implements KwamsterScreen.Page {
     double[] combo = latest.hits.stream().mapToDouble(FightAnalytics.Hit::combo).toArray();
     c.block(
         c.chartHeight(),
-        new Chart(List.of(new Series("Combo", null, combo, Theme.SERIES_1, Mark.LINE)),
-            0, Double.NaN, "", "hit #", null, grid(), points(), "No correlated hits in this fight"));
+        new Chart(
+            List.of(new Series("Combo", null, combo, Theme.SERIES_1, Mark.LINE)),
+            0,
+            Double.NaN,
+            "",
+            "hit #",
+            null,
+            grid(),
+            points(),
+            "No correlated hits in this fight"));
     c.heading("Estimated momentum", "latest fight / seconds");
     double[] samples = latest.momentumSamples(160);
     double[] xs = new double[samples.length];
     for (int i = 0; i < xs.length; i++) xs[i] = latest.duration * i / (xs.length - 1);
     c.block(
         c.chartHeight(),
-        new Chart(List.of(new Series("Momentum (estimate)", xs, samples, Theme.SERIES_1, Mark.LINE)),
-            -1, 1, "", "s", null, grid(), false, "No exchanges"));
-    c.note(MetricDefs.get("momentum").help() + " An illustrative exchange indicator only.", Theme.WARN);
+        new Chart(
+            List.of(new Series("Momentum (estimate)", xs, samples, Theme.SERIES_1, Mark.LINE)),
+            -1,
+            1,
+            "",
+            "s",
+            null,
+            grid(),
+            false,
+            "No exchanges"));
+    c.note(
+        MetricDefs.get("momentum").help() + " An illustrative exchange indicator only.",
+        Theme.WARN);
   }
 
   static int gradeColor(Grade g) {

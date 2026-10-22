@@ -28,6 +28,7 @@ public final class Aggregate {
   public final List<Double> intervals;
   public final List<Integer> comboLengths;
   public final int jumpsWithoutDamage, motionSamples;
+  public final List<FightAnalytics.Timing> timingSamples = new ArrayList<>();
   public final int[] readiness = new int[4];
   public final int[] hitReachBins = new int[FightAnalytics.REACH_BINS + 1];
   public final int[] missReachBins = new int[FightAnalytics.REACH_BINS + 1];
@@ -44,9 +45,21 @@ public final class Aggregate {
    * @param analytics resolves timeline analytics for a fight with events (may cache)
    */
   public Aggregate(
-      List<FightRecord> newestFirst, java.util.function.Function<FightRecord, FightAnalytics> analytics) {
+      List<FightRecord> newestFirst,
+      java.util.function.Function<FightRecord, FightAnalytics> analytics) {
     fights = newestFirst.size();
-    int at = 0, h = 0, em = 0, un = 0, co = 0, cr = 0, sp = 0, ju = 0, in = 0, lc = 0, rc = 0, ic = 0;
+    int at = 0,
+        h = 0,
+        em = 0,
+        un = 0,
+        co = 0,
+        cr = 0,
+        sp = 0,
+        ju = 0,
+        in = 0,
+        lc = 0,
+        rc = 0,
+        ic = 0;
     double rs = 0, mr = 0, is = 0, isq = 0;
     for (var f : newestFirst) {
       Statistics s = f.statistics();
@@ -114,6 +127,7 @@ public final class Aggregate {
       ed += a.edge;
       hi += a.high;
       lo += a.low;
+      timingSamples.addAll(a.timings);
       add(readiness, a.readiness);
       add(hitReachBins, a.hitReachBins);
       add(missReachBins, a.missReachBins);

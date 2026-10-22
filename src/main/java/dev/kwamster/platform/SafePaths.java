@@ -5,9 +5,9 @@ import java.nio.file.*;
 import java.util.UUID;
 
 /**
- * Resolves the only locations KWAMSTER opens or writes for the user: its managed fights and
- * exports directories under the Minecraft game directory, and per-fight export folders named by a
- * validated UUID. Nothing read from a recording ever becomes a path component.
+ * Resolves the only locations KWAMSTER opens or writes for the user: its managed fights and exports
+ * directories under the Minecraft game directory, and per-fight export folders named by a validated
+ * UUID. Nothing read from a recording ever becomes a path component.
  */
 public final class SafePaths {
   public enum Managed {
@@ -52,14 +52,15 @@ public final class SafePaths {
   }
 
   /**
-   * Reduces recording-derived text to a safe single path segment: letters, digits, space, dash
-   * and underscore only, no leading/trailing dots or spaces, at most 32 characters.
+   * Reduces recording-derived text to a safe single path segment: letters, digits, space, dash and
+   * underscore only, no leading/trailing dots or spaces, at most 32 characters.
    */
   public static String sanitize(String text) {
     if (text == null) return "";
     StringBuilder out = new StringBuilder();
     for (char c : text.toCharArray())
-      if (Character.isLetterOrDigit(c) && c < 128 || c == ' ' || c == '-' || c == '_') out.append(c);
+      if (Character.isLetterOrDigit(c) && c < 128 || c == ' ' || c == '-' || c == '_')
+        out.append(c);
     String s = out.toString().trim().replaceAll(" +", " ");
     return s.length() > 32 ? s.substring(0, 32).trim() : s;
   }
@@ -68,14 +69,42 @@ public final class SafePaths {
    * Export folder for a fight inside {@code <exports>}. Re-exporting the same fight reuses its
    * folder; if another fight already owns the name, the short fight id is appended.
    */
-  public static Path exportFolder(Path dataDir, dev.kwamster.combat.fights.FightRecord f, boolean anonymize)
+  public static Path exportFolder(
+      Path dataDir, dev.kwamster.combat.fights.FightRecord f, boolean anonymize)
       throws IOException {
     String id = requireUuid(f.id());
     Path exports = managed(dataDir, Managed.EXPORTS);
     String base = exportName(f, anonymize);
     Path folder = checked(exports, base);
     if (Files.exists(folder) && !ownedBy(folder, id))
-      folder = checked(exports, base + " [" + id.substring(0, 8) + "]");
+      folder = checked(exports, base + " [" + id + "]");
+    if (Files.exists(folder) && !ownedBy(folder, id))
+      throw new IOException("Export collision; existing folder preserved");
+    return folder;
+  }
+
+  /** Local naming always uses the known opponent, independently of sharing privacy. */
+  public static Path recordingFolder(Path dataDir, dev.kwamster.combat.fights.FightRecord f)
+      throws IOException {
+    String id = requireUuid(f.id());
+    Path root = managed(dataDir, Managed.FIGHTS);
+    Path folder = checked(root, exportName(f, false));
+    if (Files.exists(folder)) {
+      if (Files.isRegularFile(folder.resolve(id + ".json"), LinkOption.NOFOLLOW_LINKS))
+        return folder;
+      try (var entries = Files.list(folder)) {
+        if (entries.findAny().isPresent())
+          folder = checked(root, exportName(f, false) + " [" + id + "]");
+      }
+    }
+    if (Files.exists(folder)) {
+      if (!Files.isDirectory(folder)) throw new IOException("Recording folder collision");
+      try (var entries = Files.list(folder)) {
+        if (entries.findAny().isPresent()
+            && !Files.isRegularFile(folder.resolve(id + ".json"), LinkOption.NOFOLLOW_LINKS))
+          throw new IOException("Recording collision; existing contents preserved");
+      }
+    }
     return folder;
   }
 
@@ -88,6 +117,13 @@ public final class SafePaths {
 
   /** True when the folder holds this fight's report (or nothing yet). */
   private static boolean ownedBy(Path folder, String id) {
+    Path owner = folder.resolve(".kwamster-owner");
+    try {
+      if (Files.isRegularFile(owner, LinkOption.NOFOLLOW_LINKS) && Files.size(owner) < 100)
+        return id.equals(Files.readString(owner));
+    } catch (IOException ex) {
+      return false;
+    }
     Path report = folder.resolve("report.json");
     try {
       if (!Files.exists(report)) {

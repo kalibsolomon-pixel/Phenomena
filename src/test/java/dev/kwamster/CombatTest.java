@@ -34,7 +34,7 @@ class CombatTest {
       Confidence confidence,
       Attack a,
       String detail) {
-    return new CombatEvent(++seq, ms * 1_000_000, k, actor, target, confidence, a, detail);
+    return new CombatEvent(++seq, ms * 1_000_000, k, actor, target, confidence, a, detail, ms / 50);
   }
 
   void attack(long ms) {
@@ -126,6 +126,8 @@ class CombatTest {
     attack(1);
     hit(20);
     engine.accept(event(30, Kind.DEATH, null, "opponent", Confidence.OBSERVED, null, ""));
+    assertTrue(records.isEmpty(), "death waits for a scoped result announcement");
+    engine.tick(4_000_000_000L);
     assertEquals(FightRecord.Outcome.UNKNOWN, records.getFirst().outcome());
   }
 
@@ -136,7 +138,8 @@ class CombatTest {
     assertEquals(0, engine.stats().jumpCandidates);
     engine.accept(event(20, Kind.DAMAGE_IN, "opponent", "local", Confidence.CONFIRMED, null, ""));
     engine.accept(event(100, Kind.JUMP, "local", null, Confidence.OBSERVED, null, ""));
-    assertEquals(1, engine.stats().jumpCandidates);
+    assertEquals(
+        2, engine.stats().jumpCandidates, "both early and late actual jumps are candidates");
   }
 
   @Test
@@ -223,6 +226,9 @@ class CombatTest {
     attack(1);
     for (int i = 0; i < 10000; i++)
       engine.accept(event(i + 2, Kind.MOTION, "local", null, Confidence.OBSERVED, null, "trace"));
+    assertTrue(
+        engine.engaged(), "dense motion traces are thinned before interrupting a long round");
+    for (int i = 0; i < 1001; i++) attack(10002 + i);
     assertFalse(engine.engaged());
     assertEquals(10000, records.getFirst().events().size());
     assertEquals(FightRecord.Outcome.INTERRUPTED, records.getFirst().outcome());

@@ -27,6 +27,7 @@ public final class KwamsterClient implements ClientModInitializer {
   public static CombatEngine engine;
   public static KeyMapping openKey;
   public static FightStore store;
+  public static AutoReports autoReports;
   public static Path dataDir;
   public static String status = "Local by default / K opens KWAMSTER";
   public static final List<FightRecord> history = new ArrayList<>();
@@ -56,19 +57,30 @@ public final class KwamsterClient implements ClientModInitializer {
               LOG.warn("{}", error);
               Minecraft.getInstance().execute(() -> status = error);
             });
+    autoReports =
+        new AutoReports(
+            store,
+            dataDir,
+            error -> {
+              LOG.info("{}", error);
+              Minecraft.getInstance().execute(() -> status = error);
+            });
     installEngine();
+    var recoveryOptions = reportOptions();
     store.load(
-        fights ->
-            Minecraft.getInstance()
-                .execute(
-                    () -> {
-                      for (var f : fights)
-                        if (history.stream().noneMatch(h -> h.id().equals(f.id()))) history.add(f);
-                      history.sort(
-                          Comparator.comparingLong(FightRecord::startEpochMillis).reversed());
-                      trimHistory();
-                      historyChanged();
-                    }));
+        fights -> {
+          autoReports.recover(fights, recoveryOptions);
+          Minecraft.getInstance()
+              .execute(
+                  () -> {
+                    for (var f : fights)
+                      if (history.stream().noneMatch(h -> h.id().equals(f.id()))) history.add(f);
+                    history.sort(
+                        Comparator.comparingLong(FightRecord::startEpochMillis).reversed());
+                    trimHistory();
+                    historyChanged();
+                  });
+        });
     openKey =
         KeyBindingHelper.registerKeyBinding(
             new KeyMapping(
@@ -76,9 +88,11 @@ public final class KwamsterClient implements ClientModInitializer {
                 GLFW.GLFW_KEY_K,
                 KeyMapping.Category.register(
                     Identifier.fromNamespaceAndPath("kwamster", "controls"))));
+    ClientTickEvents.START_CLIENT_TICK.register(client -> ClientCapture.startTick());
     ClientTickEvents.END_CLIENT_TICK.register(
         client -> {
           ClientCapture.tick();
+          autoReports.tick(ClientCapture.now());
           // The persistent HUD is dormant: tracking never depends on it.
           if (config.hudOverlay) CombatHud.tick();
           while (openKey.consumeClick())
@@ -93,6 +107,7 @@ public final class KwamsterClient implements ClientModInitializer {
     ClientLifecycleEvents.CLIENT_STOPPING.register(
         client -> {
           engine.finish(ClientCapture.now(), FightRecord.Outcome.INTERRUPTED, "Client stopped");
+          autoReports.pump();
           saveConfig();
           store.close();
         });
@@ -108,8 +123,7 @@ public final class KwamsterClient implements ClientModInitializer {
               trimHistory();
               historyChanged();
               CombatHud.summaryAt = ClientCapture.now();
-              if (config.recording)
-                store.save(fight, config.retention, (long) (config.maxStorageMb * 1024 * 1024));
+              if (config.recording) autoReports.finalized(fight, reportOptions());
               if (config.chatSummary)
                 Minecraft.getInstance()
                     .gui
@@ -127,6 +141,11 @@ public final class KwamsterClient implements ClientModInitializer {
             },
             FeedbackController::hit,
             ClientCapture::label);
+  }
+
+  public static dev.kwamster.sharing.ReportExporter.Options reportOptions() {
+    return new dev.kwamster.sharing.ReportExporter.Options(
+        config.anonymizeExports, config.exportMotion, config.reducedMotion);
   }
 
   private static void trimHistory() {

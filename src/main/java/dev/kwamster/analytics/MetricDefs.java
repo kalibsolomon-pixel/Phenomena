@@ -82,7 +82,8 @@ public final class MetricDefs {
               "Jump candidates",
               "",
               "Inferred",
-              "Possible jump resets: jumps inside the window after incoming damage. Success unavailable."),
+              "Actual jumps within the signed client-tick window around incoming damage. Same tick"
+                  + " is an ideal candidate; success is unavailable."),
           new Def(
               "longestCombo",
               "Longest combo",

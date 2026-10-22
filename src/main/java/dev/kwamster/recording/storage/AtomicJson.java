@@ -22,10 +22,13 @@ public final class AtomicJson {
             path.toAbsolutePath().getParent(), path.getFileName().toString(), ".tmp");
     try {
       Files.writeString(tmp, text);
+      try (var channel = java.nio.channels.FileChannel.open(tmp, StandardOpenOption.WRITE)) {
+        channel.force(true);
+      }
       try {
         Files.move(tmp, path, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
       } catch (AtomicMoveNotSupportedException ex) {
-        Files.move(tmp, path, StandardCopyOption.REPLACE_EXISTING);
+        throw new IOException("Atomic replacement unavailable; original file preserved", ex);
       }
     } finally {
       Files.deleteIfExists(tmp);

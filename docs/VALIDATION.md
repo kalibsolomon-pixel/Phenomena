@@ -92,3 +92,18 @@ The full client acceptance sequence also passed with all four of these Fabric 1.
 | ImmediatelyFast | 1.14.3+1.21.11 | https://modrinth.com/mod/immediatelyfast/version/4EwhsTu7 |
 
 Downloaded jars were verified against their SHA-512 metadata. They remain only in ignored development/test folders and are not bundled with KWAMSTER. Sodium reported its AMD driver workaround; the smoke test and screenshots still completed. This does not establish compatibility with every setting, resource pack or long-running workload.
+
+
+## 0.1.2 final acceptance
+
+The final build passed 158 JUnit cases: 157 passed, one existing Windows symlink-privilege skip, zero failures/errors. Final muted Fabric client acceptance also passed with the four existing checksum-verified compatibility mods simultaneously loaded. The additional sequence exercises actual sword/axe/trident/fist/item/mace attributes, a changed attack-speed attribute, mace-smash confirmation, automatic report availability before GUI use, and an integrated-server system result with inferred confidence. Pure tests additionally cover named-start forfeits and identity binding, conservative same-opponent rematches, delayed/unknown/player-chat results, queue pressure, transient/permanent export failures and partial/damaged export recovery.
+
+The final combined command was:
+
+```powershell
+./scripts/dev.ps1 build generateExampleReport runClientGameTest -PvalidationRun=v012-final-compat
+```
+
+The run directory was new and included the four compatibility jars in its mods folder. It captured 27 GUI screenshots; selected images and a synthetic, anonymized report are in docs/screenshots/0.1.2 and docs/example-report-0.1.2. Previous run directories remain intact. The test harness disables Fabric's packet synchronizer because its low-level packet-observation guard explicitly requires it; the first exploratory run failed on that restriction and subsequent runs passed. No manual multiplayer acceptance or audible sound acceptance is claimed. Browser visual acceptance remains unverified because the browser policy blocked the local file URL. The final generated JavaScript passes Node syntax checking.
+
+See 0.1.2.md for the evidence investigation, changed definitions, preservation guarantees, paths and remaining limits.

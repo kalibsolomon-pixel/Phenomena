@@ -9,9 +9,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 /**
- * User-initiated file actions. All filesystem work runs on the storage worker; process launches
- * run on their own daemon thread; results come back as notices. Paths are built only from the
- * game directory and validated fight UUIDs.
+ * User-initiated file actions. All filesystem work runs on the storage worker; process launches run
+ * on their own daemon thread; results come back as notices. Paths are built only from the game
+ * directory and validated fight UUIDs.
  */
 public final class FightActions {
   private FightActions() {}
@@ -51,6 +51,7 @@ public final class FightActions {
     submit(
         () -> {
           FightRecord full = inMemory != null ? inMemory : KwamsterClient.store.readOne(fight.id());
+          KwamsterClient.store.persistFinalized(full);
           Path folder = SafePaths.exportFolder(data, full, options.anonymize());
           ReportExporter.export(folder, full, options);
           Path file = SafePaths.reportFile(folder);

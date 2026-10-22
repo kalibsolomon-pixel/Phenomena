@@ -85,7 +85,7 @@ public final class FightStore implements AutoCloseable {
       throw new IOException("Invalid fight identifier");
     }
     if (!Files.exists(p)) throw new IOException("Recording not found");
-    if (Files.isSymbolicLink(p) || Files.size(p) > 4 * 1024 * 1024)
+    if (Files.isSymbolicLink(p) || Files.size(p) > 32 * 1024 * 1024)
       throw new IOException("Unsafe report");
     var f = decode(Files.readString(p));
     if (!f.id().equals(id)) throw new IOException("Report ID mismatch");
@@ -102,6 +102,25 @@ public final class FightStore implements AutoCloseable {
             errors.accept(ex.toString());
           }
         });
+  }
+
+  /**
+   * Automatic pipeline entry; caller is already on the bounded storage worker. No destructive
+   * pruning.
+   */
+  public Path persistFinalized(FightRecord fight) throws IOException {
+    Path existing = path(fight.id());
+    if (Files.exists(existing)) {
+      readOne(fight.id());
+      return existing;
+    }
+    Path file =
+        Files.exists(existing)
+            ? existing
+            : dev.kwamster.platform.SafePaths.recordingFolder(directory.getParent(), fight)
+                .resolve(fight.id() + ".json");
+    AtomicJson.write(file, fight);
+    return file;
   }
 
   public void delete(String id, Runnable done) {
@@ -123,16 +142,18 @@ public final class FightStore implements AutoCloseable {
     List<FightRecord> result = new ArrayList<>();
     long loadedBytes = 0;
     int loadedEvents = 0;
-    try (var files = Files.list(directory)) {
+    try (var files = Files.walk(directory, 2)) {
       for (var p :
           files
+              .filter(Files::isRegularFile)
               .filter(f -> f.getFileName().toString().endsWith(".json"))
               .sorted(Comparator.comparingLong(FightStore::modified).reversed())
               .limit(2000)
               .toList()) {
         try {
-          if (Files.isSymbolicLink(p) || Files.size(p) > 4 * 1024 * 1024)
-            throw new IOException("Oversize or symlink");
+          if (Files.isSymbolicLink(p)
+              || Files.isSymbolicLink(p.getParent())
+              || Files.size(p) > 32 * 1024 * 1024) throw new IOException("Oversize or symlink");
           var f = decode(Files.readString(p));
           if (!p.getFileName().toString().equals(f.id() + ".json"))
             throw new IOException("ID mismatch");
@@ -157,7 +178,7 @@ public final class FightStore implements AutoCloseable {
   public static FightRecord decode(String json) throws IOException {
     try {
       var f = AtomicJson.GSON.fromJson(json, FightRecord.class);
-      if (f == null || f.schemaVersion() != 1)
+      if (f == null || (f.schemaVersion() < 1 || f.schemaVersion() > 2))
         throw new IOException("Unsupported report schema; preserved");
       UUID.fromString(f.id());
       if (f.statistics() == null
@@ -189,7 +210,7 @@ public final class FightStore implements AutoCloseable {
       for (var p :
           files.filter(f -> f.getFileName().toString().endsWith(".json")).limit(2000).toList()) {
         try {
-          if (Files.isSymbolicLink(p) || Files.size(p) > 4 * 1024 * 1024) continue;
+          if (Files.isSymbolicLink(p) || Files.size(p) > 32 * 1024 * 1024) continue;
           var f = decode(Files.readString(p));
           if (p.getFileName().toString().equals(f.id() + ".json"))
             managed.add(new Stored(p, f.startEpochMillis(), Files.size(p)));
@@ -217,7 +238,25 @@ public final class FightStore implements AutoCloseable {
 
   private Path path(String id) {
     UUID.fromString(id);
-    return directory.resolve(id + ".json");
+    Path legacy = directory.resolve(id + ".json");
+    if (Files.exists(legacy) || !Files.isDirectory(directory)) return legacy;
+    try (var folders = Files.list(directory)) {
+      for (var folder :
+          folders
+              .filter(p -> Files.isDirectory(p, LinkOption.NOFOLLOW_LINKS))
+              .limit(2000)
+              .toList()) {
+        Path candidate = folder.resolve(id + ".json");
+        if (Files.exists(candidate) && !Files.isSymbolicLink(candidate)) return candidate;
+      }
+    } catch (IOException ex) {
+      throw new IllegalStateException("Cannot resolve recording", ex);
+    }
+    return legacy;
+  }
+
+  public Path recordingFile(String id) {
+    return path(id);
   }
 
   public boolean await(long millis) throws InterruptedException {

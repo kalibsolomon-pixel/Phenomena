@@ -50,7 +50,8 @@ public final class Blocks {
       return;
     }
     for (int i = 0; i <= steps; i++) {
-      int px = x0 + Math.round(dx * (float) i / steps), py = y0 + Math.round(dy * (float) i / steps);
+      int px = x0 + Math.round(dx * (float) i / steps),
+          py = y0 + Math.round(dy * (float) i / steps);
       g.fill(px, py, px + 1, py + 1, color);
     }
   }
@@ -73,7 +74,8 @@ public final class Blocks {
 
     @Override
     public void render(GuiGraphics g, int x, int y, int w, int h, int mx, int my) {
-      for (int i = 0; i < lines.size(); i++) g.drawString(font(), lines.get(i), x, y + i * 10, color, false);
+      for (int i = 0; i < lines.size(); i++)
+        g.drawString(font(), lines.get(i), x, y + i * 10, color, false);
     }
   }
 
@@ -162,13 +164,15 @@ public final class Blocks {
         g.drawString(f, KButton.fit(f, s.label(), cw - 10), cx + 5, cy + 4, Theme.MUTED, false);
         g.drawString(
             f,
-            Component.literal(KButton.fit(f, s.value(), cw - 10)).withStyle(net.minecraft.ChatFormatting.BOLD),
+            Component.literal(KButton.fit(f, s.value(), cw - 10))
+                .withStyle(net.minecraft.ChatFormatting.BOLD),
             cx + 5,
             cy + 4 + step,
             Format.NONE.equals(s.value()) ? Theme.DIM : Theme.TEXT,
             false);
         if (s.caption() != null)
-          g.drawString(f, KButton.fit(f, s.caption(), cw - 10), cx + 5, cy + 4 + 2 * step, Theme.DIM, false);
+          g.drawString(
+              f, KButton.fit(f, s.caption(), cw - 10), cx + 5, cy + 4 + 2 * step, Theme.DIM, false);
         if (hov && s.help() != null) tooltip(g, s.help(), mx, my);
       }
     }
@@ -204,7 +208,11 @@ public final class Blocks {
         if (i == values.length - 1) sw = x + w - cx;
         g.fill(cx, y, cx + Math.max(1, sw - 2), y + 10, colors[i]);
         if (hover(mx, my, cx, y, sw, 10))
-          tooltip(g, names[i] + ": " + values[i] + " (" + Format.percent(100.0 * values[i] / total) + ")", mx, my);
+          tooltip(
+              g,
+              names[i] + ": " + values[i] + " (" + Format.percent(100.0 * values[i] / total) + ")",
+              mx,
+              my);
         cx += sw;
       }
       int lx = x;
@@ -230,8 +238,8 @@ public final class Blocks {
   public record Series(String name, double[] xs, double[] ys, int color, Mark mark) {}
 
   /**
-   * Single-axis chart with fixed or data-driven bounds, recessive grid, min/mid/max y labels and
-   * a crosshair tooltip on the nearest sample.
+   * Single-axis chart with fixed or data-driven bounds, recessive grid, min/mid/max y labels and a
+   * crosshair tooltip on the nearest sample.
    */
   public static final class Chart implements Block {
     private final List<Series> series;
@@ -311,7 +319,10 @@ public final class Blocks {
       String top = yLabel(yMax), mid = yLabel((yMin + yMax) / 2), bottom = yLabel(yMin);
       int gutter = Math.max(f.width(top), Math.max(f.width(mid), f.width(bottom))) + 6;
       int legendH = series.size() > 1 ? 12 : 0;
-      int px = x + gutter, py = y + 4, pw = Math.max(10, w - gutter - 4), ph = Math.max(10, h - 18 - legendH);
+      int px = x + gutter,
+          py = y + 4,
+          pw = Math.max(10, w - gutter - 4),
+          ph = Math.max(10, h - 18 - legendH);
       g.fill(px, py, px + pw, py + ph, Theme.alpha(Theme.SURFACE_2, 0x90));
       for (int i = 0; i <= 2; i++) {
         int gy = py + ph - i * ph / 2;
@@ -327,7 +338,8 @@ public final class Blocks {
       if (xLabels != null && xLabels.length > 0) {
         String a = xLabels[0], b = xLabels[xLabels.length - 1];
         g.drawString(f, a, px, py + ph + 4, Theme.DIM, false);
-        if (xLabels.length > 1) g.drawString(f, b, px + pw - f.width(b), py + ph + 4, Theme.DIM, false);
+        if (xLabels.length > 1)
+          g.drawString(f, b, px + pw - f.width(b), py + ph + 4, Theme.DIM, false);
       }
       if (xUnit != null && !xUnit.isEmpty()) {
         int uw = f.width(xUnit);
@@ -387,7 +399,9 @@ public final class Blocks {
         String where =
             hs.xs() == null && xLabels != null && hi < xLabels.length
                 ? xLabels[hi]
-                : (xUnit == null || xUnit.isEmpty() ? "#" + (hi + 1) : Format.number(xv, 2) + " " + xUnit);
+                : (xUnit == null || xUnit.isEmpty()
+                    ? "#" + (hi + 1)
+                    : Format.number(xv, 2) + " " + xUnit);
         tooltip(g, hs.name() + " / " + where + ": " + value(hs.ys()[hi]), mx, my);
       }
     }
@@ -405,8 +419,8 @@ public final class Blocks {
   // ---- bar chart -----------------------------------------------------------
 
   /**
-   * Vertical bars over ordered bins, optionally grouped with a second series. Colors may be set
-   * per bar for semantic categories (readiness colors chosen by the player).
+   * Vertical bars over ordered bins, optionally grouped with a second series. Colors may be set per
+   * bar for semantic categories (readiness colors chosen by the player).
    */
   public static final class Bars implements Block {
     private final String[] labels;
@@ -473,7 +487,8 @@ public final class Blocks {
         }
         if (i % labelEvery == 0) {
           String l = KButton.fit(f, labels[i], slot * labelEvery - 2);
-          g.drawString(f, l, px + i * slot + (slot - f.width(l)) / 2, py + ph + 4, Theme.DIM, false);
+          g.drawString(
+              f, l, px + i * slot + (slot - f.width(l)) / 2, py + ph + 4, Theme.DIM, false);
         }
       }
       if (b != null) {
@@ -495,9 +510,9 @@ public final class Blocks {
   // ---- hitbox --------------------------------------------------------------
 
   /**
-   * Front view of the contacted face in normalized coordinates. Shows each recorded intersection
-   * or an aggregate density grid, with the high/low quartiles and edge bands used by the
-   * placement categories. Placement is descriptive only.
+   * Front view of the contacted face in normalized coordinates. Shows each recorded intersection or
+   * an aggregate density grid, with the high/low quartiles and edge bands used by the placement
+   * categories. Placement is descriptive only.
    */
   public static final class Hitbox implements Block {
     public static final int COLS = 6, ROWS = 12;
@@ -512,7 +527,8 @@ public final class Blocks {
       this.heat = heat;
       int m = 0;
       for (var p : hits) {
-        int c = Math.min(COLS - 1, (int) (p[0] * COLS)), r = Math.min(ROWS - 1, (int) ((1 - p[1]) * ROWS));
+        int c = Math.min(COLS - 1, (int) (p[0] * COLS)),
+            r = Math.min(ROWS - 1, (int) ((1 - p[1]) * ROWS));
         m = Math.max(m, ++cells[r * COLS + c]);
       }
       maxCell = m;
@@ -531,8 +547,14 @@ public final class Blocks {
             int x0 = bx + c * bw / COLS, x1 = bx + (c + 1) * bw / COLS;
             int y0 = by + r * bh / ROWS, y1 = by + (r + 1) * bh / ROWS;
             if (v > 0)
-              g.fill(x0, y0, x1, y1, Theme.mix(Theme.SURFACE_2, Theme.SEQ_HIGH, .2 + .8 * v / (double) maxCell));
-            if (hover(mx, my, x0, y0, x1 - x0, y1 - y0)) tooltip(g, v + " hits in this cell", mx, my);
+              g.fill(
+                  x0,
+                  y0,
+                  x1,
+                  y1,
+                  Theme.mix(Theme.SURFACE_2, Theme.SEQ_HIGH, .2 + .8 * v / (double) maxCell));
+            if (hover(mx, my, x0, y0, x1 - x0, y1 - y0))
+              tooltip(g, v + " hits in this cell", mx, my);
           }
       }
       int q1 = by + bh / 4, q3 = by + bh * 3 / 4;
@@ -544,12 +566,16 @@ public final class Blocks {
       g.renderOutline(bx - 1, by - 1, bw + 2, bh + 2, Theme.BORDER);
       if (!heat) {
         for (var p : others) {
-          int cx = bx + (int) Math.round(p[0] * (bw - 1)), cy = by + (int) Math.round((1 - p[1]) * (bh - 1));
+          int cx = bx + (int) Math.round(p[0] * (bw - 1)),
+              cy = by + (int) Math.round((1 - p[1]) * (bh - 1));
           g.renderOutline(cx - 2, cy - 2, 5, 5, Theme.SERIES_2);
         }
         for (var p : hits) {
-          int cx = bx + (int) Math.round(p[0] * (bw - 1)), cy = by + (int) Math.round((1 - p[1]) * (bh - 1));
-          g.fill(cx - 1, cy - 1, cx + 2, cy + 2, Theme.SERIES_1);
+          int cx = bx + (int) Math.round(p[0] * (bw - 1)),
+              cy = by + (int) Math.round((1 - p[1]) * (bh - 1));
+          int[] colors = {0xFF56B4E9, 0xFF009E73, 0xFFE69F00, 0xFFCC79A7};
+          int color = p.length > 2 && p[2] >= 0 && p[2] < 4 ? colors[(int) p[2]] : Theme.SERIES_1;
+          g.fill(cx - 1, cy - 1, cx + 2, cy + 2, color);
         }
       }
       int lx = bx + bw + 10;

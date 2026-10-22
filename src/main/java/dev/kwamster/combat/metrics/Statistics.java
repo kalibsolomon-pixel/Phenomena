@@ -17,6 +17,7 @@ public final class Statistics {
       currentCombo,
       longestCombo,
       incoming;
+  public int perfectReachHits;
   public int centerAim, edgeAim, highAim, lowAim;
   public int[] reachDistribution = new int[8];
   public double[] recentReach = new double[16];
