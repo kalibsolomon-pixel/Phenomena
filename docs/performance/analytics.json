@@ -1,0 +1,8 @@
+{
+  "events": 200000,
+  "elapsedMs": 38.2187,
+  "nsPerEvent": 191.0935,
+  "allocatedBytesPerEvent": 102.85848,
+  "atomicReplaceMeanMs": 3.174187,
+  "storageErrors": []
+}

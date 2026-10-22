@@ -29,3 +29,6 @@ Initial profiler output was rejected because a mid-frame start produced an inval
 
 ## Owner preference
 All development Minecraft test instances must stay muted while the owner watches a show. Both local options files have master volume zero; the test-only initializer reapplies it after Fabric's options reset. System and other application audio are unchanged.
+
+## Local commits and final review
+Foundation: 1cd57ec. Combat core: 0809231. Connected GUI/recording/replay implementation: 1823f9c. The final build and 40 tests pass; both ordinary and four-mod client gametests pass. Checked diffs contain additions and modifications only, with no unexpected deletions. No remote is configured and no push or release occurred. All test clients exited; their saved master volume remains zero.

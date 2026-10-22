@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "id": "c723c003-42d7-488a-8472-9bae0c2f0246",
+  "startEpochMillis": 1792639775169,
+  "endEpochMillis": 1792639775467,
+  "durationNanos": 297543600,
+  "opponent": "Opponent",
+  "outcome": "UNKNOWN",
+  "reason": "Integration test",
+  "statistics": {
+    "attempts": 1,
+    "hits": 1,
+    "emptyMisses": 0,
+    "uncertain": 0,
+    "contacts": 1,
+    "criticalConditions": 0,
+    "sprintHits": 0,
+    "jumpCandidates": 0,
+    "currentCombo": 0,
+    "longestCombo": 1,
+    "incoming": 0,
+    "centerAim": 0,
+    "edgeAim": 0,
+    "highAim": 1,
+    "lowAim": 0,
+    "reachDistribution": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "recentReach": [
+      1.9999999880790709,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "recentReachIndex": 1,
+    "recentReachCount": 1,
+    "recentInterval": 0.0,
+    "momentumAt": 10059855900,
+    "reachSum": 1.9999999880790709,
+    "maxReach": 1.9999999880790709,
+    "cooldownSum": 1.0,
+    "intervalSum": 0.0,
+    "intervalSquared": 0.0,
+    "reachCount": 1,
+    "intervalCount": 0,
+    "lastHit": 10059855900,
+    "comboStart": 10059855900,
+    "momentum": 0.2
+  },
+  "events": [
+    {
+      "sequence": 1,
+      "nanoTime": 10059855900,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 1.9999999880790709,
+        "aimX": 0.5,
+        "aimY": 0.8307692128995942,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true
+      },
+      "detail": "interpolated eye-to-client-target-box; partial\u003d0.059997916; margin\u003d0.0; critical conditions observed"
+    },
+    {
+      "sequence": 2,
+      "nanoTime": 10064400700,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 3,
+      "nanoTime": 10115830400,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source"
+    },
+    {
+      "sequence": 4,
+      "nanoTime": 10158638900,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 5,
+      "nanoTime": 10260718400,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    }
+  ],
+  "policy": {
+    "correlationMillis": 250.0,
+    "comboSeconds": 3.0,
+    "jumpWindowMillis": 150.0,
+    "perfectCooldown": 0.95,
+    "greatCooldown": 0.85
+  },
+  "evaluations": [
+    {
+      "attackSequence": 1,
+      "evidenceSequence": 3,
+      "readiness": "PERFECT",
+      "confidence": "INFERRED",
+      "combo": 1,
+      "momentum": 0.2
+    }
+  ]
+}
