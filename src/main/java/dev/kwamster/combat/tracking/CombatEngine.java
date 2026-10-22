@@ -108,7 +108,7 @@ public final class CombatEngine {
           }
           if (match != null) {
             pending.remove(match);
-            stats.hit(match.attack(), match.nanoTime(), policy.comboSeconds());
+            stats.hit(match.attack(), match.nanoTime(), e.nanoTime(), policy.comboSeconds());
             lastActivity = e.nanoTime();
             state = State.ENGAGED;
             var grade =

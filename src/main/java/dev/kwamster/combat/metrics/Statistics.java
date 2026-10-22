@@ -36,7 +36,7 @@ public final class Statistics {
     if (a != null && a.rayContact()) contacts++;
   }
 
-  public void hit(Attack a, long time, double comboSeconds) {
+  public void hit(Attack a, long time, long evidenceTime, double comboSeconds) {
     hits++;
     uncertain--;
     if (a.reach() >= 0) {
@@ -70,9 +70,9 @@ public final class Statistics {
     currentCombo++;
     longestCombo = Math.max(longestCombo, currentCombo);
     lastHit = time;
-    momentum = momentumAt(time) + .2;
+    momentum = momentumAt(evidenceTime) + .2;
     momentum = Math.min(1, momentum);
-    momentumAt = time;
+    momentumAt = evidenceTime;
   }
 
   public void incoming(long time) {

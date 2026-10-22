@@ -16,7 +16,7 @@ Gradle build and 3 foundation tests pass on Java 21. Custom K dashboard compiled
 ## Phases 2–7 — connected implementation and validation
 Custom dashboard/settings/history screens, accessible vanilla-backed controls, independent HUD editor, four display modes, fight lifecycle and summary alerts, per-category cooldown-readiness feedback, movement indicator, combo/timing/momentum metrics, bounded local recording, lazy history timelines, anonymized portable reports and browser timeline replay are connected. These phases share the composition root and were validated together rather than committing disconnected UI/storage stubs.
 
-The final unit suite contains 40 passing tests. Actual Fabric 1.21.11 client gametests exercise navigation, toggle persistence, resize, HUD scale/keyboard position, singleplayer melee correlation, history and file export. A second pass with Sodium 0.8.14, Lithium 0.21.4, FerriteCore 8.2.0 and ImmediatelyFast 1.14.3 passes together. These are smoke tests, not a claim of universal compatibility. External-server PvP and audible sound perception remain untested.
+The final unit suite contains 41 passing tests. Actual Fabric 1.21.11 client gametests exercise navigation, toggle persistence, resize, HUD scale/keyboard position, singleplayer melee correlation, history and file export. A second pass with Sodium 0.8.14, Lithium 0.21.4, FerriteCore 8.2.0 and ImmediatelyFast 1.14.3 passes together. These are smoke tests, not a claim of universal compatibility. External-server PvP and audible sound perception remain untested.
 
 Browser validation loaded the generated report, advanced playback, and observed the final raw events. Saved screenshots and a synthetic training report are local evidence. No combat recording was uploaded. Hosted sharing is explicitly pending infrastructure and owner authorization.
 
@@ -31,4 +31,6 @@ Initial profiler output was rejected because a mid-frame start produced an inval
 All development Minecraft test instances must stay muted while the owner watches a show. Both local options files have master volume zero; the test-only initializer reapplies it after Fabric's options reset. System and other application audio are unchanged.
 
 ## Local commits and final review
-Foundation: 1cd57ec. Combat core: 0809231. Connected GUI/recording/replay implementation: 1823f9c. The final build and 40 tests pass; both ordinary and four-mod client gametests pass. Checked diffs contain additions and modifications only, with no unexpected deletions. No remote is configured and no push or release occurred. All test clients exited; their saved master volume remains zero.
+Foundation: 1cd57ec. Combat core: 0809231. Connected GUI/recording/replay implementation: 1823f9c. The final build and 41 tests pass; both ordinary and four-mod client gametests pass. Checked diffs contain additions and modifications only, with no unexpected deletions. No remote is configured and no push or release occurred. All test clients exited; their saved master volume remains zero.
+
+Final estimator correction: use server-evidence arrival time for momentum decay while preserving attack-time hit intervals. A regression test covers retaliation between attack and delayed confirmation; 41 tests pass after the correction.

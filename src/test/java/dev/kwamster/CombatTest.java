@@ -227,4 +227,13 @@ class CombatTest {
     assertEquals(10000, records.getFirst().events().size());
     assertEquals(FightRecord.Outcome.INTERRUPTED, records.getFirst().outcome());
   }
+
+  @Test
+  void delayedConfirmationDoesNotBackdateMomentum() {
+    attack(1);
+    engine.accept(event(50, Kind.DAMAGE_IN, "opponent", "local", Confidence.CONFIRMED, null, ""));
+    hit(100);
+    assertEquals(100_000_000L, engine.stats().momentumAt);
+    assertEquals(-.25 * Math.exp(-.05 / 3) + .2, engine.stats().momentum, 1e-9);
+  }
 }
