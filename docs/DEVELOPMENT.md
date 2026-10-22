@@ -9,3 +9,6 @@ Architecture: immutable raw events -> bounded ordered correlator -> fight lifecy
 
 ## Phase 0
 Gradle build and 3 foundation tests pass on Java 21. Custom K dashboard compiled using 1.21.11 renderContents API. Live launch pending. Configuration schema v1 preserves invalid originals. No previous schema exists to migrate.
+
+## Phase 1
+24 unit tests pass (geometry, aim normalization, correlation, duplicate prevention, expiry, cooldown quality, fight lifecycle, combos and jump candidates). Build passes. Foundation development client launched and rendered assets successfully. Three narrow observational mixins capture entity attacks, empty swings and source-attributed damage packets after main-thread dispatch. Critical conditions remain observed; jump-reset success remains unavailable. Incoming motion-baseline estimates require controlled trials. Gameplay validation pending integration tests.
