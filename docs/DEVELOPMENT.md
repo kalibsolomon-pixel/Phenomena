@@ -34,3 +34,18 @@ All development Minecraft test instances must stay muted while the owner watches
 Foundation: 1cd57ec. Combat core: 0809231. Connected GUI/recording/replay implementation: 1823f9c. The final build and 41 tests pass; both ordinary and four-mod client gametests pass. Checked diffs contain additions and modifications only, with no unexpected deletions. No remote is configured and no push or release occurred. All test clients exited; their saved master volume remains zero.
 
 Final estimator correction: use server-evidence arrival time for momentum decay while preserving attack-time hit intervals. A regression test covers retaliation between attack and delayed confirmation; 41 tests pass after the correction.
+
+## 0.1.1 tabbed analytics GUI and local replay - 2026-10-22
+
+Starting point: main at b19b5c2, clean tree. Export folders are named "Fight vs <opponent> <local time>" (opponent omitted when anonymizing) at the owner's request. Six empty untracked directories at the repository root (`.gitattribute`, `.gitignor`, `README.m`, `build.gradl`, `gradle.propertie`, `settings.gradl`) were left untouched.
+
+The separate PanelScreen-family screens (Dashboard, History, FightDetail, Settings, Choice, Confirm) were replaced by one tabbed `KwamsterScreen` with persistent session state. These seven deletions are intentional. `HudEditorScreen` and `CombatHud` remain, dormant. A Minecraft-independent analytics package now feeds both the dashboard and the browser report. Configuration moved to schema 2 with a migration from schema 1. File actions go through `SafePaths` and `SystemOpener`.
+
+Defects found and fixed during the work:
+
+- `ReportExporter`'s `"\u003c"` replacements were Java compile-time escapes and did nothing; Gson's default HTML escaping had been covering them. Escaping is now explicit and tested.
+- In the new viewer, a chained `Element.append()` stopped the Timeline and table rendering, and empty swings that retain geometry were labelled as unreported attacks.
+
+The client test now generates genuine fights, including uncertain, sprint and critical-condition samples, and drives the GUI through real cursor and key input. A run with -PrealOpen=true opened File Explorer for the fights and exports folders and the default browser for the report. Screenshots were reviewed and the layout corrected: compact chrome on short windows, keyboard-only focus rings, column widths, swatch placement, label truncation and card tags.
+
+The unit suite now has 78 tests, one of them skipped on Windows (symbolic-link privilege). Both client sequences pass. All development test clients stayed muted.

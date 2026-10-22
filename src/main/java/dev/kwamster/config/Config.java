@@ -1,7 +1,9 @@
 package dev.kwamster.config;
 
 public final class Config {
-  public int schemaVersion = 1;
+  public static final int SCHEMA = 2;
+
+  public int schemaVersion = SCHEMA;
   public boolean tracking = true,
       recording = true,
       perHitChat = false,
@@ -29,7 +31,24 @@ public final class Config {
     }
   }
 
-  public Display display = Display.HUD;
+  /** Schema 1 display mode. Read only for migration; schema 2 never writes it. */
+  public Display display;
+
+  /** Local fight-end chat line (schema 2 replacement for Display.CHAT / BOTH). */
+  public boolean chatSummary = false;
+
+  /**
+   * Dormant persistent HUD. The dashboard is the primary surface; no interface control enables
+   * this in 0.1.1, and migration from schema 1 leaves it off.
+   */
+  public boolean hudOverlay = false;
+
+  public SoundChannel soundChannel = SoundChannel.UI;
+  public Density density = Density.COMFORTABLE;
+  public boolean reducedMotion = false, chartPoints = true, chartGrid = true;
+  public int trendWindow = 20;
+  public boolean anonymizeExports = true, exportMotion = true, openAfterExport = false;
+
   public int accent = 0xFF88C8AA, retention = 100;
   public double inactivitySeconds = 8,
       correlationMillis = 250,
@@ -56,6 +75,18 @@ public final class Config {
     public boolean chat() {
       return this == CHAT || this == BOTH;
     }
+  }
+
+  /** Minecraft sound category used for feedback, so the vanilla volume sliders apply. */
+  public enum SoundChannel {
+    UI,
+    PLAYERS,
+    MASTER
+  }
+
+  public enum Density {
+    COMFORTABLE,
+    COMPACT
   }
 
   public static class Hud {
@@ -86,10 +117,22 @@ public final class Config {
     }
   }
 
+  /** Schema 1 to 2: display mode becomes chatSummary; the persistent HUD is retired. */
+  private void migrate() {
+    if (schemaVersion == 1) {
+      chatSummary = display != null && display.chat();
+      hudOverlay = false;
+      schemaVersion = SCHEMA;
+    }
+    display = null;
+  }
+
   public void validate() {
-    if (schemaVersion != 1)
+    if (schemaVersion != 1 && schemaVersion != SCHEMA)
       throw new IllegalArgumentException("Unsupported config schema " + schemaVersion);
-    if (display == null) display = Display.HUD;
+    migrate();
+    if (soundChannel == null) soundChannel = SoundChannel.UI;
+    if (density == null) density = Density.COMFORTABLE;
     if (analytics == null) analytics = new Hud();
     if (direction == null) direction = new Hud();
     if (alert == null) alert = new Hud();
@@ -105,6 +148,7 @@ public final class Config {
     direction.validate();
     alert.validate();
     retention = Math.max(1, Math.min(1000, retention));
+    trendWindow = Math.max(5, Math.min(100, trendWindow));
     inactivitySeconds = clamp(inactivitySeconds, 2, 120);
     correlationMillis = clamp(correlationMillis, 50, 500);
     comboSeconds = clamp(comboSeconds, .5, 10);

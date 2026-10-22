@@ -34,6 +34,8 @@ loom.runs.clientGameTest {
     if (providers.gradleProperty('performance').orNull in ['baseline', 'mod']) vmArg '-Dfabric.modsFolder=' + layout.buildDirectory.dir('performance/mods').get().asFile.absolutePath
     if (providers.gradleProperty('performance').orNull in ['baseline', 'mod']) vmArg '-Dfabric.client.gametest.disableNetworkSynchronizer=true'
     if (providers.gradleProperty('performance').orNull == 'baseline') vmArg '-Dfabric.debug.disableModIds=kwamster'
+    // -PrealOpen=true lets the client test launch the real file manager and browser once.
+    if (providers.gradleProperty('realOpen').orNull == 'true') vmArg '-Dkwamster.realOpen=true'
 }
 
 tasks.register('benchmarkAnalytics', JavaExec) {

@@ -215,7 +215,7 @@ public final class HudEditorScreen extends Screen {
   @Override
   public void onClose() {
     KwamsterClient.saveConfig();
-    minecraft.setScreen(new DashboardScreen());
+    minecraft.setScreen(new KwamsterScreen());
   }
 
   @Override

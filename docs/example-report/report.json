@@ -1,32 +1,32 @@
 {
   "schemaVersion": 1,
-  "id": "c723c003-42d7-488a-8472-9bae0c2f0246",
-  "startEpochMillis": 1792639775169,
-  "endEpochMillis": 1792639775467,
-  "durationNanos": 297543600,
+  "id": "1aa15a63-af19-4e58-bc03-da59e123d991",
+  "startEpochMillis": 1792644130170,
+  "endEpochMillis": 1792644138115,
+  "durationNanos": 7944850200,
   "opponent": "Opponent",
   "outcome": "UNKNOWN",
-  "reason": "Integration test",
+  "reason": "Integration test fight 4",
   "statistics": {
-    "attempts": 1,
-    "hits": 1,
-    "emptyMisses": 0,
+    "attempts": 8,
+    "hits": 6,
+    "emptyMisses": 2,
     "uncertain": 0,
-    "contacts": 1,
+    "contacts": 6,
     "criticalConditions": 0,
     "sprintHits": 0,
     "jumpCandidates": 0,
     "currentCombo": 0,
-    "longestCombo": 1,
+    "longestCombo": 6,
     "incoming": 0,
-    "centerAim": 0,
+    "centerAim": 4,
     "edgeAim": 0,
-    "highAim": 1,
+    "highAim": 2,
     "lowAim": 0,
     "reachDistribution": [
       0,
-      1,
       0,
+      6,
       0,
       0,
       0,
@@ -34,12 +34,12 @@
       0
     ],
     "recentReach": [
-      1.9999999880790709,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
+      2.597064314848943,
+      2.5504735436500616,
+      2.5810164917381098,
+      2.614462893350693,
+      2.553751026309827,
+      2.7322304903352608,
       0.0,
       0.0,
       0.0,
@@ -51,52 +51,52 @@
       0.0,
       0.0
     ],
-    "recentReachIndex": 1,
-    "recentReachCount": 1,
-    "recentInterval": 0.0,
-    "momentumAt": 10059855900,
-    "reachSum": 1.9999999880790709,
-    "maxReach": 1.9999999880790709,
-    "cooldownSum": 1.0,
-    "intervalSum": 0.0,
-    "intervalSquared": 0.0,
-    "reachCount": 1,
-    "intervalCount": 0,
-    "lastHit": 10059855900,
-    "comboStart": 10059855900,
-    "momentum": 0.2
+    "recentReachIndex": 6,
+    "recentReachCount": 6,
+    "recentInterval": 1.5022465,
+    "momentumAt": 40196350100,
+    "reachSum": 15.628998760232896,
+    "maxReach": 2.7322304903352608,
+    "cooldownSum": 6.0,
+    "intervalSum": 6.1483748,
+    "intervalSquared": 8.2080689970043,
+    "reachCount": 6,
+    "intervalCount": 5,
+    "lastHit": 40137653500,
+    "comboStart": 33989278700,
+    "momentum": 0.5063421456379021
   },
   "events": [
     {
-      "sequence": 1,
-      "nanoTime": 10059855900,
+      "sequence": 264,
+      "nanoTime": 33989278700,
       "kind": "ATTACK",
       "actor": "local",
       "target": "Opponent",
       "confidence": "OBSERVED",
       "attack": {
         "cooldown": 1.0,
-        "reach": 1.9999999880790709,
-        "aimX": 0.5,
-        "aimY": 0.8307692128995942,
+        "reach": 2.597064314848943,
+        "aimX": 0.6116707198128207,
+        "aimY": 0.5807179211749641,
         "aimZ": 0.0,
         "sprinting": false,
         "criticalConditions": false,
         "rayContact": true
       },
-      "detail": "interpolated eye-to-client-target-box; partial\u003d0.059997916; margin\u003d0.0; critical conditions observed"
+      "detail": "interpolated eye-to-client-target-box; partial\u003d0.11999619; margin\u003d0.0; critical conditions observed"
     },
     {
-      "sequence": 2,
-      "nanoTime": 10064400700,
+      "sequence": 265,
+      "nanoTime": 33989705000,
       "kind": "MOTION",
       "actor": "local",
       "confidence": "OBSERVED",
       "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
     },
     {
-      "sequence": 3,
-      "nanoTime": 10115830400,
+      "sequence": 266,
+      "nanoTime": 34047911500,
       "kind": "HURT",
       "actor": "local",
       "target": "Opponent",
@@ -104,16 +104,810 @@
       "detail": "local-melee-source"
     },
     {
-      "sequence": 4,
-      "nanoTime": 10158638900,
+      "sequence": 267,
+      "nanoTime": 34090077100,
       "kind": "MOTION",
       "actor": "local",
       "confidence": "OBSERVED",
       "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
     },
     {
-      "sequence": 5,
-      "nanoTime": 10260718400,
+      "sequence": 268,
+      "nanoTime": 34192013000,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 269,
+      "nanoTime": 34284664200,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 270,
+      "nanoTime": 34386528600,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 271,
+      "nanoTime": 34489532200,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 272,
+      "nanoTime": 34590823000,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 273,
+      "nanoTime": 34641136800,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 2.5504735436500616,
+        "aimX": 0.5,
+        "aimY": 0.85597243706282,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true
+      },
+      "detail": "interpolated eye-to-client-target-box; partial\u003d0.13999605; margin\u003d0.0; critical conditions observed"
+    },
+    {
+      "sequence": 274,
+      "nanoTime": 34691356700,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 275,
+      "nanoTime": 34699224600,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source"
+    },
+    {
+      "sequence": 276,
+      "nanoTime": 34791442100,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 277,
+      "nanoTime": 34891519700,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 278,
+      "nanoTime": 34992415500,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 279,
+      "nanoTime": 35084769600,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 280,
+      "nanoTime": 35185904700,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 281,
+      "nanoTime": 35286851200,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 282,
+      "nanoTime": 35387967200,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 283,
+      "nanoTime": 35488975400,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 284,
+      "nanoTime": 35589736500,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 285,
+      "nanoTime": 35692327500,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 286,
+      "nanoTime": 35735318000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 2.5810164917381098,
+        "aimX": 0.4555848027408807,
+        "aimY": 0.6266460287158763,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true
+      },
+      "detail": "interpolated eye-to-client-target-box; partial\u003d0.03999591; margin\u003d0.0; critical conditions observed"
+    },
+    {
+      "sequence": 287,
+      "nanoTime": 35787532200,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 288,
+      "nanoTime": 35795387900,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source"
+    },
+    {
+      "sequence": 289,
+      "nanoTime": 35888796300,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 290,
+      "nanoTime": 35991548900,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 291,
+      "nanoTime": 36092884500,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 292,
+      "nanoTime": 36185684500,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 293,
+      "nanoTime": 36287372200,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 294,
+      "nanoTime": 36388883100,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 295,
+      "nanoTime": 36490772000,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 296,
+      "nanoTime": 36591932100,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 297,
+      "nanoTime": 36691962000,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 298,
+      "nanoTime": 36734379900,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 0.10000000149011612,
+        "reach": 2.549999988079071,
+        "aimX": -1.0,
+        "aimY": -1.0,
+        "aimZ": -1.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": false
+      },
+      "detail": "empty-swing; plausible recent opponent; interpolated eye-to-client-target-box; partial\u003d0.01999557; margin\u003d0.0; critical conditions observed"
+    },
+    {
+      "sequence": 299,
+      "nanoTime": 36784824400,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 300,
+      "nanoTime": 36887411600,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 301,
+      "nanoTime": 36988732000,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 302,
+      "nanoTime": 37089812500,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 303,
+      "nanoTime": 37190109800,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 304,
+      "nanoTime": 37292346300,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 305,
+      "nanoTime": 37392443400,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 306,
+      "nanoTime": 37434275000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 2.614462893350693,
+        "aimX": 0.5,
+        "aimY": 0.5348774362027516,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true
+      },
+      "detail": "interpolated eye-to-client-target-box; partial\u003d0.01999569; margin\u003d0.0; critical conditions observed"
+    },
+    {
+      "sequence": 307,
+      "nanoTime": 37486293300,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 308,
+      "nanoTime": 37494210700,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source"
+    },
+    {
+      "sequence": 309,
+      "nanoTime": 37587420600,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 310,
+      "nanoTime": 37688741400,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 311,
+      "nanoTime": 37789527200,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 312,
+      "nanoTime": 37890504200,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 313,
+      "nanoTime": 37992378700,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 314,
+      "nanoTime": 38084440100,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 315,
+      "nanoTime": 38186519300,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 316,
+      "nanoTime": 38287270700,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 317,
+      "nanoTime": 38387480800,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 318,
+      "nanoTime": 38489612800,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 319,
+      "nanoTime": 38593521200,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 320,
+      "nanoTime": 38635407000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 2.553751026309827,
+        "aimX": 0.5802798728472401,
+        "aimY": 0.7642521909227744,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true
+      },
+      "detail": "interpolated eye-to-client-target-box; partial\u003d0.039995313; margin\u003d0.0; critical conditions observed"
+    },
+    {
+      "sequence": 321,
+      "nanoTime": 38685665400,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 322,
+      "nanoTime": 38693609200,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source"
+    },
+    {
+      "sequence": 323,
+      "nanoTime": 38786366700,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 324,
+      "nanoTime": 38887725400,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 325,
+      "nanoTime": 38989562000,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 326,
+      "nanoTime": 39089972900,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 327,
+      "nanoTime": 39189993100,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 328,
+      "nanoTime": 39291695300,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 329,
+      "nanoTime": 39392568200,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 330,
+      "nanoTime": 39436084200,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 0.10000000149011612,
+        "reach": 2.549999988079071,
+        "aimX": -1.0,
+        "aimY": -1.0,
+        "aimZ": -1.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": false
+      },
+      "detail": "empty-swing; plausible recent opponent; interpolated eye-to-client-target-box; partial\u003d0.039995074; margin\u003d0.0; critical conditions observed"
+    },
+    {
+      "sequence": 331,
+      "nanoTime": 39487285900,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 332,
+      "nanoTime": 39588398200,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 333,
+      "nanoTime": 39689849500,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 334,
+      "nanoTime": 39791893100,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 335,
+      "nanoTime": 39884998800,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 336,
+      "nanoTime": 39985922000,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 337,
+      "nanoTime": 40086443300,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 338,
+      "nanoTime": 40137653500,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 2.7322304903352608,
+        "aimX": 0.4107521648315092,
+        "aimY": 0.3283841054345409,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true
+      },
+      "detail": "interpolated eye-to-client-target-box; partial\u003d0.07999492; margin\u003d0.0; critical conditions observed"
+    },
+    {
+      "sequence": 339,
+      "nanoTime": 40188485700,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 340,
+      "nanoTime": 40196350100,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source"
+    },
+    {
+      "sequence": 341,
+      "nanoTime": 40291402800,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 342,
+      "nanoTime": 40392243700,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 343,
+      "nanoTime": 40485104700,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 344,
+      "nanoTime": 40586545600,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 345,
+      "nanoTime": 40688280500,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 346,
+      "nanoTime": 40788665200,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 347,
+      "nanoTime": 40890407100,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 348,
+      "nanoTime": 40992887400,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 349,
+      "nanoTime": 41087241900,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 350,
+      "nanoTime": 41188865000,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 351,
+      "nanoTime": 41291383600,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 352,
+      "nanoTime": 41391955800,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 353,
+      "nanoTime": 41485463300,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 354,
+      "nanoTime": 41588452100,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 355,
+      "nanoTime": 41688469500,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 356,
+      "nanoTime": 41790635200,
+      "kind": "MOTION",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
+    },
+    {
+      "sequence": 357,
+      "nanoTime": 41884532000,
       "kind": "MOTION",
       "actor": "local",
       "confidence": "OBSERVED",
@@ -129,12 +923,52 @@
   },
   "evaluations": [
     {
-      "attackSequence": 1,
-      "evidenceSequence": 3,
+      "attackSequence": 264,
+      "evidenceSequence": 266,
       "readiness": "PERFECT",
       "confidence": "INFERRED",
       "combo": 1,
       "momentum": 0.2
+    },
+    {
+      "attackSequence": 273,
+      "evidenceSequence": 275,
+      "readiness": "PERFECT",
+      "confidence": "INFERRED",
+      "combo": 2,
+      "momentum": 0.36096919316617254
+    },
+    {
+      "attackSequence": 286,
+      "evidenceSequence": 288,
+      "readiness": "PERFECT",
+      "confidence": "INFERRED",
+      "combo": 3,
+      "momentum": 0.4504864558336791
+    },
+    {
+      "attackSequence": 306,
+      "evidenceSequence": 308,
+      "readiness": "PERFECT",
+      "confidence": "INFERRED",
+      "combo": 4,
+      "momentum": 0.4557124945463635
+    },
+    {
+      "attackSequence": 320,
+      "evidenceSequence": 322,
+      "readiness": "PERFECT",
+      "confidence": "INFERRED",
+      "combo": 5,
+      "momentum": 0.5055344738444696
+    },
+    {
+      "attackSequence": 338,
+      "evidenceSequence": 340,
+      "readiness": "PERFECT",
+      "confidence": "INFERRED",
+      "combo": 6,
+      "momentum": 0.5063421456379021
     }
   ]
 }

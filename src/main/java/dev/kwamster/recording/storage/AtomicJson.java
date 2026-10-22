@@ -11,12 +11,17 @@ public final class AtomicJson {
   private AtomicJson() {}
 
   public static void write(Path path, Object value) throws IOException {
+    writeString(path, GSON.toJson(value));
+  }
+
+  /** Writes text to a unique temporary sibling, then atomically replaces the target. */
+  public static void writeString(Path path, String text) throws IOException {
     Files.createDirectories(path.toAbsolutePath().getParent());
     Path tmp =
         Files.createTempFile(
             path.toAbsolutePath().getParent(), path.getFileName().toString(), ".tmp");
     try {
-      Files.writeString(tmp, GSON.toJson(value));
+      Files.writeString(tmp, text);
       try {
         Files.move(tmp, path, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
       } catch (AtomicMoveNotSupportedException ex) {

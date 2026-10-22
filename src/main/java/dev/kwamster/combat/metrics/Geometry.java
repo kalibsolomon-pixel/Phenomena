@@ -52,8 +52,12 @@ public final class Geometry {
   public static String placement(double x, double y, double z) {
     if (y > .75) return "High";
     if (y < .25) return "Low";
-    double horizontal = Math.min(x, 1 - x) < Math.min(z, 1 - z) ? z : x;
-    return Math.abs(horizontal - .5) > .35 ? "Edge" : "Center";
+    return Math.abs(faceHorizontal(x, z) - .5) > .35 ? "Edge" : "Center";
+  }
+
+  /** Horizontal coordinate across the contacted vertical face of a normalized box. */
+  public static double faceHorizontal(double x, double z) {
+    return Math.min(x, 1 - x) < Math.min(z, 1 - z) ? z : x;
   }
 
   public static String direction(double vx, double vz, double facingX, double facingZ) {

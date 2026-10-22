@@ -4,7 +4,7 @@ import dev.kwamster.combat.fights.*;
 import dev.kwamster.combat.tracking.*;
 import dev.kwamster.config.*;
 import dev.kwamster.feedback.FeedbackController;
-import dev.kwamster.gui.screens.DashboardScreen;
+import dev.kwamster.gui.screens.KwamsterScreen;
 import dev.kwamster.hud.CombatHud;
 import dev.kwamster.recording.storage.*;
 import java.nio.file.*;
@@ -30,6 +30,13 @@ public final class KwamsterClient implements ClientModInitializer {
   public static Path dataDir;
   public static String status = "Local by default / K opens KWAMSTER";
   public static final List<FightRecord> history = new ArrayList<>();
+
+  /** Incremented on every history change so derived GUI data is recomputed only when needed. */
+  public static long historyVersion;
+
+  public static void historyChanged() {
+    historyVersion++;
+  }
 
   @Override
   public void onInitializeClient() {
@@ -60,6 +67,7 @@ public final class KwamsterClient implements ClientModInitializer {
                       history.sort(
                           Comparator.comparingLong(FightRecord::startEpochMillis).reversed());
                       trimHistory();
+                      historyChanged();
                     }));
     openKey =
         KeyBindingHelper.registerKeyBinding(
@@ -71,14 +79,17 @@ public final class KwamsterClient implements ClientModInitializer {
     ClientTickEvents.END_CLIENT_TICK.register(
         client -> {
           ClientCapture.tick();
-          CombatHud.tick();
+          // The persistent HUD is dormant: tracking never depends on it.
+          if (config.hudOverlay) CombatHud.tick();
           while (openKey.consumeClick())
-            if (client.screen == null) client.setScreen(new DashboardScreen());
+            if (client.screen == null) client.setScreen(new KwamsterScreen());
         });
     HudElementRegistry.attachElementBefore(
         VanillaHudElements.CHAT,
         Identifier.fromNamespaceAndPath("kwamster", "analytics"),
-        (g, d) -> CombatHud.render(g));
+        (g, d) -> {
+          if (config.hudOverlay) CombatHud.render(g);
+        });
     ClientLifecycleEvents.CLIENT_STOPPING.register(
         client -> {
           engine.finish(ClientCapture.now(), FightRecord.Outcome.INTERRUPTED, "Client stopped");
@@ -95,10 +106,11 @@ public final class KwamsterClient implements ClientModInitializer {
             fight -> {
               history.addFirst(fight);
               trimHistory();
+              historyChanged();
               CombatHud.summaryAt = ClientCapture.now();
               if (config.recording)
                 store.save(fight, config.retention, (long) (config.maxStorageMb * 1024 * 1024));
-              if (config.display.chat())
+              if (config.chatSummary)
                 Minecraft.getInstance()
                     .gui
                     .getChat()
@@ -113,7 +125,8 @@ public final class KwamsterClient implements ClientModInitializer {
                                 fight.statistics().accuracy(),
                                 fight.statistics().uncertain)));
             },
-            FeedbackController::hit);
+            FeedbackController::hit,
+            ClientCapture::label);
   }
 
   private static void trimHistory() {

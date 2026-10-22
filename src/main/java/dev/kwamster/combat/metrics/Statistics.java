@@ -3,6 +3,9 @@ package dev.kwamster.combat.metrics;
 import dev.kwamster.combat.events.CombatEvent.Attack;
 
 public final class Statistics {
+  /** Estimated momentum model, shared with derived timelines and the report viewer. */
+  public static final double MOMENTUM_HIT = .2, MOMENTUM_INCOMING = .25, MOMENTUM_DECAY_NANOS = 3e9;
+
   public int attempts,
       hits,
       emptyMisses,
@@ -70,20 +73,19 @@ public final class Statistics {
     currentCombo++;
     longestCombo = Math.max(longestCombo, currentCombo);
     lastHit = time;
-    momentum = momentumAt(evidenceTime) + .2;
-    momentum = Math.min(1, momentum);
+    momentum = Math.min(1, momentumAt(evidenceTime) + MOMENTUM_HIT);
     momentumAt = evidenceTime;
   }
 
   public void incoming(long time) {
     incoming++;
     currentCombo = 0;
-    momentum = Math.max(-1, momentumAt(time) - .25);
+    momentum = Math.max(-1, momentumAt(time) - MOMENTUM_INCOMING);
     momentumAt = time;
   }
 
   public double momentumAt(long time) {
-    return momentum * Math.exp(-Math.max(0, time - momentumAt) / 3e9);
+    return momentum * Math.exp(-Math.max(0, time - momentumAt) / MOMENTUM_DECAY_NANOS);
   }
 
   public double recentReachDeviation() {

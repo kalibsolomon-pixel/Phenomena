@@ -1,159 +1,335 @@
 <!doctype html>
-<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:"><title>KWAMSTER · Fight report</title>
-<style>:root{color-scheme:dark;font:15px system-ui;background:#111417;color:#e6ecea}body{max-width:1000px;margin:auto;padding:32px 20px}h1{font-size:26px;letter-spacing:.12em}h2{font-size:17px;margin-top:32px}p,small{color:#a7b3b7}button,input,select{background:#20282d;color:inherit;border:1px solid #43504d;padding:8px}button{cursor:pointer}button:focus-visible,input:focus-visible{outline:2px solid #88c8aa}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}.card{background:#1b2025;padding:18px;border:1px solid #35403d}.card b{display:block;font-size:24px;color:#88c8aa;margin-bottom:6px}table{border-collapse:collapse;width:100%;font-size:13px}td,th{text-align:left;padding:9px;border-bottom:1px solid #35403d}section.timeline{max-height:420px;overflow:auto}svg{width:100%;height:140px;background:#1b2025}#seek{width:65%}.bar{height:12px;background:#88c8aa;display:inline-block}.warn{border-left:3px solid #c9b977;padding-left:12px}a{color:#88c8aa}</style>
-<h1>KWAMSTER</h1><p>LOCAL FIGHT REPORT / SCHEMA 1</p><p id="identity"></p><div class="grid" id="summary"></div>
-<p class="warn">Hits: server-reported local melee damage events correlated to observed attacks. Reach and critical conditions are client observations. Unresolved attacks are uncertain. Momentum and readiness feedback are estimates, not server damage ratings. Jump-reset success is unavailable.</p>
-<h2>Event replay</h2><button id="play">Play</button> <input id="seek" type="range" min="0" max="1" step="0.001" value="0" aria-label="Playback position"> <output id="clock"></output><p id="annotation"></p><svg id="chart" role="img" aria-label="Attack reach samples over time"></svg><p>Reach samples at attack time. Green markers show observed aim contact; gray markers show no ray contact. These are not server reach measurements.</p>
-<h2>Reach distribution / all aimed attempts</h2><div id="distribution"></div><h2>Readiness breakdown / observed attempts</h2><div id="quality"></div>
-<h2>Combo progression / correlated hits</h2><p id="combos"></p><h2>Event timeline</h2><label>Filter <select id="filter"><option>All</option><option>ATTACK</option><option>HURT</option><option>DAMAGE_IN</option><option>JUMP</option><option>DEATH</option></select></label><section class="timeline"><table><thead><tr><th>Time</th><th>Event</th><th>Confidence</th><th>Details</th></tr></thead><tbody id="events"></tbody></table></section><p>No upload occurs. You can share this folder yourself. Hosted sharing is pending owner-provided infrastructure.</p>
-<script id="data" type="application/json">{
-  "schemaVersion": 1,
-  "id": "c723c003-42d7-488a-8472-9bae0c2f0246",
-  "startEpochMillis": 1792639775169,
-  "endEpochMillis": 1792639775467,
-  "durationNanos": 297543600,
-  "opponent": "Opponent",
-  "outcome": "UNKNOWN",
-  "reason": "Integration test",
-  "statistics": {
-    "attempts": 1,
-    "hits": 1,
-    "emptyMisses": 0,
-    "uncertain": 0,
-    "contacts": 1,
-    "criticalConditions": 0,
-    "sprintHits": 0,
-    "jumpCandidates": 0,
-    "currentCombo": 0,
-    "longestCombo": 1,
-    "incoming": 0,
-    "centerAim": 0,
-    "edgeAim": 0,
-    "highAim": 1,
-    "lowAim": 0,
-    "reachDistribution": [
-      0,
-      1,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-    ],
-    "recentReach": [
-      1.9999999880790709,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0
-    ],
-    "recentReachIndex": 1,
-    "recentReachCount": 1,
-    "recentInterval": 0.0,
-    "momentumAt": 10059855900,
-    "reachSum": 1.9999999880790709,
-    "maxReach": 1.9999999880790709,
-    "cooldownSum": 1.0,
-    "intervalSum": 0.0,
-    "intervalSquared": 0.0,
-    "reachCount": 1,
-    "intervalCount": 0,
-    "lastHit": 10059855900,
-    "comboStart": 10059855900,
-    "momentum": 0.2
-  },
-  "events": [
-    {
-      "sequence": 1,
-      "nanoTime": 10059855900,
-      "kind": "ATTACK",
-      "actor": "local",
-      "target": "Opponent",
-      "confidence": "OBSERVED",
-      "attack": {
-        "cooldown": 1.0,
-        "reach": 1.9999999880790709,
-        "aimX": 0.5,
-        "aimY": 0.8307692128995942,
-        "aimZ": 0.0,
-        "sprinting": false,
-        "criticalConditions": false,
-        "rayContact": true
-      },
-      "detail": "interpolated eye-to-client-target-box; partial\u003d0.059997916; margin\u003d0.0; critical conditions observed"
-    },
-    {
-      "sequence": 2,
-      "nanoTime": 10064400700,
-      "kind": "MOTION",
-      "actor": "local",
-      "confidence": "OBSERVED",
-      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
-    },
-    {
-      "sequence": 3,
-      "nanoTime": 10115830400,
-      "kind": "HURT",
-      "actor": "local",
-      "target": "Opponent",
-      "confidence": "CONFIRMED",
-      "detail": "local-melee-source"
-    },
-    {
-      "sequence": 4,
-      "nanoTime": 10158638900,
-      "kind": "MOTION",
-      "actor": "local",
-      "confidence": "OBSERVED",
-      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
-    },
-    {
-      "sequence": 5,
-      "nanoTime": 10260718400,
-      "kind": "MOTION",
-      "actor": "local",
-      "confidence": "OBSERVED",
-      "detail": "vx\u003d0.0;vy\u003d-0.0784000015258789;vz\u003d0.0;ground\u003dtrue"
-    }
-  ],
-  "policy": {
-    "correlationMillis": 250.0,
-    "comboSeconds": 3.0,
-    "jumpWindowMillis": 150.0,
-    "perfectCooldown": 0.95,
-    "greatCooldown": 0.85
-  },
-  "evaluations": [
-    {
-      "attackSequence": 1,
-      "evidenceSequence": 3,
-      "readiness": "PERFECT",
-      "confidence": "INFERRED",
-      "combo": 1,
-      "momentum": 0.2
-    }
-  ]
-}</script><script>
-'use strict';const f=JSON.parse(document.getElementById('data').textContent),s=f.statistics,events=f.events,base=events[0]?.nanoTime||0,duration=Math.max(f.durationNanos/1e9,.001);const $=id=>document.getElementById(id),sec=e=>(e.nanoTime-base)/1e9;
-$('identity').textContent=new Date(f.startEpochMillis).toLocaleString()+' · '+f.outcome+' · '+f.reason;
-const metrics=[['Correlated hits',s.hits],['Attempts',s.attempts],['Uncertain',s.uncertain],['Accuracy (conservative)',(s.attempts?100*s.hits/s.attempts:0).toFixed(1)+'%'],['Average hit reach',s.reachCount?(s.reachSum/s.reachCount).toFixed(2)+' m':'N/A'],['Critical conditions',s.criticalConditions],['Sprint hits',s.sprintHits],['Jump candidates',s.jumpCandidates],['Best combo',s.longestCombo],['Duration',duration.toFixed(1)+' s']];for(const[label,value]of metrics){const d=document.createElement('div');d.className='card';const b=document.createElement('b');b.textContent=value;d.append(b,document.createTextNode(label));$('summary').append(d);}
-const attacks=events.filter(e=>e.attack),bins=[0,0,0,0,0];for(const e of attacks)bins[Math.min(4,Math.max(0,Math.floor(e.attack.reach))) ]++;bins.forEach((v,i)=>{let p=document.createElement('p');p.textContent=(i===4?'4+':i+'–'+(i+1))+' m: '+v+' ';let b=document.createElement('span');b.className='bar';b.style.width=(v/Math.max(1,attacks.length)*70)+'%';p.append(b);$('distribution').append(p);});
-const grades=[0,0,0,0],policy=f.policy||{perfectCooldown:.95,greatCooldown:.85};for(const e of attacks)grades[e.attack.cooldown>=policy.perfectCooldown?0:e.attack.cooldown>=policy.greatCooldown?1:e.attack.cooldown>=.5?2:3]++;$('quality').textContent=['Perfect','Great','Normal','Poor'].map((n,i)=>n+': '+grades[i]).join(' / ')+' (recorded thresholds; observed attempts)';
-const ns='http://www.w3.org/2000/svg';$('chart').setAttribute('viewBox','0 0 900 140');for(const e of attacks){const dot=document.createElementNS(ns,'circle');dot.setAttribute('cx',10+880*sec(e)/duration);dot.setAttribute('cy',125-Math.min(6,e.attack.reach)*18);dot.setAttribute('r',3);dot.setAttribute('fill',e.attack.rayContact?'#88c8aa':'#778087');const title=document.createElementNS(ns,'title');title.textContent=sec(e).toFixed(2)+' s · '+e.attack.reach.toFixed(2)+' m';dot.append(title);$('chart').append(dot);}
-const marker=document.createElementNS(ns,'line');marker.setAttribute('y1','0');marker.setAttribute('y2','140');marker.setAttribute('stroke','#e0ca83');$('chart').append(marker);
-function render(){const t=Number($('seek').value)*duration;$('clock').textContent=t.toFixed(2)+' / '+duration.toFixed(2)+' s';marker.setAttribute('x1',10+880*t/duration);marker.setAttribute('x2',10+880*t/duration);const visible=events.filter(e=>sec(e)<=t&&($('filter').value==='All'||e.kind===$('filter').value));$('events').replaceChildren();for(const e of visible.slice(-200)){let row=document.createElement('tr');for(const text of [sec(e).toFixed(3),e.kind,e.confidence,e.attack?'Cooldown '+e.attack.cooldown.toFixed(2)+' · Reach '+e.attack.reach.toFixed(2)+' m · Aim '+[e.attack.aimX,e.attack.aimY,e.attack.aimZ].map(v=>v.toFixed(2)).join(', '):e.detail]){let td=document.createElement('td');td.textContent=text;row.append(td);}$('events').append(row);}$('annotation').textContent=visible.at(-1)?.kind||'Start';}
-$('combos').textContent=(f.evaluations||[]).map(e=>'Combo '+e.combo+' / '+e.readiness+' readiness / momentum estimate '+Math.round(e.momentum*100)+'%').join(' → ')||'No correlated hits';
-let playing=false,last=0;function frame(now){if(!playing)return;if(last)$('seek').value=Math.min(1,Number($('seek').value)+(now-last)/1000/duration);last=now;render();if(Number($('seek').value)>=1){playing=false;$('play').textContent='Play';return;}requestAnimationFrame(frame);}$('play').onclick=()=>{playing=!playing;if(playing&&Number($('seek').value)>=1)$('seek').value=0;$('play').textContent=playing?'Pause':'Play';last=0;if(playing)requestAnimationFrame(frame);};$('seek').oninput=render;$('filter').onchange=render;render();
-</script></html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<title>KWAMSTER Fight Report</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#111417;--surface:#1b2025;--surface-2:#22282d;--hover:#2c3338;--pressed:#16191c;
+  --border:#3b434b;--border-soft:#2c3238;--grid:#2a3036;
+  --text:#e6ecea;--muted:#9aa6ac;--dim:#6c767c;
+  --accent:#88c8aa;--warn:#e4c46e;
+  --s1:#3987e5;--s2:#d95926;--s3:#199e70;--seq:#86b6ef;
+  --mono:"Minecraft","Minecraftia","Monocraft",ui-monospace,"Cascadia Mono",Consolas,"DejaVu Sans Mono",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text)}
+body{font:14px/1.45 var(--mono);letter-spacing:.01em}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px 48px}
+header.top{background:#15191c;border-bottom:1px solid var(--border-soft)}
+header.top .wrap{display:flex;align-items:center;gap:14px;padding-top:12px;padding-bottom:12px;flex-wrap:wrap}
+.brand{font-weight:700;letter-spacing:.14em;color:var(--accent)}
+.sub{color:var(--dim)}
+.badges{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+.badge{border:1px solid var(--border);padding:1px 7px;color:var(--muted);font-size:12px}
+.ident{padding:16px 0 4px}
+.ident h1{font-size:18px;margin:0 0 4px;font-weight:700}
+.ident p{margin:0;color:var(--muted)}
+nav.tabs{display:flex;gap:2px;margin-top:14px;border-bottom:1px solid var(--border-soft);overflow-x:auto;scrollbar-width:thin}
+nav.tabs button{background:transparent;border:0;border-bottom:2px solid transparent;color:var(--muted);padding:8px 14px;font:inherit;cursor:pointer;white-space:nowrap}
+nav.tabs button:hover{background:var(--surface-2);color:var(--text)}
+nav.tabs button[aria-selected=true]{background:var(--surface);color:var(--text);border-bottom-color:var(--accent)}
+nav.tabs button:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:1px solid var(--accent);outline-offset:-1px}
+main.panel{background:var(--surface);border:1px solid var(--border-soft);border-top:0;padding:16px}
+section[role=tabpanel]{display:none}
+section[role=tabpanel].on{display:block}
+h2{font-size:14px;font-weight:700;margin:22px 0 8px;display:flex;align-items:center;gap:10px}
+h2:first-child{margin-top:4px}
+h2::after{content:"";flex:1;height:1px;background:var(--border-soft)}
+h2 small{color:var(--dim);font-weight:400;order:2}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.card{background:var(--surface-2);padding:8px 10px;box-shadow:inset 0 1px 0 rgba(255,255,255,.07)}
+.card .l{color:var(--muted);font-size:12px}
+.card .v{font-size:19px;font-weight:700;margin:2px 0}
+.card .v.none{color:var(--dim)}
+.card .c{color:var(--dim);font-size:11px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 6px;align-items:baseline}
+.tag{display:inline-block;font-size:10px;border:1px solid var(--border);color:var(--dim);padding:0 4px;white-space:nowrap;margin-left:auto}
+.note{background:rgba(34,40,45,.6);border-left:2px solid var(--border);padding:8px 12px;color:var(--muted);margin:10px 0}
+.note.warn{border-left-color:var(--warn)}
+p.muted{color:var(--muted);margin:6px 0}
+button.mc,select.mc{background:var(--surface-2);color:var(--text);border:1px solid var(--border);padding:5px 12px;font:inherit;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -1px 0 rgba(0,0,0,.25)}
+button.mc:hover,select.mc:hover{background:var(--hover)}
+button.mc:active{background:var(--pressed);box-shadow:none}
+button.mc[aria-pressed=true]{border-color:var(--accent)}
+.controls{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:6px 0 10px}
+.controls output{color:var(--muted);min-width:120px}
+input[type=range]{flex:1;min-width:160px;accent-color:var(--accent)}
+.chart{position:relative;background:rgba(34,40,45,.55);margin:4px 0}
+.chart svg{display:block;width:100%;height:auto}
+.legend{display:flex;gap:16px;flex-wrap:wrap;color:var(--muted);font-size:12px;margin:4px 0 2px}
+.legend i{display:inline-block;width:9px;height:9px;margin-right:6px;vertical-align:0}
+.legend i.hollow{background:transparent!important;border:2px solid}
+.tip{position:absolute;pointer-events:none;background:#0d0f11;border:1px solid var(--border);padding:3px 7px;font-size:12px;white-space:nowrap;display:none;z-index:2}
+table{border-collapse:collapse;width:100%;font-size:12px}
+th,td{text-align:left;padding:4px 8px;border-bottom:1px solid var(--border-soft)}
+th{color:var(--dim);font-weight:400;background:var(--surface-2);position:sticky;top:0}
+td.r,th.r{text-align:right}
+tr.cur td{background:var(--hover)}
+.scroll{max-height:360px;overflow:auto;border:1px solid var(--border-soft)}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.now{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px;margin:8px 0}
+.annot{background:var(--surface-2);border-left:2px solid var(--accent);padding:8px 12px;min-height:38px}
+.annot b{font-weight:700}
+footer{color:var(--dim);font-size:12px;padding-top:14px}
+@media (max-width:720px){.split{grid-template-columns:1fr}.badges{margin-left:0}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+.reduced *{transition:none!important}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><span class="brand">KWAMSTER</span><span class="sub">Fight report</span><span class="badges" id="badges"></span></div></header>
+<div class="wrap">
+<div class="ident"><h1 id="title">Fight</h1><p id="subtitle"></p></div>
+<nav class="tabs" role="tablist" aria-label="Report sections" id="tabs"></nav>
+<main class="panel">
+<section role="tabpanel" id="p-summary" aria-labelledby="t-summary"></section>
+<section role="tabpanel" id="p-timeline" aria-labelledby="t-timeline"></section>
+<section role="tabpanel" id="p-reach" aria-labelledby="t-reach"></section>
+<section role="tabpanel" id="p-aim" aria-labelledby="t-aim"></section>
+<section role="tabpanel" id="p-timing" aria-labelledby="t-timing"></section>
+<section role="tabpanel" id="p-movement" aria-labelledby="t-movement"></section>
+</main>
+<footer>Generated locally by KWAMSTER. This file makes no network requests and nothing was uploaded. Share the folder yourself if you choose.</footer>
+</div>
+<script id="data" type="application/json">{"format":"kwamster-report","version":2,"anonymized":true,"motionIncluded":true,"reducedMotion":false,"metrics":[{"key":"accuracy","label":"Hit accuracy","unit":"%","confidence":"Inferred","help":"Correlated hits / all attempts. Uncertain attempts stay in the denominator."},{"key":"hits","label":"Correlated hits","unit":"","confidence":"Confirmed source","help":"Server melee damage events from the local player, matched to an attack."},{"key":"attempts","label":"Attack attempts","unit":"","confidence":"Observed","help":"Entity attacks plus empty swings during an engagement."},{"key":"emptyMisses","label":"Empty swings","unit":"","confidence":"Observed","help":"Swings with no entity selected. The only confirmed misses."},{"key":"uncertain","label":"Uncertain attacks","unit":"","confidence":"Inferred","help":"Entity attacks with no matching server report. Not proven misses."},{"key":"averageReach","label":"Average reach","unit":"m","confidence":"Observed","help":"Client eye-to-hitbox distance on correlated hits. Not a server verdict."},{"key":"maxReach","label":"Maximum reach","unit":"m","confidence":"Observed","help":"Largest client-measured distance on a correlated hit."},{"key":"criticalRate","label":"Critical-hit rate","unit":"%","confidence":"Observed","help":"Hits with critical conditions / correlated hits. Damage is not verified."},{"key":"sprintRate","label":"Sprint-hit rate","unit":"%","confidence":"Observed","help":"Hits made while sprinting / correlated hits. Knockback is not verified."},{"key":"averageInterval","label":"Average hit interval","unit":"s","confidence":"Observed","help":"Mean attack-time gap between consecutive correlated hits."},{"key":"intervalDeviation","label":"Interval deviation","unit":"s","confidence":"Observed","help":"Population standard deviation of hit intervals; lower is more consistent."},{"key":"jumpCandidates","label":"Jump candidates","unit":"","confidence":"Inferred","help":"Possible jump resets: jumps inside the window after incoming damage. Success unavailable."},{"key":"longestCombo","label":"Longest combo","unit":"","confidence":"Inferred","help":"Consecutive correlated hits without retaliation or timeout."},{"key":"averageCombo","label":"Average combo","unit":"","confidence":"Inferred","help":"Mean length of hit chains, single hits included."},{"key":"momentum","label":"Momentum (estimate)","unit":"","confidence":"Inferred","help":"+0.20 per hit, -0.25 per incoming hit, 3 s decay. Not a win probability."},{"key":"fights","label":"Recorded fights","unit":"","confidence":"Observed","help":"Fights in local history."}],"fight":{"schemaVersion":1,"id":"1aa15a63-af19-4e58-bc03-da59e123d991","startEpochMillis":1792644130170,"endEpochMillis":1792644138115,"durationNanos":7944850200,"opponent":"Opponent","outcome":"UNKNOWN","reason":"Integration test fight 4","statistics":{"attempts":8,"hits":6,"emptyMisses":2,"uncertain":0,"contacts":6,"criticalConditions":0,"sprintHits":0,"jumpCandidates":0,"currentCombo":0,"longestCombo":6,"incoming":0,"centerAim":4,"edgeAim":0,"highAim":2,"lowAim":0,"reachDistribution":[0,0,6,0,0,0,0,0],"recentReach":[2.597064314848943,2.5504735436500616,2.5810164917381098,2.614462893350693,2.553751026309827,2.7322304903352608,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"recentReachIndex":6,"recentReachCount":6,"recentInterval":1.5022465,"momentumAt":40196350100,"reachSum":15.628998760232896,"maxReach":2.7322304903352608,"cooldownSum":6.0,"intervalSum":6.1483748,"intervalSquared":8.2080689970043,"reachCount":6,"intervalCount":5,"lastHit":40137653500,"comboStart":33989278700,"momentum":0.5063421456379021},"events":[{"sequence":264,"nanoTime":33989278700,"kind":"ATTACK","actor":"local","target":"Opponent","confidence":"OBSERVED","attack":{"cooldown":1.0,"reach":2.597064314848943,"aimX":0.6116707198128207,"aimY":0.5807179211749641,"aimZ":0.0,"sprinting":false,"criticalConditions":false,"rayContact":true},"detail":"interpolated eye-to-client-target-box; partial=0.11999619; margin=0.0; critical conditions observed"},{"sequence":265,"nanoTime":33989705000,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":266,"nanoTime":34047911500,"kind":"HURT","actor":"local","target":"Opponent","confidence":"CONFIRMED","detail":"local-melee-source"},{"sequence":267,"nanoTime":34090077100,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":268,"nanoTime":34192013000,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":269,"nanoTime":34284664200,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":270,"nanoTime":34386528600,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":271,"nanoTime":34489532200,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":272,"nanoTime":34590823000,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":273,"nanoTime":34641136800,"kind":"ATTACK","actor":"local","target":"Opponent","confidence":"OBSERVED","attack":{"cooldown":1.0,"reach":2.5504735436500616,"aimX":0.5,"aimY":0.85597243706282,"aimZ":0.0,"sprinting":false,"criticalConditions":false,"rayContact":true},"detail":"interpolated eye-to-client-target-box; partial=0.13999605; margin=0.0; critical conditions observed"},{"sequence":274,"nanoTime":34691356700,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":275,"nanoTime":34699224600,"kind":"HURT","actor":"local","target":"Opponent","confidence":"CONFIRMED","detail":"local-melee-source"},{"sequence":276,"nanoTime":34791442100,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":277,"nanoTime":34891519700,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":278,"nanoTime":34992415500,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":279,"nanoTime":35084769600,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":280,"nanoTime":35185904700,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":281,"nanoTime":35286851200,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":282,"nanoTime":35387967200,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":283,"nanoTime":35488975400,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":284,"nanoTime":35589736500,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":285,"nanoTime":35692327500,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":286,"nanoTime":35735318000,"kind":"ATTACK","actor":"local","target":"Opponent","confidence":"OBSERVED","attack":{"cooldown":1.0,"reach":2.5810164917381098,"aimX":0.4555848027408807,"aimY":0.6266460287158763,"aimZ":0.0,"sprinting":false,"criticalConditions":false,"rayContact":true},"detail":"interpolated eye-to-client-target-box; partial=0.03999591; margin=0.0; critical conditions observed"},{"sequence":287,"nanoTime":35787532200,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":288,"nanoTime":35795387900,"kind":"HURT","actor":"local","target":"Opponent","confidence":"CONFIRMED","detail":"local-melee-source"},{"sequence":289,"nanoTime":35888796300,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":290,"nanoTime":35991548900,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":291,"nanoTime":36092884500,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":292,"nanoTime":36185684500,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":293,"nanoTime":36287372200,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":294,"nanoTime":36388883100,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":295,"nanoTime":36490772000,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":296,"nanoTime":36591932100,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":297,"nanoTime":36691962000,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":298,"nanoTime":36734379900,"kind":"ATTACK","actor":"local","target":"Opponent","confidence":"OBSERVED","attack":{"cooldown":0.10000000149011612,"reach":2.549999988079071,"aimX":-1.0,"aimY":-1.0,"aimZ":-1.0,"sprinting":false,"criticalConditions":false,"rayContact":false},"detail":"empty-swing; plausible recent opponent; interpolated eye-to-client-target-box; partial=0.01999557; margin=0.0; critical conditions observed"},{"sequence":299,"nanoTime":36784824400,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":300,"nanoTime":36887411600,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":301,"nanoTime":36988732000,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":302,"nanoTime":37089812500,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":303,"nanoTime":37190109800,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":304,"nanoTime":37292346300,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":305,"nanoTime":37392443400,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":306,"nanoTime":37434275000,"kind":"ATTACK","actor":"local","target":"Opponent","confidence":"OBSERVED","attack":{"cooldown":1.0,"reach":2.614462893350693,"aimX":0.5,"aimY":0.5348774362027516,"aimZ":0.0,"sprinting":false,"criticalConditions":false,"rayContact":true},"detail":"interpolated eye-to-client-target-box; partial=0.01999569; margin=0.0; critical conditions observed"},{"sequence":307,"nanoTime":37486293300,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":308,"nanoTime":37494210700,"kind":"HURT","actor":"local","target":"Opponent","confidence":"CONFIRMED","detail":"local-melee-source"},{"sequence":309,"nanoTime":37587420600,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":310,"nanoTime":37688741400,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":311,"nanoTime":37789527200,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":312,"nanoTime":37890504200,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":313,"nanoTime":37992378700,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":314,"nanoTime":38084440100,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":315,"nanoTime":38186519300,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":316,"nanoTime":38287270700,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":317,"nanoTime":38387480800,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":318,"nanoTime":38489612800,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":319,"nanoTime":38593521200,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":320,"nanoTime":38635407000,"kind":"ATTACK","actor":"local","target":"Opponent","confidence":"OBSERVED","attack":{"cooldown":1.0,"reach":2.553751026309827,"aimX":0.5802798728472401,"aimY":0.7642521909227744,"aimZ":0.0,"sprinting":false,"criticalConditions":false,"rayContact":true},"detail":"interpolated eye-to-client-target-box; partial=0.039995313; margin=0.0; critical conditions observed"},{"sequence":321,"nanoTime":38685665400,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":322,"nanoTime":38693609200,"kind":"HURT","actor":"local","target":"Opponent","confidence":"CONFIRMED","detail":"local-melee-source"},{"sequence":323,"nanoTime":38786366700,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":324,"nanoTime":38887725400,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":325,"nanoTime":38989562000,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":326,"nanoTime":39089972900,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":327,"nanoTime":39189993100,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":328,"nanoTime":39291695300,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":329,"nanoTime":39392568200,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":330,"nanoTime":39436084200,"kind":"ATTACK","actor":"local","target":"Opponent","confidence":"OBSERVED","attack":{"cooldown":0.10000000149011612,"reach":2.549999988079071,"aimX":-1.0,"aimY":-1.0,"aimZ":-1.0,"sprinting":false,"criticalConditions":false,"rayContact":false},"detail":"empty-swing; plausible recent opponent; interpolated eye-to-client-target-box; partial=0.039995074; margin=0.0; critical conditions observed"},{"sequence":331,"nanoTime":39487285900,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":332,"nanoTime":39588398200,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":333,"nanoTime":39689849500,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":334,"nanoTime":39791893100,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":335,"nanoTime":39884998800,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":336,"nanoTime":39985922000,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":337,"nanoTime":40086443300,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":338,"nanoTime":40137653500,"kind":"ATTACK","actor":"local","target":"Opponent","confidence":"OBSERVED","attack":{"cooldown":1.0,"reach":2.7322304903352608,"aimX":0.4107521648315092,"aimY":0.3283841054345409,"aimZ":0.0,"sprinting":false,"criticalConditions":false,"rayContact":true},"detail":"interpolated eye-to-client-target-box; partial=0.07999492; margin=0.0; critical conditions observed"},{"sequence":339,"nanoTime":40188485700,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":340,"nanoTime":40196350100,"kind":"HURT","actor":"local","target":"Opponent","confidence":"CONFIRMED","detail":"local-melee-source"},{"sequence":341,"nanoTime":40291402800,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":342,"nanoTime":40392243700,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":343,"nanoTime":40485104700,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":344,"nanoTime":40586545600,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":345,"nanoTime":40688280500,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":346,"nanoTime":40788665200,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":347,"nanoTime":40890407100,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":348,"nanoTime":40992887400,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":349,"nanoTime":41087241900,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":350,"nanoTime":41188865000,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":351,"nanoTime":41291383600,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":352,"nanoTime":41391955800,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":353,"nanoTime":41485463300,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":354,"nanoTime":41588452100,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":355,"nanoTime":41688469500,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":356,"nanoTime":41790635200,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"},{"sequence":357,"nanoTime":41884532000,"kind":"MOTION","actor":"local","confidence":"OBSERVED","detail":"vx=0.0;vy=-0.0784000015258789;vz=0.0;ground=true"}],"policy":{"correlationMillis":250.0,"comboSeconds":3.0,"jumpWindowMillis":150.0,"perfectCooldown":0.95,"greatCooldown":0.85},"evaluations":[{"attackSequence":264,"evidenceSequence":266,"readiness":"PERFECT","confidence":"INFERRED","combo":1,"momentum":0.2},{"attackSequence":273,"evidenceSequence":275,"readiness":"PERFECT","confidence":"INFERRED","combo":2,"momentum":0.36096919316617254},{"attackSequence":286,"evidenceSequence":288,"readiness":"PERFECT","confidence":"INFERRED","combo":3,"momentum":0.4504864558336791},{"attackSequence":306,"evidenceSequence":308,"readiness":"PERFECT","confidence":"INFERRED","combo":4,"momentum":0.4557124945463635},{"attackSequence":320,"evidenceSequence":322,"readiness":"PERFECT","confidence":"INFERRED","combo":5,"momentum":0.5055344738444696},{"attackSequence":338,"evidenceSequence":340,"readiness":"PERFECT","confidence":"INFERRED","combo":6,"momentum":0.5063421456379021}]},"derived":{"summary":{"attempts":8,"hits":6,"emptyMisses":2,"uncertain":0,"contacts":6,"accuracy":75.0,"averageReach":2.6048331267054827,"maxReach":2.7322304903352608,"reachSamples":6,"criticalConditions":0,"criticalRate":0.0,"sprintHits":0,"sprintRate":0.0,"averageInterval":1.22967496,"intervalDeviation":0.3598795522808406,"jumpCandidates":0,"incoming":0,"longestCombo":6,"averageCombo":6.0,"duration":7.9448502},"hits":[{"seq":264,"t":0.0,"evidenceT":0.0586328,"reach":2.597064314848943,"contact":true,"aimH":0.6116707198128207,"aimV":0.5807179211749641,"cooldown":1.0,"readiness":"PERFECT","sprinting":false,"critical":false,"combo":1,"momentum":0.2},{"seq":273,"t":0.6518581,"evidenceT":0.7099459,"reach":2.5504735436500616,"contact":true,"aimH":0.5,"aimV":0.85597243706282,"cooldown":1.0,"readiness":"PERFECT","sprinting":false,"critical":false,"combo":2,"momentum":0.36096919316617254},{"seq":286,"t":1.7460393,"evidenceT":1.8061092,"reach":2.5810164917381098,"contact":true,"aimH":0.4555848027408807,"aimV":0.6266460287158763,"cooldown":1.0,"readiness":"PERFECT","sprinting":false,"critical":false,"combo":3,"momentum":0.4504864558336791},{"seq":306,"t":3.4449963,"evidenceT":3.504932,"reach":2.614462893350693,"contact":true,"aimH":0.5,"aimV":0.5348774362027516,"cooldown":1.0,"readiness":"PERFECT","sprinting":false,"critical":false,"combo":4,"momentum":0.4557124945463635},{"seq":320,"t":4.6461283,"evidenceT":4.7043305,"reach":2.553751026309827,"contact":true,"aimH":0.5802798728472401,"aimV":0.7642521909227744,"cooldown":1.0,"readiness":"PERFECT","sprinting":false,"critical":false,"combo":5,"momentum":0.5055344738444696},{"seq":338,"t":6.1483748,"evidenceT":6.2070714,"reach":2.7322304903352608,"contact":true,"aimH":0.4107521648315092,"aimV":0.3283841054345409,"cooldown":1.0,"readiness":"PERFECT","sprinting":false,"critical":false,"combo":6,"momentum":0.5063421456379021}],"misses":[{"seq":298,"t":2.7451012,"empty":true,"estimatedReach":2.549999988079071,"contact":false},{"seq":330,"t":5.4468055,"empty":true,"estimatedReach":2.549999988079071,"contact":false}],"readiness":{"PERFECT":6,"GREAT":0,"NORMAL":0,"POOR":0},"reachBinSize":0.5,"hitReachBins":[0,0,0,0,0,6,0,0,0,0,0,0,0],"missReachBins":[0,0,0,0,0,2,0,0,0,0,0,0,0],"cooldownBins":[0,0,0,0,0,0,0,0,0,6],"intervals":[0.6518581,1.0941812,1.698957,1.2011319999999999,1.5022465],"comboLengths":[6],"placement":{"high":2,"low":0,"center":4,"edge":0},"momentum":[[0.0,0.0],[0.039923870351758796,0.0],[0.07984774070351759,0.198590659671557],[0.11977161105527638,0.19596533137842279],[0.15969548140703518,0.19337470939352142],[0.19961935175879397,0.19081833490648845],[0.23954322211055276,0.18829575517233937],[0.2794670924623116,0.18580652343128676],[0.31939096281407037,0.18335019882961703],[0.35931483316582913,0.18092634634161342],[0.39923870351758795,0.17853453669251104],[0.43916257386934676,0.1761743462824704],[0.4790864442211055,0.17384535711155602],[0.5190103145728644,0.17154715670570703],[0.5589341849246232,0.169279338043686],[0.5988580552763819,0.16704149948499386],[0.6387819256281407,0.1648332446987375],[0.6787057959798996,0.16265418259343803],[0.7186296663316583,0.3599258465489021],[0.7585535366834172,0.3551676997662795],[0.7984774070351759,0.35047245472028415],[0.8384012773869347,0.34583927986269974],[0.8783251477386935,0.3412673546382087],[0.9182490180904523,0.33675586933906865],[0.958172888442211,0.33230402496170947],[0.99809675879397,0.32791103306522645],[1.0380206291457288,0.32357611563174404],[1.0779444994974874,0.3192985049286252],[1.1178683698492464,0.3150774433725029],[1.157792240201005,0.3109121833951088],[1.1977161105527638,0.3068019873108756],[1.2376399809045227,0.30274612718628985],[1.2775638512562815,0.2987438847109716],[1.3174877216080403,0.29479455107045865],[1.357411591959799,0.2908974268206724],[1.397335462311558,0.2870518217640432],[1.4372593326633165,0.28325705482727376],[1.4771832030150756,0.27951245394071744],[1.5171070733668344,0.2758173559193524],[1.557030943718593,0.2721711063453285],[1.5969548140703518,0.26857305945206683],[1.6368786844221108,0.26502257800989193],[1.6768025547738694,0.26151903321317566],[1.7167264251256282,0.2580618045689727],[1.756650295477387,0.25465027978712906],[1.7965741658291456,0.2512838546718423],[1.8364980361809047,0.4459462369478803],[1.8764219065326635,0.44005091802899315],[1.916345776884422,0.4342335340320223],[1.956269647236181,0.42849305467308696],[1.99619351758794,0.42282846328845053],[2.0361173879396985,0.4172387566544652],[2.0760412582914576,0.41172294480989624],[2.115965128643216,0.4062800508805965],[2.1558889989949748,0.4009091109064966],[2.195812869346734,0.39560917367088416],[2.235736739698493,0.39037930053193926],[2.2756606100502514,0.38521856525649656],[2.31558448040201,0.38012605385600545],[2.355508350753769,0.37510086442465895],[2.3954322211055277,0.37014210697966216],[2.4353560914572867,0.3652489033036123],[2.4752799618090453,0.360420386788963],[2.515203832160804,0.3556557022845439],[2.555127702512563,0.35095400594410986],[2.5950515728643215,0.3463144650768924],[2.6349754432160806,0.3417362580001261],[2.674899313567839,0.3372185738935254],[2.714823183919598,0.33276061265568446],[2.7547470542713572,0.3283615847623763],[2.794670924623116,0.32402071112672404],[2.8345947949748744,0.3197372229612215],[2.874518665326633,0.31551036164157764],[2.914442535678392,0.31133937857236094],[2.954366406030151,0.3072235350544197],[2.9942902763819097,0.3031621021540556],[3.0342141467336687,0.29915436057392586],[3.074138017085427,0.29519960052565314],[3.114061887437186,0.2912971216041184],[3.153985757788945,0.28744623266341673],[3.1939096281407036,0.2836462516944518],[3.2338334984924626,0.2798965057041494],[3.2737573688442216,0.2761963305962677],[3.31368123919598,0.2725450710537824],[3.353605109547739,0.26894208042282747],[3.3935289798994974,0.26538672059817026],[3.4334528502512565,0.2618783619101998],[3.4733767206030155,0.25841638301341],[3.513300590954774,0.45444304213759307],[3.5532244613065327,0.4484353971752621],[3.5931483316582913,0.4425071720623883],[3.6330722020100503,0.43665731688464965],[3.6729960723618094,0.4308847956073786],[3.712919942713568,0.42518858589207637],[3.752843813065327,0.41956767891535174],[3.792767683417085,0.4140210791902546],[3.832691553768844,0.4085478043899704],[3.8726154241206032,0.40314688517384634],[3.912539294472362,0.39781736501571674],[3.952463164824121,0.3925583000344977],[3.99238703517588,0.38736875882702243],[4.0323109055276385,0.3822478223030852],[4.072234775879397,0.3771945835226666],[4.112158646231156,0.3722081475353105],[4.152082516582915,0.3672876312216246],[4.192006386934674,0.3624321631368762],[4.231930257286432,0.3576408833566552],[4.271854127638191,0.3529129433245782],[4.3117779979899495,0.34824750570200513],[4.351701868341709,0.34364374421974314],[4.391625738693468,0.33910084353171105],[4.431549609045226,0.3346179990705373],[4.471473479396986,0.3301944169050681],[4.511397349748743,0.32582931359975914],[4.551321220100503,0.3215219160759244],[4.5912450904522615,0.31727146147482244],[4.63116896080402,0.31307719702254927],[4.67109283115578,0.3089383798967195],[4.711016701507538,0.504409026684374],[4.750940571859297,0.4977408415277464],[4.790864442211055,0.49116080842814147],[4.830788312562814,0.4846677620332221],[4.870712182914573,0.4782605523963726],[4.910636053266332,0.4719380447730394],[4.950559923618091,0.46569911941976133],[4.990483793969849,0.45954267139585914],[5.030407664321608,0.45346761036774563],[5.070331534673367,0.44747286041582257],[5.110255405025126,0.44155735984393135],[5.1501792753768845,0.435720060991321],[5.190103145728643,0.4299599300471036],[5.230027016080402,0.4242759468671618],[5.269950886432161,0.41866710479347685],[5.30987475678392,0.41313241047584515],[5.349798627135678,0.40767088369595134],[5.389722497487438,0.40228155719376785],[5.429646367839196,0.3969634764962488],[5.469570238190955,0.39171569974828835],[5.5094941085427145,0.38653729754591454],[5.549417978894473,0.3814273527716877],[5.589341849246232,0.3763849604322749],[5.629265719597989,0.37140922749817173],[5.669189589949749,0.3664992727455428],[5.7091134603015075,0.3616542266001535],[5.749037330653266,0.3568732309833645],[5.7889612010050255,0.35215543916016195],[5.828885071356784,0.34750001558919785],[5.868808941708543,0.3429061357748112],[5.908732812060302,0.3383729861210065],[5.948656682412061,0.33389976378736314],[5.988580552763819,0.3294856765468476],[6.028504423115579,0.3251299426455073],[6.0684282934673375,0.3208317906640191],[6.108352163819095,0.3165904593810666],[6.148276034170854,0.312405197638525],[6.188199904522613,0.3082752642084278],[6.228123774874372,0.5028013489765759],[6.2680476452261304,0.4961544169935844],[6.30797151557789,0.48959535610496524],[6.3478953859296485,0.48312300467265074],[6.387819256281407,0.4767362164151928],[6.427743126633167,0.470433860204752],[6.467666996984925,0.4642148198667699],[6.507590867336684,0.4580779939822896],[6.547514737688443,0.45202229569288943],[6.587438608040201,0.4460466525081966],[6.62736247839196,0.4401500061159429],[6.667286348743718,0.43433131219453447],[6.707210219095478,0.4285895402280971],[6.747134089447236,0.4229236733239682],[6.787057959798995,0.41733270803259964],[6.826981830150754,0.41181565416984306],[6.866905700502513,0.4063715346415846],[6.9068295708542715,0.40099938527069595],[6.946753441206031,0.3956982546262753],[6.98667731155779,0.39046720385514494],[7.026601181909548,0.38530530651557565],[7.066525052261306,0.3802116484132105],[7.106448922613065,0.3751853274391562],[7.146372792964824,0.3702254534102171],[7.186296663316583,0.36533114791123855],[7.226220533668342,0.3605015441395363],[7.266144404020101,0.3557357867513823],[7.306068274371859,0.3510330317105191],[7.345992144723619,0.34639244613867753],[7.385916015075377,0.34181320816807076],[7.425839885427136,0.33729450679583733],[7.465763755778895,0.33283554174040925],[7.505687626130654,0.32843552329977915],[7.545611496482412,0.32409367221164],[7.58553536683417,0.3198092195153743],[7.62545923718593,0.3155814064158685],[7.665383107537688,0.31140948414912695],[7.705306977889447,0.3072927138496619],[7.7452308482412064,0.30323036641963785],[7.785154718592965,0.29922172239974515],[7.825078588944724,0.29526607184178033],[7.865002459296483,0.29136271418291126],[7.904926329648242,0.2875109581216047],[7.9448502,0.2837101214951938]],"incoming":[],"jumps":[],"jumpsWithoutDamage":0,"motionSamples":80,"sprintTransitions":0}}</script>
+<script>
+'use strict';
+(function(){
+const P=JSON.parse(document.getElementById('data').textContent);
+const F=P.fight, D=P.derived, S=D.summary, E=F.events||[];
+const base=E.length?E[0].nanoTime:0, dur=Math.max(S.duration||0,.001);
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+if(P.reducedMotion)document.documentElement.classList.add('reduced');
+const METRIC={};for(const m of P.metrics||[])METRIC[m.key]=m;
+
+// ---- formatting (mirrors analytics.Format) ----
+const NONE='—';
+const fin=v=>typeof v==='number'&&isFinite(v);
+const pct=v=>fin(v)?v.toFixed(1)+'%':NONE;
+const m2=v=>fin(v)?v.toFixed(2)+' m':NONE;
+const s2=v=>fin(v)?v.toFixed(2)+' s':NONE;
+const num=(v,d)=>fin(v)?v.toFixed(d):NONE;
+const sec=e=>(e.nanoTime-base)/1e9;
+const isEmpty=e=>!e.attack||(e.detail||'').startsWith('empty-swing');
+const cap=s=>s?s.charAt(0)+s.slice(1).toLowerCase():'';
+function el(tag,attrs,text){const n=document.createElement(tag);if(attrs)for(const k in attrs){if(k==='class')n.className=attrs[k];else n.setAttribute(k,attrs[k]);}if(text!=null)n.textContent=String(text);return n;}
+function sv(tag,attrs){const n=document.createElementNS(NS,tag);if(attrs)for(const k in attrs)n.setAttribute(k,attrs[k]);return n;}
+function h2(parent,text,small){const h=el('h2',null,text);if(small)h.append(el('small',null,small));parent.append(h);return h;}
+function note(parent,text,warn){parent.append(el('div',{class:'note'+(warn?' warn':'')},text));}
+function card(label,value,caption,key){const c=el('div',{class:'card'});const d=key&&METRIC[key];const cap0=el('div',{class:'c'});cap0.append(el('span',null,caption||''));if(d){cap0.append(el('span',{class:'tag'},d.confidence));c.title=d.confidence+': '+d.help;}c.append(el('div',{class:'l'},label),el('div',{class:'v'+(value===NONE?' none':'')},value),cap0);return c;}
+function cards(parent,list){const g=el('div',{class:'cards'});for(const x of list)g.append(card(...x));parent.append(g);}
+function label(key,fallback){return METRIC[key]?METRIC[key].label:fallback;}
+
+// ---- header ----
+const opp=P.opponentLabel||(P.anonymized?'Opponent':'Opponent');
+$('title').textContent='Fight vs '+opp;
+$('subtitle').textContent='Outcome '+cap(F.outcome)+' · '+new Date(F.startEpochMillis).toLocaleString()+' · '+num(dur,1)+' s, '+E.length+' events · ended: '+(F.reason||'unknown');
+for(const b of ['Offline',P.anonymized?'Anonymized':'Not anonymized',P.motionIncluded?'Motion included':'Motion omitted','Report v'+P.version])$('badges').append(el('span',{class:'badge'},b));
+
+// ---- tabs (hash routed, arrow-key navigation) ----
+const TABS=[['summary','Summary'],['timeline','Timeline'],['reach','Reach'],['aim','Aim'],['timing','Timing'],['movement','Movement']];
+const built={};
+for(const[id,name]of TABS){const b=el('button',{role:'tab',id:'t-'+id,'aria-controls':'p-'+id,'aria-selected':'false',tabindex:'-1'},name);b.onclick=()=>show(id,true);$('tabs').append(b);}
+$('tabs').addEventListener('keydown',e=>{const i=TABS.findIndex(t=>$('t-'+t[0]).getAttribute('aria-selected')==='true');let j=i;if(e.key==='ArrowRight')j=(i+1)%TABS.length;else if(e.key==='ArrowLeft')j=(i+TABS.length-1)%TABS.length;else if(e.key==='Home')j=0;else if(e.key==='End')j=TABS.length-1;else return;e.preventDefault();show(TABS[j][0],true);$('t-'+TABS[j][0]).focus();});
+function show(id,push){if(!TABS.some(t=>t[0]===id))id='summary';for(const[t]of TABS){const on=t===id;$('t-'+t).setAttribute('aria-selected',on);$('t-'+t).tabIndex=on?0:-1;$('p-'+t).classList.toggle('on',on);}if(!built[id]){built[id]=true;BUILD[id]($('p-'+id));}if(push&&location.hash!=='#'+id){try{history.replaceState(null,'','#'+id);}catch(e){}}}
+window.addEventListener('hashchange',()=>show(location.hash.slice(1)));
+
+// ---- charts ----
+function tip(box){const t=el('div',{class:'tip'});box.append(t);return t;}
+function place(t,box,x,y,text){t.textContent=text;t.style.display='block';const r=box.getBoundingClientRect();let left=x-r.left+12;if(left+t.offsetWidth>r.width)left=x-r.left-t.offsetWidth-12;t.style.left=Math.max(0,left)+'px';t.style.top=Math.max(0,y-r.top-28)+'px';}
+function legend(parent,items){if(items.length<2)return;const l=el('div',{class:'legend'});for(const it of items){const s=el('span');const i=el('i',it.hollow?{class:'hollow'}:null);if(it.hollow)i.style.borderColor=it.color;else i.style.background=it.color;s.append(i,document.createTextNode(it.name));l.append(s);}parent.append(l);}
+function niceCeil(v){if(!(v>0))return 1;const m=Math.pow(10,Math.floor(Math.log10(v)));for(const k of[1,1.5,2,2.5,3,4,5,6,8,10])if(k*m>=v)return k*m;return 10*m;}
+function yfmt(v,unit){return unit==='%'?v.toFixed(0)+'%':unit==='m'?v.toFixed(1)+' m':unit==='s'?v.toFixed(2)+' s':Math.abs(v)<10&&v%1?v.toFixed(1):v.toFixed(0);}
+function vfmt(v,unit){return unit==='%'?pct(v):unit==='m'?m2(v):unit==='s'?s2(v):num(v,2);}
+/** series: {name,xs?,ys,color,mark:'line'|'points'|'hollow'}; NaN/null are gaps. */
+function lineChart(parent,o){
+  const W=900,H=o.h||200,L=56,R=12,T=10,B=26;const box=el('div',{class:'chart'});const svg=sv('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':o.aria||o.series.map(s=>s.name).join(', ')});box.append(svg);parent.append(box);
+  let lo=Infinity,hi=-Infinity,xl=Infinity,xh=-Infinity;for(const s of o.series)s.ys.forEach((v,i)=>{if(!fin(v))return;lo=Math.min(lo,v);hi=Math.max(hi,v);const x=s.xs?s.xs[i]:i;xl=Math.min(xl,x);xh=Math.max(xh,x);});
+  const any=isFinite(lo);const y0=fin(o.yMin)?o.yMin:(any?Math.min(0,lo):0);let y1=fin(o.yMax)?o.yMax:(any?niceCeil(hi):1);if(y1<=y0)y1=y0+1;
+  const x0=any?Math.min(0,xl):0;let x1=any?Math.max(xh,1):1;if(fin(o.xMax))x1=o.xMax;if(x1<=x0)x1=x0+1;
+  const px=x=>L+(W-L-R)*(x-x0)/(x1-x0),py=v=>T+(H-T-B)*(1-(Math.max(y0,Math.min(y1,v))-y0)/(y1-y0));
+  for(const v of[y0,(y0+y1)/2,y1]){const y=py(v);svg.append(sv('line',{x1:L,x2:W-R,y1:y,y2:y,stroke:v===y0?'#3b434b':'#2a3036'}));const t=sv('text',{x:L-6,y:y+4,'text-anchor':'end',fill:'#6c767c','font-size':11});t.textContent=yfmt(v,o.unit);svg.append(t);}
+  if(y0<0&&y1>0){const z=py(0);svg.append(sv('line',{x1:L,x2:W-R,y1:z,y2:z,stroke:'#3b434b'}));}
+  const xa=sv('text',{x:(L+W-R)/2,y:H-6,'text-anchor':'middle',fill:'#6c767c','font-size':11});xa.textContent=o.xLabel||'';svg.append(xa);
+  for(const[v,anchor]of[[x0,'start'],[x1,'end']]){const t=sv('text',{x:px(v),y:H-6,'text-anchor':anchor,fill:'#6c767c','font-size':11});t.textContent=o.xFmt?o.xFmt(v):num(v,o.xDec??0);svg.append(t);}
+  if(!any){const t=sv('text',{x:(L+W)/2,y:H/2,'text-anchor':'middle',fill:'#9aa6ac','font-size':13});t.textContent=o.empty||'No samples';svg.append(t);legend(parent,o.series.map(s=>({name:s.name,color:s.color,hollow:s.mark==='hollow'})));return;}
+  const pts=[];
+  for(const s of o.series){let d='';let pen=false;s.ys.forEach((v,i)=>{if(!fin(v)){pen=false;return;}const x=px(s.xs?s.xs[i]:i),y=py(v);pts.push({x,y,s,i,v});if(s.mark==='line'){d+=(pen?'L':'M')+x.toFixed(1)+' '+y.toFixed(1);pen=true;}});
+    if(s.mark==='line'){svg.append(sv('path',{d,fill:'none',stroke:s.color,'stroke-width':2,'stroke-linejoin':'round'}));if(o.points!==false&&s.ys.length<=120)for(const p of pts.filter(p=>p.s===s))svg.append(sv('circle',{cx:p.x,cy:p.y,r:3,fill:s.color,stroke:'#1b2025','stroke-width':1.5}));}
+    else for(const p of pts.filter(p=>p.s===s))svg.append(s.mark==='hollow'?sv('circle',{cx:p.x,cy:p.y,r:4,fill:'none',stroke:s.color,'stroke-width':2}):sv('circle',{cx:p.x,cy:p.y,r:4,fill:s.color,stroke:'#1b2025','stroke-width':1.5}));}
+  const cross=sv('line',{y1:T,y2:H-B,stroke:'rgba(230,236,234,.35)',visibility:'hidden'});svg.append(cross);const ring=sv('circle',{r:6,fill:'none',stroke:'#e6ecea','stroke-width':1.5,visibility:'hidden'});svg.append(ring);
+  const t=tip(box);
+  svg.addEventListener('mousemove',ev=>{const r=svg.getBoundingClientRect(),mx=(ev.clientX-r.left)*W/r.width,my=(ev.clientY-r.top)*H/r.height;let best=null,bd=40;for(const p of pts){const d=Math.abs(p.x-mx)+(p.s.mark==='line'?0:Math.abs(p.y-my)*.5);if(d<bd){bd=d;best=p;}}if(!best){cross.setAttribute('visibility','hidden');ring.setAttribute('visibility','hidden');t.style.display='none';return;}cross.setAttribute('x1',best.x);cross.setAttribute('x2',best.x);cross.setAttribute('visibility','visible');ring.setAttribute('cx',best.x);ring.setAttribute('cy',best.y);ring.setAttribute('visibility','visible');const xv=best.s.xs?best.s.xs[best.i]:best.i;place(t,box,ev.clientX,ev.clientY,best.s.name+' · '+(o.xFmt?o.xFmt(xv):(o.xLabel||'#')+' '+num(xv,o.xDec??0))+': '+vfmt(best.v,o.unit));});
+  svg.addEventListener('mouseleave',()=>{cross.setAttribute('visibility','hidden');ring.setAttribute('visibility','hidden');t.style.display='none';});
+  legend(parent,o.series.map(s=>({name:s.name,color:s.color,hollow:s.mark==='hollow'})));
+}
+/** Grouped vertical bars. groups: [{name,values,color}] */
+function bars(parent,o){
+  const W=900,H=o.h||180,L=40,R=10,T=10,B=24;const box=el('div',{class:'chart'});const svg=sv('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':o.aria||''});box.append(svg);parent.append(box);
+  const n=o.labels.length,g=o.groups.length;let max=0;for(const gr of o.groups)for(const v of gr.values)max=Math.max(max,v);
+  const top=Math.max(1,max);for(const v of[0,top]){const y=T+(H-T-B)*(1-v/top);svg.append(sv('line',{x1:L,x2:W-R,y1:y,y2:y,stroke:v?'#2a3036':'#3b434b'}));const tx=sv('text',{x:L-6,y:y+4,'text-anchor':'end',fill:'#6c767c','font-size':11});tx.textContent=v;svg.append(tx);}
+  const slot=(W-L-R)/n,bw=Math.min(28,(slot-6)/g);const t=tip(box);
+  o.labels.forEach((lab,i)=>{o.groups.forEach((gr,k)=>{const v=gr.values[i]||0,h=(H-T-B)*v/top,x=L+i*slot+(slot-bw*g)/2+k*bw;const r=sv('rect',{x:x+1,y:H-B-h,width:Math.max(1,bw-2),height:Math.max(0,h),fill:gr.color,rx:Math.min(3,bw/4)});svg.append(r);const hit=sv('rect',{x,y:T,width:bw,height:H-T-B,fill:'transparent'});hit.addEventListener('mousemove',ev=>place(t,box,ev.clientX,ev.clientY,lab+' · '+gr.name+': '+v));hit.addEventListener('mouseleave',()=>t.style.display='none');svg.append(hit);});
+    const every=Math.max(1,Math.ceil(n/((W-L-R)/48)));if(i%every===0){const tx=sv('text',{x:L+i*slot+slot/2,y:H-7,'text-anchor':'middle',fill:'#6c767c','font-size':11});tx.textContent=lab;svg.append(tx);}});
+  if(!max){const tx=sv('text',{x:(L+W)/2,y:H/2,'text-anchor':'middle',fill:'#9aa6ac','font-size':13});tx.textContent=o.empty||'No samples';svg.append(tx);}
+  legend(parent,o.groups.map(gr=>({name:gr.name,color:gr.color})));
+}
+function stack(parent,items){const total=items.reduce((a,b)=>a+b.v,0);const W=900,H=18;const box=el('div',{class:'chart'});const svg=sv('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':items.map(i=>i.name+' '+i.v).join(', ')});box.append(svg);parent.append(box);const t=tip(box);let x=0;for(const it of items){if(!total||!it.v)continue;const w=W*it.v/total;const r=sv('rect',{x,y:0,width:Math.max(1,w-2),height:H,fill:it.color});r.addEventListener('mousemove',ev=>place(t,box,ev.clientX,ev.clientY,it.name+': '+it.v+' ('+pct(100*it.v/total)+')'));r.addEventListener('mouseleave',()=>t.style.display='none');svg.append(r);x+=w;}const l=el('div',{class:'legend'});for(const it of items){const s=el('span');const i=el('i');i.style.background=it.color;s.append(i,document.createTextNode(it.name+' '+it.v));l.append(s);}parent.append(l);}
+function table(parent,heads,rows,right,max){const wrap=el('div',{class:'scroll'});const t=el('table');const tr=el('tr');heads.forEach((h,i)=>tr.append(el('th',right&&right[i]?{class:'r'}:null,h)));const th=el('thead');th.append(tr);t.append(th);const tb=el('tbody');for(const r of rows.slice(0,max||rows.length)){const row=el('tr');r.forEach((c,i)=>row.append(el('td',right&&right[i]?{class:'r'}:null,c)));tb.append(row);}t.append(tb);wrap.append(t);parent.append(wrap);if(!rows.length)parent.append(el('p',{class:'muted'},'No rows.'));return tb;}
+
+// ---- derived helpers ----
+const hits=D.hits||[],misses=D.misses||[];
+const hitBySeq={};for(const h of hits)hitBySeq[h.seq]=h;
+const reachLabels=(D.hitReachBins||[]).map((_,i,a)=>i===a.length-1?(i*D.reachBinSize).toFixed(0)+'+':(i*D.reachBinSize).toFixed(1));
+function momentumAt(t){const m=D.momentum||[];if(!m.length)return NaN;if(t<=m[0][0])return m[0][1];for(let i=1;i<m.length;i++)if(m[i][0]>=t){const a=m[i-1],b=m[i],k=(t-a[0])/Math.max(1e-9,b[0]-a[0]);return a[1]+(b[1]-a[1])*k;}return m[m.length-1][1];}
+
+// ---- tab builders ----
+const BUILD={
+summary(p){
+  h2(p,'Fight overview');
+  cards(p,[
+    [label('accuracy','Hit accuracy'),pct(S.accuracy),S.hits+' / '+S.attempts+' attempts','accuracy'],
+    [label('hits','Correlated hits'),String(S.hits),'confirmed source','hits'],
+    [label('emptyMisses','Empty swings'),String(S.emptyMisses),'confirmed misses','emptyMisses'],
+    [label('uncertain','Uncertain attacks'),String(S.uncertain),'not proven misses','uncertain'],
+    [label('averageReach','Average reach'),m2(S.averageReach),S.reachSamples+' samples','averageReach'],
+    [label('maxReach','Maximum reach'),m2(S.maxReach),'correlated hits','maxReach'],
+    [label('criticalRate','Critical-hit rate'),pct(S.criticalRate),S.criticalConditions+' with conditions','criticalRate'],
+    [label('sprintRate','Sprint-hit rate'),pct(S.sprintRate),S.sprintHits+' sprint hits','sprintRate'],
+    [label('jumpCandidates','Jump candidates'),String(S.jumpCandidates),'success unavailable','jumpCandidates'],
+    [label('longestCombo','Longest combo'),String(S.longestCombo),'avg '+num(S.averageCombo,2),'longestCombo'],
+    [label('averageInterval','Average hit interval'),s2(S.averageInterval),'SD '+s2(S.intervalDeviation),'averageInterval'],
+    ['Incoming hits',String(S.incoming),'from tracked opponent']]);
+  h2(p,'Attempts');
+  stack(p,[{name:'Correlated hits',v:S.hits,color:'var(--s1)'},{name:'Empty swings',v:S.emptyMisses,color:'var(--s2)'},{name:'Uncertain',v:S.uncertain,color:'#6c767c'}]);
+  note(p,'Hits are server-reported local melee damage events matched to observed attacks. Reach, aim and critical conditions are client observations. Uncertain attacks are not proven misses. Readiness and momentum are estimates, not damage ratings. Jump-reset success is unavailable. Opponent death is reported as Unknown, not as a win.');
+},
+timeline(p){
+  h2(p,'Playback','recorded event timestamps; no world-state replay');
+  const ctl=el('div',{class:'controls'});const play=el('button',{class:'mc','aria-label':'Play'},'Play');const prev=el('button',{class:'mc'},'Prev event');const next=el('button',{class:'mc'},'Next event');
+  const speed=el('select',{class:'mc','aria-label':'Playback speed'});for(const s of[.25,.5,1,2,4]){const o=el('option',{value:s},s+'×');if(s===1)o.selected=true;speed.append(o);}
+  const seek=el('input',{type:'range',min:0,max:1000,step:1,value:0,'aria-label':'Playback position'});const clock=el('output');
+  ctl.append(play,prev,next,speed,seek,clock);p.append(ctl);
+  // Track with lanes
+  const W=900,lanes=[['Your attacks',0],['Incoming',1],['Jumps',2],['Sprint',3]],LH=22,L=112,H=lanes.length*LH+14;
+  const box=el('div',{class:'chart'});const svg=sv('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'Event track'});box.append(svg);p.append(box);const t=tip(box);
+  const tx=v=>L+(W-L-10)*v/dur;
+  for(const[name,i]of lanes){const y=8+i*LH;svg.append(sv('line',{x1:L,x2:W-10,y1:y+LH/2,y2:y+LH/2,stroke:'#2a3036'}));const tt=sv('text',{x:8,y:y+LH/2+4,fill:'#6c767c','font-size':11});tt.textContent=name;svg.append(tt);}
+  const marks=[];let sprintOn=null;
+  for(const e of E){const x=tx(sec(e));let m=null;
+    if(e.kind==='ATTACK'){const y=8+LH/2;const h=hitBySeq[e.sequence];m=h?sv('circle',{cx:x,cy:y,r:5,fill:'var(--s1)'}):!isEmpty(e)?sv('circle',{cx:x,cy:y,r:4.5,fill:'none',stroke:'var(--s2)','stroke-width':2}):sv('rect',{x:x-1,y:y-6,width:2,height:12,fill:'#9aa6ac'});m.dataset.k=h?'Correlated hit':!isEmpty(e)?'No server report':'Empty swing';}
+    else if(e.kind==='DAMAGE_IN'){m=sv('rect',{x:x-4,y:8+LH+LH/2-4,width:8,height:8,fill:'var(--s3)'});m.dataset.k='Incoming hit';}
+    else if(e.kind==='JUMP'){m=sv('path',{d:`M${x-5} ${8+2*LH+LH/2+4}L${x} ${8+2*LH+LH/2-5}L${x+5} ${8+2*LH+LH/2+4}Z`,fill:'#9aa6ac'});m.dataset.k='Jump';}
+    else if(e.kind==='SPRINT'){if(e.detail==='true')sprintOn=sec(e);else if(sprintOn!=null){svg.append(sv('rect',{x:tx(sprintOn),y:8+3*LH+LH/2-3,width:Math.max(1,tx(sec(e))-tx(sprintOn)),height:6,fill:'#6c767c'}));sprintOn=null;}}
+    else if(e.kind==='DEATH'){m=sv('rect',{x:x-1,y:8,width:2,height:LH*4,fill:'var(--warn)'});m.dataset.k='Death observed';}
+    if(m){m.dataset.t=sec(e);svg.append(m);marks.push(m);}}
+  if(sprintOn!=null)svg.append(sv('rect',{x:tx(sprintOn),y:8+3*LH+LH/2-3,width:Math.max(1,tx(dur)-tx(sprintOn)),height:6,fill:'#6c767c'}));
+  const head=sv('line',{y1:2,y2:H-4,stroke:'#e4c46e','stroke-width':1.5});svg.append(head);
+  svg.addEventListener('mousemove',ev=>{const r=svg.getBoundingClientRect(),mx=(ev.clientX-r.left)*W/r.width;let best=null,bd=8;for(const m of marks){const d=Math.abs(tx(+m.dataset.t)-mx);if(d<bd){bd=d;best=m;}}if(best)place(t,box,ev.clientX,ev.clientY,best.dataset.k+' · '+(+best.dataset.t).toFixed(2)+' s');else t.style.display='none';});
+  svg.addEventListener('mouseleave',()=>t.style.display='none');
+  svg.addEventListener('click',ev=>{const r=svg.getBoundingClientRect(),mx=(ev.clientX-r.left)*W/r.width;setT((mx-L)/(W-L-10)*dur);});
+  legend(p,[{name:'Correlated hit',color:'var(--s1)'},{name:'No server report',color:'var(--s2)',hollow:true},{name:'Empty swing',color:'#9aa6ac'},{name:'Incoming hit',color:'var(--s3)'},{name:'Jump / sprint',color:'#6c767c'}]);
+  const now=el('div',{class:'now'});p.append(now);
+  const annot=el('div',{class:'annot','aria-live':'polite'});p.append(annot);
+  h2(p,'Events up to playhead');
+  const fl=el('div',{class:'controls'});const filter=el('select',{class:'mc','aria-label':'Event filter'});for(const k of['All','ATTACK','HURT','DAMAGE_IN','JUMP','SPRINT','DEATH','MOTION'])filter.append(el('option',{value:k},k==='All'?'All events':k));fl.append(filter);p.append(fl);
+  const wrap=el('div',{class:'scroll'});const tbl=el('table');const hr=el('tr');for(const h of['Time','Event','Confidence','Details'])hr.append(el('th',null,h));const thd=el('thead');thd.append(hr);tbl.append(thd);const tb=el('tbody');tbl.append(tb);wrap.append(tbl);p.append(wrap);
+  const times=E.filter(e=>e.kind!=='MOTION').map(sec);
+  let T=0,playing=false,last=0;
+  function describe(e){if(!e)return['Start of recording',''];const h=hitBySeq[e.sequence];
+    if(e.kind==='ATTACK'){if(h)return['Correlated hit',m2(h.reach)+(h.contact?' ray contact':' nearest box')+' · '+cap(h.readiness||'')+' readiness · combo '+h.combo+(h.critical?' · crit conditions':'')+(h.sprinting?' · sprinting':'')];if(!isEmpty(e))return['Attack without server report','Estimated distance '+m2(e.attack.reach)+'. Uncertain, not a proven miss.'];return['Empty swing','No entity selected. Confirmed miss.'+(e.attack?' Distance to the recent opponent '+m2(e.attack.reach)+'.':'')];}
+    if(e.kind==='HURT')return['Server damage report','Local melee source; amount unavailable.'];
+    if(e.kind==='DAMAGE_IN')return['Incoming hit','Opponent damage event; resets your combo.'];
+    if(e.kind==='JUMP')return['Jump',e.detail||''];if(e.kind==='SPRINT')return[e.detail==='true'?'Sprint started':'Sprint stopped',''];
+    if(e.kind==='DEATH')return['Death observed',e.detail||''];if(e.kind==='DISCONNECT')return['Disconnected',e.detail||''];return[cap(e.kind),e.detail||''];}
+  function detailText(e){const h=hitBySeq[e.sequence];if(e.attack)return(h?'Hit · ':'')+'Cooldown '+e.attack.cooldown.toFixed(2)+' · Reach '+e.attack.reach.toFixed(2)+' m'+(e.attack.rayContact?' · Aim '+[e.attack.aimX,e.attack.aimY,e.attack.aimZ].map(v=>v.toFixed(2)).join(', '):' · no ray contact');return e.detail||'';}
+  function render(){const k=filter.value;seek.value=Math.round(1000*T/dur);clock.textContent=T.toFixed(2)+' / '+dur.toFixed(2)+' s';head.setAttribute('x1',tx(T));head.setAttribute('x2',tx(T));
+    const upTo=E.filter(e=>sec(e)<=T+1e-9);const shown=upTo.filter(e=>k==='All'?e.kind!=='MOTION':e.kind===k);
+    tb.replaceChildren();for(const e of shown.slice(-200)){const r=el('tr');for(const c of[sec(e).toFixed(3),e.kind,cap(e.confidence),detailText(e)])r.append(el('td',null,c));tb.append(r);}if(tb.lastChild)tb.lastChild.className='cur';wrap.scrollTop=wrap.scrollHeight;
+    const lastEv=[...upTo].reverse().find(e=>e.kind!=='MOTION');const[a,b]=describe(lastEv);annot.replaceChildren(el('b',null,a),document.createTextNode(b?' — '+b:''));
+    const hs=hits.filter(h=>h.t<=T),at=upTo.filter(e=>e.kind==='ATTACK').length,inc=(D.incoming||[]).filter(x=>x<=T).length;const lh=hs[hs.length-1];
+    now.replaceChildren(card('Hits so far',String(hs.length),at+' attempts'),card('Incoming',String(inc),'opponent hits'),card('Combo at last hit',lh?String(lh.combo):NONE,''),card('Momentum (estimate)',num(momentumAt(T),2),'-1 to +1','momentum'));
+    for(const m of marks)m.setAttribute('opacity',+m.dataset.t<=T?1:.35);}
+  function setT(v){T=Math.max(0,Math.min(dur,v));render();}
+  function frame(ts){if(!playing)return;if(last)setT(T+(ts-last)/1000*Number(speed.value));last=ts;if(T>=dur){toggle(false);return;}requestAnimationFrame(frame);}
+  function toggle(on){playing=on;play.textContent=on?'Pause':'Play';play.setAttribute('aria-label',on?'Pause':'Play');last=0;if(on){if(T>=dur)T=0;requestAnimationFrame(frame);}}
+  play.onclick=()=>toggle(!playing);
+  next.onclick=()=>{const n=times.find(x=>x>T+1e-6);setT(n!=null?n:dur);};
+  prev.onclick=()=>{const c=[...times].reverse().find(x=>x<T-1e-6);setT(c!=null?c:0);};
+  seek.oninput=()=>setT(Number(seek.value)/1000*dur);filter.onchange=render;
+  document.addEventListener('keydown',e=>{if(!$('p-timeline').classList.contains('on')||e.target.tagName==='SELECT'||e.target.tagName==='INPUT')return;if(e.key===' '){e.preventDefault();toggle(!playing);}else if(e.key==='.')next.click();else if(e.key===',')prev.click();});
+  render();
+  note(p,'Playback advances through the recorded timestamps at the chosen speed. It annotates what KWAMSTER observed; it does not reconstruct positions or the Minecraft world. Space plays or pauses; comma and period step between events.');
+},
+reach(p){
+  h2(p,'Reach');
+  const est=misses.filter(m=>fin(m.estimatedReach));
+  cards(p,[[label('averageReach','Average reach'),m2(S.averageReach),S.reachSamples+' hit samples','averageReach'],[label('maxReach','Maximum reach'),m2(S.maxReach),'correlated hits','maxReach'],['Estimated miss distance',String(est.length),'attempts without a hit']]);
+  h2(p,'Distribution','0.5 m bins');
+  bars(p,{labels:reachLabels,groups:[{name:'Hit distance',values:D.hitReachBins,color:'var(--s1)'},{name:'Estimated, no hit',values:D.missReachBins,color:'var(--s2)'}],empty:'No reach samples',aria:'Reach distribution'});
+  h2(p,'Reach progression','seconds into the fight');
+  lineChart(p,{series:[{name:'Hit distance',xs:hits.map(h=>h.t),ys:hits.map(h=>h.reach),color:'var(--s1)',mark:'points'},{name:'Estimated, no hit',xs:est.map(m=>m.t),ys:est.map(m=>m.estimatedReach),color:'var(--s2)',mark:'hollow'}],yMin:0,unit:'m',xLabel:'s',xDec:1,xMax:dur,empty:'No reach samples'});
+  h2(p,'Per-hit values');
+  table(p,['Hit','Time','Reach','Measured by','Cooldown','Readiness'],hits.map((h,i)=>['#'+(i+1),h.t.toFixed(2)+' s',m2(h.reach),h.contact?'Ray contact':'Nearest box',h.cooldown.toFixed(2),cap(h.readiness||'')]),[false,true,true,false,true,false]);
+  note(p,'Hit distance is measured on correlated hits. Estimated distance on unsuccessful attempts uses the same client geometry but has no server confirmation. Neither is a server reach verdict.');
+},
+aim(p){
+  h2(p,'Aim placement','recorded ray intersections');
+  const pl=D.placement||{},tot=(pl.center||0)+(pl.edge||0)+(pl.high||0)+(pl.low||0),sh=v=>tot?pct(100*v/tot)+' of contacts':'no contacts';
+  cards(p,[['Center',String(pl.center||0),sh(pl.center||0)],['Edge',String(pl.edge||0),sh(pl.edge||0)],['High',String(pl.high||0),sh(pl.high||0)],['Low',String(pl.low||0),sh(pl.low||0)]]);
+  const ctl=el('div',{class:'controls'});const b1=el('button',{class:'mc','aria-pressed':'true'},'Individual impacts');const b2=el('button',{class:'mc','aria-pressed':'false'},'Aggregate density');ctl.append(b1,b2);p.append(ctl);
+  const holder=el('div');p.append(holder);
+  const hp=hits.filter(h=>h.contact&&fin(h.aimH)),op=misses.filter(m=>m.contact&&fin(m.aimH));
+  function draw(heat){holder.replaceChildren();b1.setAttribute('aria-pressed',!heat);b2.setAttribute('aria-pressed',heat);
+    const W=900,H=340,bh=300,bw=100,bx=(W-bw)/2,by=20;const box=el('div',{class:'chart'});const svg=sv('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'Normalized hitbox with '+hp.length+' hits'});box.append(svg);holder.append(box);const t=tip(box);
+    svg.append(sv('rect',{x:bx,y:by,width:bw,height:bh,fill:'#22282d',stroke:'#3b434b'}));
+    if(heat){const C=6,R=12,cells=new Array(C*R).fill(0);for(const h of hp)cells[Math.min(R-1,Math.floor((1-h.aimV)*R))*C+Math.min(C-1,Math.floor(h.aimH*C))]++;const mx=Math.max(1,...cells);cells.forEach((v,i)=>{if(!v)return;const r=sv('rect',{x:bx+(i%C)*bw/C,y:by+Math.floor(i/C)*bh/R,width:bw/C,height:bh/R,fill:'var(--seq)','fill-opacity':.2+.8*v/mx});r.addEventListener('mousemove',ev=>place(t,box,ev.clientX,ev.clientY,v+' hits in this cell'));r.addEventListener('mouseleave',()=>t.style.display='none');svg.append(r);});}
+    for(const q of[.25,.75])svg.append(sv('line',{x1:bx,x2:bx+bw,y1:by+bh*q,y2:by+bh*q,stroke:'#3b434b'}));
+    for(const e of[.15,.85])svg.append(sv('line',{x1:bx+bw*e,x2:bx+bw*e,y1:by+bh*.25,y2:by+bh*.75,stroke:'#2a3036','stroke-dasharray':'3 3'}));
+    for(const[txt,y]of[['High',by+bh*.125],['Center / edge band',by+bh*.5],['Low',by+bh*.875]]){const tx=sv('text',{x:bx+bw+14,y:y+4,fill:'#6c767c','font-size':12});tx.textContent=txt;svg.append(tx);}
+    if(!heat){for(const m of op){const c=sv('circle',{cx:bx+m.aimH*bw,cy:by+(1-m.aimV)*bh,r:4,fill:'none',stroke:'var(--s2)','stroke-width':2});c.addEventListener('mousemove',ev=>place(t,box,ev.clientX,ev.clientY,'Contact without server report · '+m.t.toFixed(2)+' s'));c.addEventListener('mouseleave',()=>t.style.display='none');svg.append(c);}
+      for(const h of hp){const c=sv('circle',{cx:bx+h.aimH*bw,cy:by+(1-h.aimV)*bh,r:4,fill:'var(--s1)',stroke:'#1b2025','stroke-width':1.5});c.addEventListener('mousemove',ev=>place(t,box,ev.clientX,ev.clientY,'Hit · '+h.t.toFixed(2)+' s · h '+h.aimH.toFixed(2)+' v '+h.aimV.toFixed(2)));c.addEventListener('mouseleave',()=>t.style.display='none');svg.append(c);}}
+    if(!hp.length&&!op.length){const tx=sv('text',{x:W/2,y:by+bh/2,'text-anchor':'middle',fill:'#9aa6ac','font-size':13});tx.textContent='No ray contacts';svg.append(tx);}
+    if(heat)holder.append(el('p',{class:'muted'},'Brighter cells hold more correlated hits ('+hp.length+' total, 6 \u00d7 12 grid).'));
+    else legend(holder,[{name:'Correlated hit',color:'var(--s1)'},{name:'Contact, no server report',color:'var(--s2)',hollow:true}]);}
+  b1.onclick=()=>draw(false);b2.onclick=()=>draw(true);draw(false);
+  note(p,'Coordinates are recorded intersections normalized to the target box: horizontal across the contacted face, vertical from feet (0) to head (1). Attempts without ray contact are not plotted. Placement is descriptive only; center hits are not automatically better.');
+},
+timing(p){
+  h2(p,'Hit timing');
+  const iv=D.intervals||[],cv=fin(S.averageInterval)&&S.averageInterval>0&&fin(S.intervalDeviation)?100*S.intervalDeviation/S.averageInterval:NaN;
+  cards(p,[[label('averageInterval','Average hit interval'),s2(S.averageInterval),iv.length+' intervals','averageInterval'],[label('intervalDeviation','Interval deviation'),s2(S.intervalDeviation),'consistency','intervalDeviation'],['Variation',pct(cv),'SD / mean'],['Avg cooldown',hits.length?num(hits.reduce((a,h)=>a+h.cooldown,0)/hits.length,2):NONE,'at correlated hits']]);
+  h2(p,'Readiness categories','recorded thresholds');
+  const r=D.readiness||{};bars(p,{labels:['Perfect','Great','Normal','Poor'],groups:[{name:'Correlated hits',values:['PERFECT','GREAT','NORMAL','POOR'].map(k=>r[k]||0),color:'var(--s1)'}],h:150,empty:'No correlated hits'});
+  const pol=F.policy||{};p.append(el('p',{class:'muted'},'Perfect ≥ '+num(pol.perfectCooldown,2)+', Great ≥ '+num(pol.greatCooldown,2)+', Normal ≥ 0.50, otherwise Poor. Frozen when the fight started.'));
+  h2(p,'Cooldown readiness distribution','attack strength at hit');
+  bars(p,{labels:(D.cooldownBins||[]).map((_,i)=>(i/10).toFixed(1)),groups:[{name:'Correlated hits',values:D.cooldownBins||[],color:'var(--s1)'}],empty:'No correlated hits'});
+  h2(p,'Interval trend','consecutive correlated hits');
+  lineChart(p,{series:[{name:'Interval',ys:iv,color:'var(--s1)',mark:'line'}],yMin:0,unit:'s',xLabel:'interval #',empty:'Needs two hits'});
+  note(p,'Readiness is a transparent cooldown classification, not an objective skill score or a damage measurement.',true);
+},
+movement(p){
+  h2(p,'Sprint hits');
+  cards(p,[[label('sprintRate','Sprint-hit rate'),pct(S.sprintRate),S.sprintHits+' of '+S.hits+' hits','sprintRate'],['Sprint transitions',String(D.sprintTransitions||0),'start / stop events'],['Motion samples',String(D.motionSamples||0),P.motionIncluded?'10 Hz, included':'10 Hz, omitted from export']]);
+  h2(p,'Jump-reset candidates');
+  cards(p,[[label('jumpCandidates','Jump candidates'),String(S.jumpCandidates),'inside window','jumpCandidates'],['Reset success','Unavailable','not estimated'],['Incoming hits',String(S.incoming),'opponent damage'],['Jumps without recent damage',String(D.jumpsWithoutDamage||0),'not candidates']]);
+  const j=D.jumps||[];const bins=10,cand=new Array(bins).fill(0),other=new Array(bins).fill(0);for(const x of j){const b=Math.max(0,Math.min(bins-1,Math.floor(x.offsetMs/100)));(x.candidate?cand:other)[b]++;}
+  h2(p,'Jump timing after incoming damage','100 ms bins');
+  bars(p,{labels:cand.map((_,i)=>String(i*100)),groups:[{name:'Candidate',values:cand,color:'var(--s1)'},{name:'Outside window',values:other,color:'var(--s2)'}],empty:'No jumps within 1 s after incoming damage'});
+  note(p,'Jump-reset success is unavailable. Candidates are observed jumps shortly after incoming damage; whether knockback was reduced needs a validated baseline that does not exist yet.',true);
+  h2(p,'Combo progression');
+  lineChart(p,{series:[{name:'Combo',xs:hits.map(h=>h.t),ys:hits.map(h=>h.combo),color:'var(--s1)',mark:'line'}],yMin:0,unit:'',xLabel:'s',xDec:1,xMax:dur,empty:'No correlated hits'});
+  h2(p,'Estimated momentum','illustrative, not win probability');
+  const mo=D.momentum||[];lineChart(p,{series:[{name:'Momentum (estimate)',xs:mo.map(m=>m[0]),ys:mo.map(m=>m[1]),color:'var(--s1)',mark:'line'}],yMin:-1,yMax:1,unit:'',xLabel:'s',xDec:1,xMax:dur,points:false,empty:'No exchanges'});
+  note(p,(METRIC.momentum?METRIC.momentum.help:'')+' Shown for orientation only.',true);
+}};
+show(location.hash.slice(1)||'summary');
+})();
+</script>
+</body>
+</html>

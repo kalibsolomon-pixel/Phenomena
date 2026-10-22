@@ -14,9 +14,16 @@ public final class ConfigStore {
   public Config load() throws IOException {
     if (!Files.exists(path)) return new Config();
     try {
-      Config c = AtomicJson.GSON.fromJson(Files.readString(path), Config.class);
+      String json = Files.readString(path);
+      Config c = AtomicJson.GSON.fromJson(json, Config.class);
       if (c == null) throw new IllegalArgumentException("null config");
+      boolean migrating = c.schemaVersion != Config.SCHEMA;
       c.validate();
+      if (migrating) {
+        // Keep the pre-migration file once; the next save writes the current schema.
+        Path backup = path.resolveSibling(path.getFileName() + ".v1-backup");
+        if (!Files.exists(backup)) Files.writeString(backup, json);
+      }
       return c;
     } catch (RuntimeException ex) {
       Files.copy(

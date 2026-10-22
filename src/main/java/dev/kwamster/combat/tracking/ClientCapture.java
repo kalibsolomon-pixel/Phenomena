@@ -19,7 +19,28 @@ public final class ClientCapture {
   private static String deadTarget;
   private static final long ORIGIN = System.nanoTime();
 
+  /** Bounded entity UUID to display label (type or player name); local display metadata only. */
+  private static final java.util.Map<String, String> LABELS =
+      new java.util.LinkedHashMap<>(32, .75f, true) {
+        @Override
+        protected boolean removeEldestEntry(java.util.Map.Entry<String, String> eldest) {
+          return size() > 32;
+        }
+      };
+
   private ClientCapture() {}
+
+  public static String label(String uuid) {
+    return uuid == null ? null : LABELS.get(uuid);
+  }
+
+  private static void remember(Entity entity) {
+    String label =
+        entity instanceof Player p
+            ? p.getName().getString()
+            : entity.getType().getDescription().getString();
+    LABELS.put(entity.getUUID().toString(), label);
+  }
 
   public static long now() {
     return System.nanoTime() - ORIGIN;
@@ -56,6 +77,7 @@ public final class ClientCapture {
         || player.isSpectator()
         || !KwamsterClient.config.tracking) return;
     trackedTarget = target;
+    remember(target);
     float partial = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true);
     var eye = player.getEyePosition(partial);
     var view = player.getViewVector(partial);
@@ -111,6 +133,7 @@ public final class ClientCapture {
     var cause = mc.level.getEntity(packet.sourceCauseId());
     if (target == null) return;
     if (target == mc.player && cause instanceof Player) {
+      remember(cause);
       if (!KwamsterClient.engine.engaged()
           || cause.getUUID().toString().equals(KwamsterClient.engine.opponent()))
         trackedTarget = cause;

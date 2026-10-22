@@ -18,7 +18,8 @@ public record FightRecord(
     Statistics statistics,
     List<CombatEvent> events,
     Policy policy,
-    List<Evaluation> evaluations) {
+    List<Evaluation> evaluations,
+    String opponentLabel) {
   public enum Outcome {
     WIN,
     LOSS,
@@ -74,7 +75,42 @@ public record FightRecord(
         statistics,
         events,
         Policy.of(new Config()),
-        List.of());
+        List.of(),
+        null);
+  }
+
+  public FightRecord(
+      int schemaVersion,
+      String id,
+      long startEpochMillis,
+      long endEpochMillis,
+      long durationNanos,
+      String opponent,
+      Outcome outcome,
+      String reason,
+      Statistics statistics,
+      List<CombatEvent> events,
+      Policy policy,
+      List<Evaluation> evaluations) {
+    this(
+        schemaVersion,
+        id,
+        startEpochMillis,
+        endEpochMillis,
+        durationNanos,
+        opponent,
+        outcome,
+        reason,
+        statistics,
+        events,
+        policy,
+        evaluations,
+        null);
+  }
+
+  /** Timeline-free copy kept in bounded memory; the full record loads on demand. */
+  public boolean hasTimeline() {
+    return !events.isEmpty();
   }
 
   public FightRecord summaryOnly() {
@@ -90,7 +126,8 @@ public record FightRecord(
         statistics,
         List.of(),
         policy,
-        List.of());
+        List.of(),
+        opponentLabel);
   }
 
   public FightRecord {

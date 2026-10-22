@@ -84,18 +84,19 @@ public final class CombatHud {
     if (mc.player == null
         || mc.options.hideGui
         || mc.screen instanceof dev.kwamster.gui.screens.HudEditorScreen) return;
-    if (c.display.hud()) {
+    // Dormant since 0.1.1: reached only when hudOverlay is enabled in the config file.
+    if (c.hudOverlay) {
       panel(g, c.analytics, lines, c.accent, false);
       movement(g, c.direction, false);
     }
     long now = ClientCapture.now();
-    if (c.display.hud() && c.summary && now - summaryAt < c.alertSeconds * 1e9 && summaryAt > 0) {
+    if (c.hudOverlay && c.summary && now - summaryAt < c.alertSeconds * 1e9 && summaryAt > 0) {
       float fade =
           c.animate ? (float) Math.min(1, (c.alertSeconds - (now - summaryAt) / 1e9) / .3) : 1;
       panel(g, c.alert, summary(), c.accent, false, fade);
     }
     var grade = FeedbackController.recent;
-    if (c.display.hud() && grade != null && now - FeedbackController.recentAt < 700_000_000L) {
+    if (c.hudOverlay && grade != null && now - FeedbackController.recentAt < 700_000_000L) {
       int color = c.feedback[grade.ordinal()].color;
       int y = g.guiHeight() / 2 + 24;
       if (c.floatingText) y -= (int) ((now - FeedbackController.recentAt) / 40_000_000L);

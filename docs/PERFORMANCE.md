@@ -28,3 +28,16 @@ After ten warmup fights, 200,000 synthetic events with a finalized snapshot ever
 One hundred queued atomic replacements of a small one-attack fight report averaged **3.174 ms/write**, including worker drain and retention checks, with no errors. This is a small-report check, not an upper bound for 10,000-event fights or a full 1,000-report folder. Persistence runs off the render thread; queue-full and shutdown-timeout cases report failure rather than claiming a successful write.
 
 Raw frame arrays, heap/CPU/GC counters and benchmark output are in [performance/](performance/). Reproduce commands are in [VALIDATION.md](VALIDATION.md). Initial invalid first-frame, buffer-saturation and AFK-throttled runs were rejected rather than included in these accepted results.
+
+## 0.1.1 dashboard data and report generation
+
+`./gradlew.bat benchmarkAnalytics` on the same machine:
+
+| Measure | Result |
+| --- | --- |
+| Aggregate over 1,000 fights with 50,000 timeline events, the in-memory caps (best of 7) | 5.3 ms |
+| Export of one 1,000-event fight (report.json plus index.html) | 59 ms, 432 KB HTML |
+| Engine event processing | 204 ns/event, 103 allocated bytes/event (0.1.0: 191 ns, 103 B) |
+| Atomic replacement of a small recording | 2.9 ms mean |
+
+The aggregate runs only when history changes or the scope changes. Results are cached per scope, and per-fight analytics are cached in an LRU. Charts map precomputed arrays to pixels without re-deriving data per frame. Report generation and folder or browser opening run on the storage worker and a short-lived launcher thread, never on the render thread. The frame-time comparison above was not repeated for 0.1.1. Its HUD and recording modes now exercise the dormant overlay through `hudOverlay`. Raw output is in build/performance/analytics.json.

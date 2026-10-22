@@ -21,10 +21,8 @@ public final class ModPerformanceTest implements FabricClientGameTest {
           KwamsterClient.engine.finish(
               ClientCapture.now(), FightRecord.Outcome.UNKNOWN, "Performance segment");
           KwamsterClient.config.tracking = !mode.equals("Inactive");
-          KwamsterClient.config.display =
-              mode.equals("HUD") || mode.equals("Recording")
-                  ? Config.Display.HUD
-                  : Config.Display.NONE;
+          // The retired overlay is still measurable when enabled explicitly.
+          KwamsterClient.config.hudOverlay = mode.equals("HUD") || mode.equals("Recording");
           KwamsterClient.config.recording = mode.equals("Recording");
           KwamsterClient.config.sound = false;
           KwamsterClient.config.summary = false;

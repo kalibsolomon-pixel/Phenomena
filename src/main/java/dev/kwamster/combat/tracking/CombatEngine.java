@@ -22,12 +22,13 @@ public final class CombatEngine {
   private final Config config;
   private final Consumer<FightRecord> recorder;
   private final BiConsumer<CombatEvent, HitQuality.Grade> feedback;
+  private final Function<String, String> labeler;
   private final ArrayList<CombatEvent> events = new ArrayList<>();
   private final ArrayDeque<CombatEvent> pending = new ArrayDeque<>();
   private final ArrayList<FightRecord.Evaluation> evaluations = new ArrayList<>();
   private FightRecord.Policy policy;
   private Statistics stats = new Statistics();
-  private String opponent;
+  private String opponent, opponentLabel;
   private long start, lastActivity, lastSequence = -1, lastTime = -1, startEpoch, lastDamage = -1;
   private State state = State.IDLE;
 
@@ -35,9 +36,19 @@ public final class CombatEngine {
       Config c,
       Consumer<FightRecord> recorder,
       BiConsumer<CombatEvent, HitQuality.Grade> feedback) {
+    this(c, recorder, feedback, id -> null);
+  }
+
+  /** The labeler resolves a display label (entity type or player name) for a new opponent. */
+  public CombatEngine(
+      Config c,
+      Consumer<FightRecord> recorder,
+      BiConsumer<CombatEvent, HitQuality.Grade> feedback,
+      Function<String, String> labeler) {
     this.config = c;
     this.recorder = recorder;
     this.feedback = feedback;
+    this.labeler = labeler;
   }
 
   public State state() {
@@ -151,6 +162,7 @@ public final class CombatEngine {
 
   private void begin(String target, long time) {
     opponent = target;
+    opponentLabel = labeler.apply(target);
     start = lastActivity = time;
     startEpoch = System.currentTimeMillis();
     stats = new Statistics();
@@ -188,7 +200,8 @@ public final class CombatEngine {
             stats.copy(),
             List.copyOf(events),
             policy,
-            List.copyOf(evaluations)));
+            List.copyOf(evaluations),
+            opponentLabel));
     pending.clear();
   }
 }

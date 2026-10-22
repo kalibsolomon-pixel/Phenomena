@@ -14,12 +14,19 @@ class FoundationTest {
   void configRoundTrip() throws Exception {
     var store = new ConfigStore(dir.resolve("config.json"));
     var c = store.load();
-    c.display = Config.Display.BOTH;
+    c.chatSummary = true;
+    c.density = Config.Density.COMPACT;
+    c.reducedMotion = true;
+    c.trendWindow = 40;
     c.analytics.x = .7;
     store.save(c);
     var loaded = store.load();
-    assertEquals(Config.Display.BOTH, loaded.display);
+    assertTrue(loaded.chatSummary);
+    assertEquals(Config.Density.COMPACT, loaded.density);
+    assertTrue(loaded.reducedMotion);
+    assertEquals(40, loaded.trendWindow);
     assertEquals(.7, loaded.analytics.x);
+    assertEquals(Config.SCHEMA, loaded.schemaVersion);
   }
 
   @Test

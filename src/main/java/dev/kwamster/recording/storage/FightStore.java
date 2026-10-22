@@ -61,20 +61,35 @@ public final class FightStore implements AutoCloseable {
         });
   }
 
+  public Path directory() {
+    return directory;
+  }
+
   public void loadOne(String id, Consumer<FightRecord> result) {
     submit(
         () -> {
           try {
-            Path p = path(id);
-            if (Files.isSymbolicLink(p) || Files.size(p) > 4 * 1024 * 1024)
-              throw new IOException("Unsafe report");
-            var f = decode(Files.readString(p));
-            if (!f.id().equals(id)) throw new IOException("Report ID mismatch");
-            result.accept(f);
-          } catch (IOException ex) {
+            result.accept(readOne(id));
+          } catch (IOException | RuntimeException ex) {
             errors.accept("Could not load fight: " + ex.getMessage());
           }
         });
+  }
+
+  /** Reads one managed recording by UUID. Call from the storage worker, never render code. */
+  public FightRecord readOne(String id) throws IOException {
+    Path p;
+    try {
+      p = path(id);
+    } catch (IllegalArgumentException ex) {
+      throw new IOException("Invalid fight identifier");
+    }
+    if (!Files.exists(p)) throw new IOException("Recording not found");
+    if (Files.isSymbolicLink(p) || Files.size(p) > 4 * 1024 * 1024)
+      throw new IOException("Unsafe report");
+    var f = decode(Files.readString(p));
+    if (!f.id().equals(id)) throw new IOException("Report ID mismatch");
+    return f;
   }
 
   public void save(FightRecord fight, int retention, long byteLimit) {
@@ -93,7 +108,9 @@ public final class FightStore implements AutoCloseable {
     submit(
         () -> {
           try {
-            Files.deleteIfExists(path(id));
+            Path p = path(id);
+            if (Files.isSymbolicLink(p)) throw new IOException("Refusing symbolic link");
+            Files.deleteIfExists(p);
             done.run();
           } catch (IOException ex) {
             errors.accept(ex.toString());

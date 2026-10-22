@@ -91,6 +91,36 @@ public final class AnalyticsBenchmark {
     }
     result.put("atomicReplaceMeanMs", (System.nanoTime() - start) / 1e6 / 100);
     result.put("storageErrors", errors);
+
+    // Dashboard data at the in-memory caps: 1,000 fights, 50,000 timeline events in 50 fights.
+    List<FightRecord> timelines = new ArrayList<>();
+    var maker = new CombatEngine(config, timelines::add, (e, g) -> {});
+    long s2 = 0, t2 = 1;
+    for (int f = 0; f < 50; f++) {
+      for (int i = 0; i < 500; i++) {
+        t2 += 700_000_000;
+        maker.accept(new CombatEvent(++s2, t2, Kind.ATTACK, "local", "opponent" + f, Confidence.OBSERVED, a, ""));
+        maker.accept(new CombatEvent(++s2, t2 + 10_000_000, Kind.HURT, "local", "opponent" + f,
+            Confidence.CONFIRMED, null, "local-melee-source"));
+      }
+      maker.finish(t2 + 20_000_000, FightRecord.Outcome.UNKNOWN, "benchmark");
+    }
+    List<FightRecord> history = new ArrayList<>(timelines);
+    while (history.size() < 1000) history.add(timelines.get(history.size() % 50).summaryOnly());
+    double best = Double.MAX_VALUE;
+    for (int rep = 0; rep < 7; rep++) {
+      long t0 = System.nanoTime();
+      var agg = new dev.kwamster.analytics.Aggregate(history, dev.kwamster.analytics.FightAnalytics::of);
+      if (agg.hitSamples.size() != 25_000) throw new IllegalStateException("unexpected samples");
+      best = Math.min(best, (System.nanoTime() - t0) / 1e6);
+    }
+    result.put("dashboardAggregate1000Fights50kEventsMs", best);
+    var big = timelines.getFirst();
+    Path report = Files.createTempDirectory(out, "report-benchmark-");
+    long r0 = System.nanoTime();
+    dev.kwamster.sharing.ReportExporter.export(report, big, dev.kwamster.sharing.ReportExporter.Options.DEFAULT);
+    result.put("reportExport1000EventsMs", (System.nanoTime() - r0) / 1e6);
+    result.put("reportExport1000EventsBytes", Files.size(report.resolve("index.html")));
     AtomicJson.write(out.resolve("analytics.json"), result);
     System.out.println(AtomicJson.GSON.toJson(result));
   }
