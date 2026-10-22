@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "kwamster",
+  "version": "${version}",
+  "name": "KWAMSTER",
+  "description": "Local, confidence-aware modern PvP analytics.",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.kwamster.KwamsterClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
