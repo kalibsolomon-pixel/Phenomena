@@ -19,3 +19,28 @@ java { toolchain { languageVersion = JavaLanguageVersion.of(21) }; withSourcesJa
 tasks.withType(JavaCompile).configureEach { options.release = 21 }
 processResources { inputs.property 'version', project.version; filesMatching('fabric.mod.json') { expand 'version': project.version } }
 test { useJUnitPlatform() }
+
+fabricApi { configureTests { createSourceSet = true; modId = 'kwamster-test'; enableGameTests = false; enableClientGameTests = true; clearRunDirectory = false } }
+
+processGametestResources {
+    def mode = providers.gradleProperty('performance').orElse('functional')
+    inputs.property 'testMode', mode
+    filesMatching('fabric.mod.json') {
+        expand 'entrypoint': mode.get() == 'baseline' ? 'dev.kwamster.FabricBaselineTest' : mode.get() == 'mod' ? 'dev.kwamster.ModPerformanceTest' : 'dev.kwamster.KwamsterGameTest'
+    }
+}
+loom.runs.clientGameTest {
+    vmArg '-Dkwamster.perfOutput=' + layout.buildDirectory.dir('performance').get().asFile.absolutePath
+    if (providers.gradleProperty('performance').orNull in ['baseline', 'mod']) vmArg '-Dfabric.modsFolder=' + layout.buildDirectory.dir('performance/mods').get().asFile.absolutePath
+    if (providers.gradleProperty('performance').orNull in ['baseline', 'mod']) vmArg '-Dfabric.client.gametest.disableNetworkSynchronizer=true'
+    if (providers.gradleProperty('performance').orNull == 'baseline') vmArg '-Dfabric.debug.disableModIds=kwamster'
+}
+
+tasks.register('benchmarkAnalytics', JavaExec) {
+    group = 'verification'
+    description = 'Measure synthetic event processing, allocation and atomic recording overhead'
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'dev.kwamster.AnalyticsBenchmark'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+}

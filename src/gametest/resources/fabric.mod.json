@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "kwamster-test",
+  "version": "1.0.0",
+  "name": "KWAMSTER integration tests",
+  "environment": "client",
+  "entrypoints": {
+    "fabric-client-gametest": [
+      "${entrypoint}"
+    ],
+    "client": [
+      "dev.kwamster.TestMuteInitializer"
+    ]
+  },
+  "mixins": [
+    "kwamster-test.mixins.json"
+  ]
+}

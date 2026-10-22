@@ -12,3 +12,20 @@ Gradle build and 3 foundation tests pass on Java 21. Custom K dashboard compiled
 
 ## Phase 1
 24 unit tests pass (geometry, aim normalization, correlation, duplicate prevention, expiry, cooldown quality, fight lifecycle, combos and jump candidates). Build passes. Foundation development client launched and rendered assets successfully. Three narrow observational mixins capture entity attacks, empty swings and source-attributed damage packets after main-thread dispatch. Critical conditions remain observed; jump-reset success remains unavailable. Incoming motion-baseline estimates require controlled trials. Gameplay validation pending integration tests.
+
+## Phases 2–7 — connected implementation and validation
+Custom dashboard/settings/history screens, accessible vanilla-backed controls, independent HUD editor, four display modes, fight lifecycle and summary alerts, per-category cooldown-readiness feedback, movement indicator, combo/timing/momentum metrics, bounded local recording, lazy history timelines, anonymized portable reports and browser timeline replay are connected. These phases share the composition root and were validated together rather than committing disconnected UI/storage stubs.
+
+The final unit suite contains 40 passing tests. Actual Fabric 1.21.11 client gametests exercise navigation, toggle persistence, resize, HUD scale/keyboard position, singleplayer melee correlation, history and file export. A second pass with Sodium 0.8.14, Lithium 0.21.4, FerriteCore 8.2.0 and ImmediatelyFast 1.14.3 passes together. These are smoke tests, not a claim of universal compatibility. External-server PvP and audible sound perception remain untested.
+
+Browser validation loaded the generated report, advanced playback, and observed the final raw events. Saved screenshots and a synthetic training report are local evidence. No combat recording was uploaded. Hosted sharing is explicitly pending infrastructure and owner authorization.
+
+Review corrections included guarded empty-swing capture after vanilla validation; actual 1.21.11 mobility restrictions for critical conditions; interpolated geometry; the resolved vanilla attack-range accessor; world-change boundaries; avoiding target corruption by unrelated incoming damage; policy snapshots; bounded history with lazy timelines; and preventing stale async navigation callbacks.
+
+All Java sources use consistent formatting. The Gradle wrapper distribution is checksum pinned. scripts/dev.ps1 selects the local Java 21 toolchain when available.
+
+## Performance validation
+Initial profiler output was rejected because a mid-frame start produced an invalid first sample, buffers saturated, and Minecraft's AFK limiter contaminated the final mode. Corrected test-only sampling spans the entire workload at stride eight, verifies throttle state, and uses actual persistence checkpoints. The benchmark is isolated from optional compatibility mods. See PERFORMANCE.md and docs/performance for the accepted data and limits. Synthetic analytics and atomic-write costs are measured separately.
+
+## Owner preference
+All development Minecraft test instances must stay muted while the owner watches a show. Both local options files have master volume zero; the test-only initializer reapplies it after Fabric's options reset. System and other application audio are unchanged.

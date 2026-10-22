@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "dev.kwamster.testmixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "FrameProbeMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

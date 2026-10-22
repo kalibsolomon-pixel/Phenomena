@@ -1,12 +1,40 @@
 package dev.kwamster.gui.screens;
-import dev.kwamster.gui.components.ActionButton;
-import dev.kwamster.gui.theme.Theme;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
-public class DashboardScreen extends Screen {
- public DashboardScreen() { super(Component.literal("KWAMSTER")); }
- @Override protected void init() { addRenderableWidget(new ActionButton(width/2-80,height-38,160,"Done",this::onClose)); }
- @Override public void render(GuiGraphics g,int mx,int my,float delta) {g.fill(0,0,width,height,Theme.BACKGROUND);g.drawString(font,"KWAMSTER",24,20,Theme.TEXT);g.drawString(font,"Combat intelligence / local by default",24,36,Theme.MUTED);super.render(g,mx,my,delta);}
- @Override public boolean isPauseScreen(){return false;}
+
+import dev.kwamster.KwamsterClient;
+import dev.kwamster.hud.CombatHud;
+import java.util.Locale;
+
+public final class DashboardScreen extends PanelScreen {
+  public DashboardScreen() {
+    super("Overview", "Modern combat / confidence-aware / local by default");
+  }
+
+  @Override
+  protected void content() {
+    label(
+        KwamsterClient.engine.state()
+            + " / "
+            + (KwamsterClient.config.tracking ? "Tracking active" : "Tracking paused"));
+    for (String s : CombatHud.lines) label(s);
+    label("Critical conditions: observed; reset success: unavailable");
+    label("Hits: correlated server damage events; reach: client geometry");
+    if (!KwamsterClient.history.isEmpty()) {
+      label("Recent fight / " + KwamsterClient.history.getFirst().outcome());
+      double avg =
+          KwamsterClient.history.stream()
+              .limit(10)
+              .mapToDouble(f -> f.statistics().accuracy())
+              .average()
+              .orElse(0);
+      label(String.format(Locale.ROOT, "Recent 10 fights / average accuracy %.1f%%", avg));
+    }
+    action("Open fight history", () -> minecraft.setScreen(new HistoryScreen()));
+  }
+
+  @Override
+  public void tick() {
+    if (KwamsterClient.engine != null
+        && minecraft.player != null
+        && minecraft.player.tickCount % 10 == 0) init();
+  }
 }
