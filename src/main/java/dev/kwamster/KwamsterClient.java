@@ -115,6 +115,8 @@ public final class KwamsterClient implements ClientModInitializer {
                 KeyMapping.Category.register(
                     Identifier.fromNamespaceAndPath("kwamster", "controls"))));
     ClientTickEvents.START_CLIENT_TICK.register(client -> ClientCapture.startTick());
+    net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register(
+        (handler, client) -> ClientCapture.disconnected());
     ClientTickEvents.END_CLIENT_TICK.register(
         client -> {
           ClientCapture.tick();

@@ -59,6 +59,7 @@ public final class ClientCapture {
       return;
     }
     TIMING.held(weaponKey(mc.player));
+    if (KwamsterClient.engine != null) KwamsterClient.engine.heldWeapon(weaponKey(mc.player));
     boolean down = mc.options.keyJump.isDown();
     if (down && !jumpHeld) {
       jumpConsumed = false;
@@ -150,6 +151,9 @@ public final class ClientCapture {
     if (mc.player == null || KwamsterClient.recording == null) return;
     String host = host(mc);
     long now = now();
+    // Packets can announce the match before the first END_CLIENT_TICK in its new level.
+    KwamsterClient.recording.context(
+        host, mc.player.getName().getString(), currentWorld(), now, clientTick);
     var m = Announcements.interpret(host, text, origin).orElse(null);
     if (m != null)
       KwamsterClient.recording.announcement(host, mc.player.getName().getString(), m, now);
@@ -203,13 +207,46 @@ public final class ClientCapture {
   public static void emptySwing() {
     var mc = Minecraft.getInstance();
     if (mc.player != null
+        && mc.level != null
         && mc.screen == null
         && mc.hitResult != null
         && mc.hitResult.getType() == HitResult.Type.MISS) {
-      if (KwamsterClient.engine.engaged()
-          && trackedTarget instanceof LivingEntity
-          && trackedTarget.distanceTo(mc.player) < 6) capture(mc.player, trackedTarget, true);
-      else emit(Kind.ATTACK, "local", null, Confidence.OBSERVED, null, "empty-swing");
+      LivingEntity aimed = null;
+      // Attack-time query only, never a per-frame scan. The expanded box admits opening misses
+      // before a successful hit. Facing unrelated empty space supplies no combat evidence.
+      var eye = mc.player.getEyePosition(1);
+      var end = eye.add(mc.player.getViewVector(1).scale(6));
+      double nearest = Double.POSITIVE_INFINITY;
+      for (var candidate :
+          mc.level.getEntitiesOfClass(
+              LivingEntity.class,
+              mc.player.getBoundingBox().inflate(6),
+              entity ->
+                  entity != mc.player
+                      && entity.isAlive()
+                      && !entity.isSpectator()
+                      && mc.player.hasLineOfSight(entity))) {
+        if (!KwamsterClient.engine.acceptsTarget(
+            candidate.getUUID().toString(),
+            candidate instanceof Player p
+                ? p.getName().getString()
+                : candidate.getType().getDescription().getString())) continue;
+        var contact =
+            candidate.getBoundingBox().inflate(candidate.getPickRadius() + .35).clip(eye, end);
+        if (contact.isPresent() && eye.distanceToSqr(contact.get()) < nearest) {
+          aimed = candidate;
+          nearest = eye.distanceToSqr(contact.get());
+        }
+      }
+      if (aimed != null) capture(mc.player, aimed, true);
+      else
+        emit(
+            Kind.ATTACK,
+            "local",
+            null,
+            Confidence.OBSERVED,
+            null,
+            "empty-swing; no aimed opponent");
     }
   }
 
@@ -224,9 +261,8 @@ public final class ClientCapture {
         || player.isSpectator()
         || (!KwamsterClient.config.tracking && !KwamsterClient.recording.manual())) return;
     remember(target);
-    if (!KwamsterClient.engine.acceptsTarget(
-        target.getUUID().toString(), label(target.getUUID().toString()))) return;
-    trackedTarget = target;
+    if (KwamsterClient.engine.acceptsTarget(
+        target.getUUID().toString(), label(target.getUUID().toString()))) trackedTarget = target;
     float partial = mc.getDeltaTracker().getGameTimeDeltaPartialTick(true);
     var eye = player.getEyePosition(partial);
     var view = player.getViewVector(partial);
@@ -461,8 +497,8 @@ public final class ClientCapture {
   public static void tick() {
     var mc = Minecraft.getInstance();
     if (mc.player == null || mc.level == null) {
-      if (connected)
-        emit(Kind.DISCONNECT, "local", null, Confidence.OBSERVED, null, "world unavailable");
+      // Level/player availability is not connection identity (respawn and arena loading can
+      // temporarily clear both). Actual connection teardown is observed by Fabric below.
       connected = false;
       deadTarget = null;
       removedTarget = null;
@@ -473,7 +509,13 @@ public final class ClientCapture {
       return;
     }
     if (connected && lastLevel != mc.level) {
-      emit(Kind.DISCONNECT, "local", null, Confidence.OBSERVED, null, "world or dimension changed");
+      emit(
+          Kind.WORLD_CHANGE,
+          "local",
+          null,
+          Confidence.OBSERVED,
+          null,
+          "world or dimension changed; connection retained");
       connected = false;
       trackedTarget = null;
       deadTarget = null;
@@ -569,5 +611,14 @@ public final class ClientCapture {
       lastPosition = position;
     }
     KwamsterClient.recording.tick(now(), clientTick);
+  }
+
+  public static void disconnected() {
+    emit(Kind.DISCONNECT, "local", null, Confidence.OBSERVED, null, "play connection closed");
+    connected = false;
+    lastLevel = null;
+    trackedTarget = null;
+    lastPosition = null;
+    TIMING.reset();
   }
 }

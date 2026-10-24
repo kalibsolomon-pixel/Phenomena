@@ -1,0 +1,52 @@
+{
+  "host-policy": {
+    "nsPerOperation": [
+      24.941,
+      21.904,
+      21.678
+    ],
+    "operationsPerRun": 100000
+  },
+  "matching": {
+    "nsPerOperation": [
+      1222.185,
+      1155.496,
+      1069.339
+    ],
+    "operationsPerRun": 100000
+  },
+  "lifecycle": {
+    "nsPerOperation": [
+      32425.35,
+      24616.2,
+      28757.1
+    ],
+    "operationsPerRun": 2000
+  },
+  "diagnostics-off": {
+    "nsPerOperation": [
+      12.92,
+      15.85,
+      5.42
+    ],
+    "operationsPerRun": 10000
+  },
+  "diagnostics-on": {
+    "nsPerOperation": [
+      3492.01,
+      3279.49,
+      2923.93
+    ],
+    "operationsPerRun": 10000
+  },
+  "long-match": {
+    "rounds": 250,
+    "simulatedSeconds": 15501.0,
+    "htmlBytes": 2325857,
+    "events": 5000,
+    "nsPerEventIncludingRoundMatchingAndFinalization": 12960.88,
+    "recordings": 1,
+    "exportMillis": 277.0961
+  },
+  "limits": "One discarded warmup and three measured runs. Diagnostic serialization runs asynchronously; long-match timing includes rules, events, ticks and finalization. No live FPS claim."
+}

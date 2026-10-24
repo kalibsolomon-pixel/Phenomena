@@ -15,7 +15,15 @@ $env:JAVA_HOME = (Get-ChildItem .tools -Directory -Filter 'jdk-21*' | Select-Obj
 ./gradlew.bat runClientGameTest
 ~~~
 
-On another machine install Java 21 and set JAVA_HOME, then use the checked-in Gradle wrapper. The wrapper verifies its distribution checksum. Build output: build/libs/kwamster-0.1.5.jar. Install this jar and Fabric API 0.141.6+1.21.11 into a Fabric 1.21.11 client. Sources and integration-test mods are not required for installation.
+On another machine install Java 21 and set JAVA_HOME, then use the checked-in Gradle wrapper. The wrapper verifies its distribution checksum. Development build output: build/libs/kwamster-0.1.6.jar. This assignment does not install it into Aurora. Sources and integration-test mods are not required to use the mod.
+
+## Combat exchanges and accuracy (0.1.6)
+
+Fight recordings and combat measurement have separate lifecycles. A configured match keeps recording through arena loads, round resets and breaks. A combat exchange ends after **3 seconds** without an aimed attack, correlated outgoing hit or attributed incoming hit. Settings > Measurement changes this timeout independently of the generic fight-recording timeout. The Fight Flow exchange timeline shows active intervals and breaks within the full recording.
+
+Observed outgoing inputs within an inclusive **two-client-tick** window count as one attack, anchored to the first input: ticks 100/102 merge, tick 104 starts another attack. Raw observations remain available. Aimed opening misses count without requiring a previous hit; unrelated swings are excluded. Hits and shield blocks wait for bounded server-evidence correlation. Unresolved attempts and uncertain shields remain visible and stay in the conservative accuracy denominator. Accuracy is **confirmed hits / (unique eligible combat attempts − confirmed shield blocks)**. Historical recordings retain their original policy and outcomes.
+
+The [0.1.6 investigation and validation report](docs/0.1.6.md) traces the premature PVPHQ recordings to world-object replacement being reported as a disconnect, and documents additional MCPvP formats found in the full latest log. Browser interaction remains unverified because the browser tool rejected the local-file protocol; static report checks are separate evidence.
 
 ## Capture environments (0.1.5)
 
@@ -27,7 +35,7 @@ Overview shows the policy, environment/version, match/round state, diagnostics a
 
 Type **`/kwm start`**, fight for as long as you want, then **`/kwm end`**. These commands run locally without server permissions. End automatically saves a recording and an anonymous offline HTML report, with status in chat. Repeating Start or End does not create duplicate recordings. Overview also has Start/End and folder buttons; K is unchanged.
 
-Manual sessions can contain several opponents, exchanges and rounds. Automatic announcements and inactivity do not stop the session. Starting during an automatic fight carries its observations into the manual session. Disconnect/world change/shutdown saves an Interrupted session; five-second atomic checkpoints recover after a crash without resuming on another server. The session's overall outcome stays Unknown unless interrupted; individual exchanges retain their own evidence/results. Browser reports filter by participant and exchange, with dominance kept separate for each exchange.
+Manual sessions can contain several opponents, exchanges and rounds. Automatic announcements and inactivity do not stop the session. Starting during an automatic fight carries its observations into the manual session. Actual disconnect, server change or shutdown saves an Interrupted session; arena/dimension replacement keeps the parent active. Five-second atomic checkpoints recover after a crash without resuming on another server. The session's overall outcome stays Unknown unless interrupted; nested participant scopes retain their own evidence/results and combat intervals. Browser reports filter by participant and scope, with dominance kept separate for each participant scope.
 
 All six configured adapters have real-log and/or packet fixture coverage; individual formats and missing-signal limits remain explicit. Use `/kwm diagnostics on` while playing, `/kwm diagnostics off` afterwards, then `/kwm diagnostics export` for a local redacted fixture bundle. Capture is off by default and nothing is uploaded. Read the [server inventory and evidence procedure](docs/SERVER_COMPATIBILITY.md) and [0.1.4 lifecycle, privacy, recovery and validation notes](docs/0.1.4.md).
 

@@ -64,25 +64,63 @@ final class OffensePage implements KwamsterScreen.Page {
 
   private void accuracy(Content c, Aggregate a, String coverage) {
     c.heading("Attempts", coverage);
+    if (a.measurementFights > 0) {
+      c.text(
+          "Input breakdown: "
+              + a.measurementFights
+              + " of "
+              + a.fights
+              + " fights have 0.1.6 measurements.");
+      c.stats(
+          List.of(
+              new Stat(
+                  "Total swings",
+                  "" + a.totalInputs,
+                  "raw inputs",
+                  "All observed local outgoing attack inputs during recording."),
+              new Stat(
+                  "Unique attacks",
+                  "" + a.uniqueAttacks,
+                  a.deduplicatedAttacks + " duplicates",
+                  "Inclusive two-client-tick window anchored to the first input."),
+              new Stat(
+                  "Excluded swings",
+                  "" + a.excludedSwings,
+                  "outside combat",
+                  "No valid targeted opponent evidence; excluded from accuracy."),
+              new Stat(
+                  "Unresolved attacks",
+                  "" + (a.uncertain - a.uncertainShield),
+                  "included in denominator",
+                  "Outcome evidence is insufficient. These attacks are never labelled as misses."),
+              new Stat(
+                  "Uncertain shields",
+                  "" + a.uncertainShield,
+                  "included in uncertainty",
+                  "Blocking/facing state alone cannot prove a block; retained in accuracy"
+                      + " denominator.")));
+    }
     c.stats(
         List.of(
             stat("attempts", Integer.toString(a.attempts), "observed"),
             stat("hits", Integer.toString(a.hits), "confirmed source"),
-            stat("emptyMisses", Integer.toString(a.emptyMisses), "confirmed misses"),
+            stat("emptyMisses", Integer.toString(a.emptyMisses), "eligible misses"),
             stat("uncertain", Integer.toString(a.uncertain), "not proven misses"),
             stat("shieldBlocks", Integer.toString(a.shieldBlocks), "not in denominator"),
             stat("accuracy", percent(a.accuracy()), a.hits + " / " + a.accuracyDenominator())));
     c.block(
         StackBar.height(),
         new StackBar(
-            new String[] {"Hits", "Empty swings", "Uncertain", "Shield blocks"},
+            new String[] {"Hits", "Eligible misses", "Uncertain", "Shield blocks"},
             new int[] {a.hits, a.emptyMisses, a.uncertain, a.shieldBlocks},
             new int[] {Theme.SERIES_1, Theme.SERIES_2, Theme.DIM, Theme.SERIES_3}));
     c.note(
         "Accuracy = confirmed hits / (attempts minus confirmed shield blocks). A blocked attack met"
             + " the opponent's shield: it is neither a hit nor a miss. Estimated blocks and other"
             + " attacks without a server report stay uncertain and remain in the denominator. Empty"
-            + " swings are the only confirmed misses.");
+            + " aimed misses need opponent geometry; unrelated swings are excluded in 0.1.6."
+            + " Unresolved attempts remain in the denominator to avoid inflating accuracy."
+            + " Historical fights keep their original measurement policy.");
     contextNote(c, a, "shield observations (their blocked attacks stay uncertain)");
     c.heading("Accuracy per fight");
     c.block(
@@ -463,7 +501,7 @@ final class OffensePage implements KwamsterScreen.Page {
             "correlated hits",
             critical
                 ? "Observed: cooldown > 0.9, falling, airborne, not sprinting, climbing, swimming"
-                      + " or riding."
+                    + " or riding."
                 : "Observed: sprint state at the attack."));
     list.add(
         stat(critical ? "criticalRate" : "sprintRate", percent(rate), "of " + a.hits + " hits"));

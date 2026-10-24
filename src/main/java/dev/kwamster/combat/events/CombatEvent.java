@@ -52,6 +52,8 @@ public record CombatEvent(
     VELOCITY,
     DEATH,
     DISCONNECT,
+    /** Client level replaced while the connection remains alive; never a match end. */
+    WORLD_CHANGE,
     QUALITY,
     JUMP_RESET,
     /** Shield block or shield disable sound attributed to the local player or the opponent. */

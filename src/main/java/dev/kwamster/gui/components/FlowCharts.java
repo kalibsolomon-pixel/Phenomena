@@ -16,6 +16,28 @@ import net.minecraft.client.gui.GuiGraphics;
 public final class FlowCharts {
   private FlowCharts() {}
 
+  /** Filled intervals are measured combat; the empty background is recording time on breaks. */
+  public static final class ExchangeTimeline implements Blocks.Block {
+    private final double duration;
+    private final List<dev.kwamster.analytics.FightAnalytics.ActiveExchange> exchanges;
+
+    public ExchangeTimeline(
+        double duration, List<dev.kwamster.analytics.FightAnalytics.ActiveExchange> exchanges) {
+      this.duration = Math.max(.001, duration);
+      this.exchanges = exchanges;
+    }
+
+    public void render(GuiGraphics g, int x, int y, int w, int h, int mx, int my) {
+      g.fill(x, y + 5, x + w, y + 25, Theme.SURFACE_2);
+      for (var ex : exchanges) {
+        int from = x + (int) (w * Math.max(0, ex.start()) / duration);
+        int to = x + (int) (w * Math.min(duration, ex.end()) / duration);
+        g.fill(from, y + 5, Math.max(from + 1, to), y + 25, LOCAL);
+      }
+      timeAxis(g, x, y + 30, w, duration);
+    }
+  }
+
   public static final int LOCAL = Theme.SERIES_1, OPPONENT = Theme.SERIES_2, GOOD = Theme.SERIES_3;
   public static final int NEUTRAL = 0xFF8A949A, INCOMPLETE = 0xFF5E676D;
 

@@ -75,6 +75,21 @@ public final class ManualClientTest {
     ctx.runOnClient(
         mc -> check(KwamsterClient.recording.manual(), "GUI start did not share controller"));
     ctx.takeScreenshot("kwamster-manual-recording");
+    ctx.setScreen(() -> null);
+    world.getServer().runCommand("execute in minecraft:the_nether run tp @a 0.5 80 0.5");
+    ctx.waitTicks(30);
+    ctx.runOnClient(
+        mc ->
+            check(KwamsterClient.recording.manual(), "dimension replacement ended manual parent"));
+    world.getServer().runCommand("execute in minecraft:overworld run tp @a 0.5 -60 0.5");
+    ctx.waitTicks(30);
+    ctx.runOnClient(
+        mc ->
+            check(
+                KwamsterClient.recording.manual(),
+                "return to original dimension ended manual parent"));
+    ctx.setScreen(KwamsterScreen::new);
+    ctx.waitTicks(2);
     KwamsterGameTest.click(ctx, "End Manual Recording");
     ctx.runOnClient(
         mc -> check(!KwamsterClient.recording.manual(), "GUI end did not share controller"));

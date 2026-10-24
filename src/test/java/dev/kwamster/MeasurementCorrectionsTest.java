@@ -208,7 +208,9 @@ class MeasurementCorrectionsTest {
             "local-melee-source",
             1L));
     assertEquals(1, e.stats().hits);
-    assertEquals(1, e.stats().uncertain);
+    assertEquals(0, e.stats().uncertain);
+    assertEquals(1, e.stats().uniqueAttacks);
+    assertEquals(1, e.stats().deduplicatedAttacks);
   }
 
   @Test

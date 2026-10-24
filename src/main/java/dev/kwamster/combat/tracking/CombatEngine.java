@@ -63,6 +63,47 @@ public final class CombatEngine {
   private final ArrayList<FightRecord.Evaluation> evaluations = new ArrayList<>();
   private FightRecord.Policy policy;
   private Statistics stats = new Statistics();
+  private AttackObservations attacks;
+  private CombatExchange combatExchange;
+  private final AttackTiming canonicalTiming = new AttackTiming();
+
+  public boolean combatActive() {
+    return combatExchange != null && combatExchange.active();
+  }
+
+  public void heldWeapon(String key) {
+    canonicalTiming.held(key);
+  }
+
+  private void advanceExchange(long now) {
+    if (combatExchange == null) return;
+    combatExchange.timeout(config.exchangeInactivitySeconds);
+    stats.exchangeTimeoutSeconds = config.exchangeInactivitySeconds;
+    if (combatExchange.advance(now)) resetMeasurement();
+    stats.combatExchanges = combatExchange.closedIntervals();
+  }
+
+  private void resetMeasurement() {
+    stats.currentCombo = 0;
+    stats.momentum = 0;
+    // Literal attack-time hit intervals retain the existing whole-fight definition;
+    // weapon readiness timing below is independently segmented at the exchange boundary.
+    canonicalTiming.reset();
+  }
+
+  private void interaction(long now) {
+    advanceExchange(now);
+    if (combatExchange.interact(now)) resetMeasurement();
+    stats.combatExchanges = combatExchange.closedIntervals();
+  }
+
+  private void closeExchange(long now, String reason) {
+    if (combatExchange == null) return;
+    combatExchange.close(now, reason);
+    stats.combatExchanges = combatExchange.snapshot(now);
+    resetMeasurement();
+  }
+
   private String opponent, opponentLabel;
   private Long lastConfirmedTick, lastIncomingTick;
   private long start, lastActivity, lastSequence = -1, lastTime = -1, startEpoch, lastHitNanos = -1;
@@ -107,6 +148,8 @@ public final class CombatEngine {
   }
 
   public FightRecord checkpoint(long now) {
+    advanceExchange(now);
+    stats.combatExchanges = combatExchange.snapshot(now);
     return new FightRecord(
         FightRecord.SCHEMA,
         UUID.randomUUID().toString(),
@@ -712,6 +755,7 @@ public final class CombatEngine {
     lastSequence = e.sequence();
     lastTime = e.nanoTime();
     if (e.kind() == Kind.DISCONNECT) {
+      if (engaged() && events.size() < 10000) events.add(e);
       if (configuredMatch) {
         finalizeWith(
             e.nanoTime(),
@@ -754,7 +798,8 @@ public final class CombatEngine {
         prelude.addLast(e);
         return;
       }
-      if (e.kind() == Kind.ATTACK && e.target() != null) begin(e.target(), e.nanoTime());
+      if (AttackObservations.outgoing(e) && (e.target() != null || manualExchanges))
+        begin(Objects.toString(e.target(), "unattributed"), e.nanoTime());
       else if (e.kind() == Kind.DAMAGE_IN
           && e.actor() != null
           && (e.context() == null
@@ -763,6 +808,7 @@ public final class CombatEngine {
         begin(e.actor(), e.nanoTime());
       else return;
     }
+    advanceExchange(e.nanoTime());
     if (configuredMatch && opponentLabel == null) {
       String id =
           e.kind() == Kind.ATTACK ? e.target() : e.kind() == Kind.DAMAGE_IN ? e.actor() : null;
@@ -781,8 +827,11 @@ public final class CombatEngine {
         opponentLabel = labeler.apply(id);
       }
     }
-    if (e.kind() == Kind.ATTACK && e.target() != null && !e.target().equals(opponent)) {
-      if (roundStart >= 0 && !manualExchanges) return;
+    if (AttackObservations.outgoing(e)
+        && e.target() != null
+        && !e.target().equals(opponent)
+        && !attacks.duplicate(e)
+        && (roundStart < 0 || manualExchanges)) {
       if (manualExchanges) {
         finish(e.nanoTime(), Outcome.INTERRUPTED, "Manual exchange target changed");
         clearMatchContext();
@@ -830,7 +879,17 @@ public final class CombatEngine {
             || e.kind() == Kind.JUMP_INPUT
             || e.kind() == Kind.VELOCITY
             || e.kind() == Kind.HEALTH)) return;
-    if (events.size() >= 10000) {
+    if (events.size() >= 10000 && manualExchanges) {
+      // A manual parent owns these nested scopes. Never split an outgoing two-tick group,
+      // drop its boundary input, or cut off a still-pending bounded confirmation window.
+      expirePending(e.nanoTime());
+      if (pending.isEmpty() && !attacks.duplicate(e)) {
+        String target = opponent;
+        finish(e.nanoTime(), Outcome.INTERRUPTED, "Manual measurement event limit");
+        clearMatchContext();
+        begin(target, e.nanoTime());
+      }
+    } else if (events.size() >= 10000) {
       finalizeWith(
           e.nanoTime(),
           new Candidate(
@@ -846,6 +905,13 @@ public final class CombatEngine {
       return;
     }
     events.add(e);
+    AttackObservations.Observation observation = null;
+    if (e.kind() == Kind.ATTACK) {
+      if (!AttackObservations.outgoing(e)) return;
+      observation = attacks.observe(e, !configuredMatch || Objects.equals(e.target(), opponent));
+      e = observation.event();
+      if (!observation.newlyEligible()) return; // duplicates remain raw; no analytic side effects
+    }
     if (configuredMatch
         && roundClosed
         && ((e.kind() == Kind.ATTACK && e.target() != null && e.target().equals(opponent))
@@ -862,12 +928,25 @@ public final class CombatEngine {
     expirePending(e.nanoTime());
     switch (e.kind()) {
       case ATTACK -> {
-        boolean empty =
-            e.attack() == null || (e.detail() != null && e.detail().startsWith("empty-swing"));
-        stats.attempt(e.attack(), empty);
+        boolean empty = AttackObservations.empty(e);
+        if (e.attack().rayContact()) stats.contacts++;
+        interaction(e.nanoTime());
+        var measurement = e.attack().measurement();
+        if (measurement != null && e.clientTick() != null) {
+          var timing =
+              canonicalTiming.attack(
+                  measurement.weapon(),
+                  e.clientTick(),
+                  measurement.cooldownTicks(),
+                  config.timingToleranceTicks);
+          stats.attackTimings.put(e.sequence(), timing);
+          e = AttackObservations.withTiming(e, timing);
+        }
         if (!empty && e.context() != null && Boolean.TRUE.equals(e.context().targetBlocking()))
           stats.attacksIntoShield++;
-        if (e.attack() != null && !empty) {
+        if (e.attack() != null) {
+          long attackId = e.sequence();
+          pending.removeIf(p -> p.sequence() == attackId);
           if (pending.size() == 64) pending.removeFirst();
           pending.addLast(e);
         }
@@ -877,6 +956,7 @@ public final class CombatEngine {
       case HURT -> confirm(e);
       case DAMAGE_IN -> {
         if (e.attributedTo(opponent)) {
+          interaction(e.nanoTime());
           lastIncomingTick = e.clientTick();
           stats.incoming(e.nanoTime());
           updateJumpCandidates();
@@ -943,16 +1023,21 @@ public final class CombatEngine {
     while (!pending.isEmpty()
         && now - pending.peekFirst().nanoTime() > policy.correlationMillis() * 1e6) {
       var expired = pending.removeFirst();
-      var ctx = expired.context();
-      // Blocking, facing target and no damage report: possibly blocked, never confirmed.
-      if (ctx != null
-          && Boolean.TRUE.equals(ctx.targetBlocking())
-          && Boolean.TRUE.equals(ctx.targetFacing())) stats.estimatedShieldBlocks++;
+      attacks.expire(expired);
     }
   }
 
   private CombatEvent matchPending(String target) {
-    for (var p : pending) if (Objects.equals(p.target(), target)) return p;
+    return matchPending(target, false);
+  }
+
+  private CombatEvent matchPending(String target, boolean allowShieldUpgrade) {
+    for (var p : pending)
+      if (Objects.equals(p.target(), target)
+          && (!attacks.resolved(p.sequence())
+              || allowShieldUpgrade
+                  && "SHIELD_BLOCK".equals(stats.attackClassifications.get(p.sequence()))))
+        return p;
     return null;
   }
 
@@ -961,10 +1046,23 @@ public final class CombatEngine {
     if (e.confidence() != Confidence.CONFIRMED
         || !"local".equals(e.actor())
         || !"local-melee-source".equals(e.detail())) return;
-    CombatEvent match = matchPending(e.target());
+    CombatEvent match = matchPending(e.target(), true);
     if (match == null) return;
     pending.remove(match);
     lastConfirmedTick = e.clientTick();
+    interaction(e.nanoTime());
+    var old =
+        "SHIELD_BLOCK".equals(stats.attackClassifications.get(match.sequence()))
+            ? evaluations.stream()
+                .filter(ev -> ev.attackSequence() == match.sequence() && ev.shield())
+                .findFirst()
+                .orElse(null)
+            : null;
+    if (old != null) {
+      evaluations.remove(old);
+      if (FightRecord.Evaluation.SHIELD_DISABLE.equals(old.result())) stats.shieldDisables--;
+    }
+    attacks.classify(match.sequence(), AttackObservations.Classification.HIT);
     stats.hit(match.attack(), match.nanoTime(), e.nanoTime(), policy.comboSeconds());
     if (PerfectReach.eligible(
         match.attack(), policy.perfectReachTarget(), policy.perfectReachTolerance()))
@@ -1001,7 +1099,8 @@ public final class CombatEngine {
     if ("opponent".equals(ctx.subject())) {
       CombatEvent match = matchPending(opponent);
       if (match == null) return;
-      pending.remove(match);
+      interaction(e.nanoTime());
+      attacks.classify(match.sequence(), AttackObservations.Classification.SHIELD_BLOCK);
       stats.blocked();
       if (disable) stats.shieldDisables++;
       lastActivity = e.nanoTime();
@@ -1017,6 +1116,8 @@ public final class CombatEngine {
                   ? FightRecord.Evaluation.SHIELD_DISABLE
                   : FightRecord.Evaluation.SHIELD_BLOCK));
     } else if ("local".equals(ctx.subject())) {
+      // Sound locality does not identify an attacker. Keep defensive evidence without
+      // opening/extending an offensive exchange on this signal alone.
       if (disable) stats.localShieldDisabled++;
       else stats.localShieldBlocks++;
       lastActivity = e.nanoTime();
@@ -1058,6 +1159,10 @@ public final class CombatEngine {
     start = lastActivity = time;
     startEpoch = System.currentTimeMillis();
     stats = new Statistics();
+    attacks = new AttackObservations(stats);
+    combatExchange = new CombatExchange(config.exchangeInactivitySeconds);
+    stats.exchangeTimeoutSeconds = config.exchangeInactivitySeconds;
+    canonicalTiming.reset();
     events.clear();
     for (var e : prelude) if (time - e.nanoTime() <= 250_000_000L) events.add(e);
     prelude.clear();
@@ -1079,6 +1184,8 @@ public final class CombatEngine {
 
   public void tick(long now) {
     if (!engaged()) return;
+    advanceExchange(now);
+    expirePending(now);
     if (stats.lastHit > 0 && now - stats.lastHit > policy.comboSeconds() * 1e9)
       stats.currentCombo = 0;
     if (configuredMatch && !manualExchanges) {
@@ -1190,6 +1297,8 @@ public final class CombatEngine {
       }
       return;
     }
+    advanceExchange(now);
+    closeExchange(now, "RECORDING_END");
     stats.currentCombo = 0;
     expirePending(Long.MAX_VALUE);
     stats.jumpCandidates =
@@ -1202,11 +1311,12 @@ public final class CombatEngine {
                 .count();
     var combos =
         Combos.analyze(
-            events,
+            AttackObservations.canonicalEvents(events, stats),
             evaluations,
             opponent,
             policy.comboSeconds(),
-            configuredMatch ? configuredRounds(now) : List.of());
+            configuredMatch ? configuredRounds(now) : List.of(),
+            stats.combatExchanges);
     stats.longestCombo = combos.longest(Combos.Side.LOCAL);
     stats.comboCount = combos.combos(Combos.Side.LOCAL).size();
     stats.comboHits = combos.comboHits(Combos.Side.LOCAL);
@@ -1328,8 +1438,10 @@ public final class CombatEngine {
           return;
         }
         // An explicit new named match is evidence of abandonment, never a generic timeout.
-        queuedStart = m;
-        queuedAt = now;
+        if (queuedStart == null || !Objects.equals(queuedStart.opponent(), m.opponent())) {
+          queuedStart = m;
+          queuedAt = now;
+        }
         addEvidence(m, now, true);
         decision = "Accepted next named match; waiting briefly for previous result";
         return;
@@ -1356,6 +1468,11 @@ public final class CombatEngine {
     }
     if (!engaged() || !configuredMatch) return;
     if (m.kind() == Announcements.Kind.END) {
+      if ((m.winner() != null || m.loser() != null) && !namesParticipant(m, local)) {
+        addEvidence(m, now, false);
+        decision = "Rejected: match end names a different participant";
+        return;
+      }
       matchEndMarker = now;
       addEvidence(m, now, true);
       decision = "Accepted explicit match end; awaiting result block";
@@ -1413,6 +1530,7 @@ public final class CombatEngine {
                 m.rule(),
                 Confidence.CONFIRMED));
         roundClosed = true;
+        closeExchange(now, "ROUND_BOUNDARY");
         // Reset exchange correlation across rounds; retained hits keep their original IDs.
         pending.clear();
         stats.currentCombo = 0;
@@ -1437,6 +1555,7 @@ public final class CombatEngine {
   }
 
   private void openConfiguredRound(int number, long now) {
+    closeExchange(now, "ROUND_BOUNDARY");
     if (!rounds.isEmpty() && !roundClosed) {
       var r = rounds.getLast();
       rounds.set(

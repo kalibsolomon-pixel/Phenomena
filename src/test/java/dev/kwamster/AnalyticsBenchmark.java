@@ -80,7 +80,7 @@ public final class AnalyticsBenchmark {
             null,
             "local-melee-source"));
     recording.finish(20_000_000, FightRecord.Outcome.UNKNOWN, "recording");
-    Path out = Path.of("build/performance");
+    Path out = Path.of(args.length > 0 ? args[0] : "build/performance");
     Files.createDirectories(out);
     Path tmp = Files.createTempDirectory(out, "storage-benchmark-");
     List<String> errors = new ArrayList<>();
@@ -99,9 +99,19 @@ public final class AnalyticsBenchmark {
     for (int f = 0; f < 50; f++) {
       for (int i = 0; i < 500; i++) {
         t2 += 700_000_000;
-        maker.accept(new CombatEvent(++s2, t2, Kind.ATTACK, "local", "opponent" + f, Confidence.OBSERVED, a, ""));
-        maker.accept(new CombatEvent(++s2, t2 + 10_000_000, Kind.HURT, "local", "opponent" + f,
-            Confidence.CONFIRMED, null, "local-melee-source"));
+        maker.accept(
+            new CombatEvent(
+                ++s2, t2, Kind.ATTACK, "local", "opponent" + f, Confidence.OBSERVED, a, ""));
+        maker.accept(
+            new CombatEvent(
+                ++s2,
+                t2 + 10_000_000,
+                Kind.HURT,
+                "local",
+                "opponent" + f,
+                Confidence.CONFIRMED,
+                null,
+                "local-melee-source"));
       }
       maker.finish(t2 + 20_000_000, FightRecord.Outcome.UNKNOWN, "benchmark");
     }
@@ -110,7 +120,8 @@ public final class AnalyticsBenchmark {
     double best = Double.MAX_VALUE;
     for (int rep = 0; rep < 7; rep++) {
       long t0 = System.nanoTime();
-      var agg = new dev.kwamster.analytics.Aggregate(history, dev.kwamster.analytics.FightAnalytics::of);
+      var agg =
+          new dev.kwamster.analytics.Aggregate(history, dev.kwamster.analytics.FightAnalytics::of);
       if (agg.hitSamples.size() != 25_000) throw new IllegalStateException("unexpected samples");
       best = Math.min(best, (System.nanoTime() - t0) / 1e6);
     }
@@ -118,7 +129,8 @@ public final class AnalyticsBenchmark {
     var big = timelines.getFirst();
     Path report = Files.createTempDirectory(out, "report-benchmark-");
     long r0 = System.nanoTime();
-    dev.kwamster.sharing.ReportExporter.export(report, big, dev.kwamster.sharing.ReportExporter.Options.DEFAULT);
+    dev.kwamster.sharing.ReportExporter.export(
+        report, big, dev.kwamster.sharing.ReportExporter.Options.DEFAULT);
     result.put("reportExport1000EventsMs", (System.nanoTime() - r0) / 1e6);
     result.put("reportExport1000EventsBytes", Files.size(report.resolve("index.html")));
 
@@ -144,25 +156,107 @@ public final class AnalyticsBenchmark {
         CombatEvent e =
             switch (k) {
               case 0, 4, 8 ->
-                  new CombatEvent(++rs, rt, Kind.ATTACK, "local", "B", Confidence.OBSERVED, a, "",
-                      tick, Context.target(k == 8, k == 8));
+                  new CombatEvent(
+                      ++rs,
+                      rt,
+                      Kind.ATTACK,
+                      "local",
+                      "B",
+                      Confidence.OBSERVED,
+                      a,
+                      "",
+                      tick,
+                      Context.target(k == 8, k == 8));
               case 1, 5 ->
-                  new CombatEvent(++rs, rt, Kind.HURT, "local", "B", Confidence.CONFIRMED, null,
-                      "local-melee-source", tick, null);
+                  new CombatEvent(
+                      ++rs,
+                      rt,
+                      Kind.HURT,
+                      "local",
+                      "B",
+                      Confidence.CONFIRMED,
+                      null,
+                      "local-melee-source",
+                      tick,
+                      null);
               case 2 ->
-                  new CombatEvent(++rs, rt, Kind.DAMAGE_IN, "B", "local", Confidence.CONFIRMED, null,
-                      "server damage event", tick,
-                      Context.incoming(Attribution.OPPONENT_DIRECT, "minecraft:player_attack", true, true, false, true));
-              case 3 -> new CombatEvent(++rs, rt, Kind.VELOCITY, "local", null, Confidence.OBSERVED, null,
-                  "", tick, Context.velocity(.3, .36, .1, true));
-              case 6 -> new CombatEvent(++rs, rt, Kind.HEALTH, "local", null, Confidence.OBSERVED, null,
-                  "", tick, Context.health(20 - (i % 7), 0));
-              case 7 -> new CombatEvent(++rs, rt, Kind.JUMP, "local", null, Confidence.OBSERVED, null,
-                  "", tick, Context.jump(false));
-              case 9 -> new CombatEvent(++rs, rt, Kind.SHIELD, null, null, Confidence.OBSERVED, null,
-                  "", tick, Context.shield("BLOCK", "opponent", .7));
-              default -> new CombatEvent(++rs, rt, Kind.MOTION, "local", null, Confidence.OBSERVED, null,
-                  "vx=0.1;vy=0;vz=0.2;ground=true", tick, null);
+                  new CombatEvent(
+                      ++rs,
+                      rt,
+                      Kind.DAMAGE_IN,
+                      "B",
+                      "local",
+                      Confidence.CONFIRMED,
+                      null,
+                      "server damage event",
+                      tick,
+                      Context.incoming(
+                          Attribution.OPPONENT_DIRECT,
+                          "minecraft:player_attack",
+                          true,
+                          true,
+                          false,
+                          true));
+              case 3 ->
+                  new CombatEvent(
+                      ++rs,
+                      rt,
+                      Kind.VELOCITY,
+                      "local",
+                      null,
+                      Confidence.OBSERVED,
+                      null,
+                      "",
+                      tick,
+                      Context.velocity(.3, .36, .1, true));
+              case 6 ->
+                  new CombatEvent(
+                      ++rs,
+                      rt,
+                      Kind.HEALTH,
+                      "local",
+                      null,
+                      Confidence.OBSERVED,
+                      null,
+                      "",
+                      tick,
+                      Context.health(20 - (i % 7), 0));
+              case 7 ->
+                  new CombatEvent(
+                      ++rs,
+                      rt,
+                      Kind.JUMP,
+                      "local",
+                      null,
+                      Confidence.OBSERVED,
+                      null,
+                      "",
+                      tick,
+                      Context.jump(false));
+              case 9 ->
+                  new CombatEvent(
+                      ++rs,
+                      rt,
+                      Kind.SHIELD,
+                      null,
+                      null,
+                      Confidence.OBSERVED,
+                      null,
+                      "",
+                      tick,
+                      Context.shield("BLOCK", "opponent", .7));
+              default ->
+                  new CombatEvent(
+                      ++rs,
+                      rt,
+                      Kind.MOTION,
+                      "local",
+                      null,
+                      Confidence.OBSERVED,
+                      null,
+                      "vx=0.1;vy=0;vz=0.2;ground=true",
+                      tick,
+                      null);
             };
         richEngine.accept(e);
         richEvents++;
@@ -186,13 +280,75 @@ public final class AnalyticsBenchmark {
       int k = (int) (cs % 6);
       capEngine.accept(
           switch (k) {
-            case 0 -> new CombatEvent(++cs, ct, Kind.ATTACK, "local", "B", Confidence.OBSERVED, a, "", tick, null);
-            case 1 -> new CombatEvent(++cs, ct, Kind.HURT, "local", "B", Confidence.CONFIRMED, null, "local-melee-source", tick, null);
-            case 2 -> new CombatEvent(++cs, ct, Kind.DAMAGE_IN, "B", "local", Confidence.CONFIRMED, null, "", tick,
-                Context.incoming(Attribution.OPPONENT_DIRECT, "minecraft:player_attack", true, true, false, true));
-            case 3 -> new CombatEvent(++cs, ct, Kind.HEALTH, "local", null, Confidence.OBSERVED, null, "", tick, Context.health(10 + cs % 9, 0));
-            case 4 -> new CombatEvent(++cs, ct, Kind.VELOCITY, "local", null, Confidence.OBSERVED, null, "", tick, Context.velocity(.3, .3, .1, true));
-            default -> new CombatEvent(++cs, ct, Kind.JUMP, "local", null, Confidence.OBSERVED, null, "", tick, Context.jump(false));
+            case 0 ->
+                new CombatEvent(
+                    ++cs, ct, Kind.ATTACK, "local", "B", Confidence.OBSERVED, a, "", tick, null);
+            case 1 ->
+                new CombatEvent(
+                    ++cs,
+                    ct,
+                    Kind.HURT,
+                    "local",
+                    "B",
+                    Confidence.CONFIRMED,
+                    null,
+                    "local-melee-source",
+                    tick,
+                    null);
+            case 2 ->
+                new CombatEvent(
+                    ++cs,
+                    ct,
+                    Kind.DAMAGE_IN,
+                    "B",
+                    "local",
+                    Confidence.CONFIRMED,
+                    null,
+                    "",
+                    tick,
+                    Context.incoming(
+                        Attribution.OPPONENT_DIRECT,
+                        "minecraft:player_attack",
+                        true,
+                        true,
+                        false,
+                        true));
+            case 3 ->
+                new CombatEvent(
+                    ++cs,
+                    ct,
+                    Kind.HEALTH,
+                    "local",
+                    null,
+                    Confidence.OBSERVED,
+                    null,
+                    "",
+                    tick,
+                    Context.health(10 + cs % 9, 0));
+            case 4 ->
+                new CombatEvent(
+                    ++cs,
+                    ct,
+                    Kind.VELOCITY,
+                    "local",
+                    null,
+                    Confidence.OBSERVED,
+                    null,
+                    "",
+                    tick,
+                    Context.velocity(.3, .3, .1, true));
+            default ->
+                new CombatEvent(
+                    ++cs,
+                    ct,
+                    Kind.JUMP,
+                    "local",
+                    null,
+                    Confidence.OBSERVED,
+                    null,
+                    "",
+                    tick,
+                    Context.jump(false));
           });
       if (cs > 20000) capEngine.finish(ct, FightRecord.Outcome.UNKNOWN, "benchmark");
     }
@@ -208,13 +364,15 @@ public final class AnalyticsBenchmark {
     result.put("fightAnalytics10kEventsMs", bestAnalytics);
     Path capReport = Files.createTempDirectory(out, "report-benchmark-capped-");
     long c0 = System.nanoTime();
-    dev.kwamster.sharing.ReportExporter.export(capReport, worst, dev.kwamster.sharing.ReportExporter.Options.DEFAULT);
+    dev.kwamster.sharing.ReportExporter.export(
+        capReport, worst, dev.kwamster.sharing.ReportExporter.Options.DEFAULT);
     result.put("reportExport10kEventsMs", (System.nanoTime() - c0) / 1e6);
     result.put("reportExport10kEventsBytes", Files.size(capReport.resolve("index.html")));
 
     // Dashboard aggregate with 0.1.3 context-rich timelines at the in-memory caps.
     List<FightRecord> richHistory = new ArrayList<>(rich);
-    while (richHistory.size() < 1000) richHistory.add(rich.get(richHistory.size() % rich.size()).summaryOnly());
+    while (richHistory.size() < 1000)
+      richHistory.add(rich.get(richHistory.size() % rich.size()).summaryOnly());
     double bestRich = Double.MAX_VALUE;
     for (int rep = 0; rep < 7; rep++) {
       long t0 = System.nanoTime();

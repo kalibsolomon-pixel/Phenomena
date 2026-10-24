@@ -80,7 +80,7 @@ public final class Announcements {
   }
 
   private static final String NAME = "([A-Za-z0-9_]{1,16})";
-  private static final String SYM = "[^A-Za-z0-9]*";
+  private static final String SYM = "[^A-Za-z0-9_]*";
   // ---- Minemen (minemen.net, minemen.club)
   private static final Pattern MM_PAIR =
       Pattern.compile(
@@ -434,8 +434,12 @@ public final class Announcements {
         Pattern.compile(
             "^—+ ⚔ Match Complete ⚔ 🗡 "
                 + NAME
-                + " won the round! \\((?:0 - 1|1 - 0)\\) (?:🛡 \\d+ ᴀʀᴍᴏʀ ᴀᴠɢ\\. \\| )?❤ \\d+/20 ʜᴘ"
-                + " —+$");
+                + " won the round! \\((?:0 - 1|1 - 0|2 - 0)\\) (?:(?:🛡 \\d+ ᴀʀᴍᴏʀ ᴀᴠɢ\\. \\| )?❤"
+                + " \\d+(?:\\.\\d+)?/20 ʜᴘ|⚗ \\d+ xᴘ \\| 🛡 \\d+ ᴀʀᴍᴏʀ ᴀᴠɢ\\.) —+$");
+    private static final Pattern MCP_ROUND =
+        Pattern.compile(
+            "^—+ 🗡 " + NAME + " won the round! \\(1 - 0\\) ❤ \\d+(?:\\.\\d+)?/20 ʜᴘ —+$");
+    private static final Pattern MCP_RESIGNED = Pattern.compile("^" + NAME + " resigned$");
 
     public boolean supports(String host) {
       return metadata.hosts().contains(normalizeHost(host));
@@ -482,6 +486,30 @@ public final class Announcements {
                   null,
                   null,
                   "complete",
+                  original,
+                  origin,
+                  Scope.MATCH,
+                  null));
+        if (origin == Origin.SYSTEM && (m = MCP_ROUND.matcher(text)).matches())
+          return Optional.of(
+              signal(
+                  Kind.RESULT,
+                  m.group(1),
+                  null,
+                  null,
+                  "round-winner",
+                  original,
+                  origin,
+                  Scope.ROUND,
+                  null));
+        if (origin == Origin.SYSTEM && (m = MCP_RESIGNED.matcher(text)).matches())
+          return Optional.of(
+              signal(
+                  Kind.END,
+                  null,
+                  m.group(1),
+                  null,
+                  "resigned",
                   original,
                   origin,
                   Scope.MATCH,

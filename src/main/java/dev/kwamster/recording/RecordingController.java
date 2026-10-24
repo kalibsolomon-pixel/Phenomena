@@ -145,18 +145,12 @@ public final class RecordingController {
   public void context(String host, String player, String dimension, long now, long tick) {
     host = Announcements.normalizeHost(host);
     boolean changed =
-        server != null
-            && (!Objects.equals(host, server)
-                || !Objects.equals(player, local)
-                || !Objects.equals(dimension, world));
+        server != null && (!Objects.equals(host, server) || !Objects.equals(player, local));
     if (!manual() && changed && engine.engaged()) {
       engine.finish(now, FightRecord.Outcome.INTERRUPTED, "Connection context changed");
       engine.clearMatchContext();
     }
-    if (manual()
-        && (!Objects.equals(host, server)
-            || !Objects.equals(player, local)
-            || !Objects.equals(dimension, world)))
+    if (manual() && (!Objects.equals(host, server) || !Objects.equals(player, local)))
       terminate(now, tick, "Server or world changed", true);
     if (!manual()) {
       server = host;
@@ -243,11 +237,13 @@ public final class RecordingController {
     }
     for (var e : events)
       if (!counted.contains(e.sequence())) {
-        if (e.kind() == Kind.ATTACK)
-          stats.attempt(
-              e.attack(),
-              e.attack() == null || (e.detail() != null && e.detail().startsWith("empty-swing")));
-        else if (e.kind() == Kind.DAMAGE_IN) {
+        if (AttackObservations.outgoing(e)) {
+          // Inputs captured while the nested engine was idle are still classified centrally.
+          // They do not become automatic misses in the manual parent.
+          var orphan = new Statistics();
+          new AttackObservations(orphan).observe(e);
+          stats.add(orphan);
+        } else if (e.kind() == Kind.DAMAGE_IN) {
           if (e.actor() == null) stats.unattributedIncoming++;
           else stats.thirdPartyIncoming++;
         }

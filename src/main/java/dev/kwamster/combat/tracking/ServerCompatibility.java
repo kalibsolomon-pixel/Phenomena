@@ -65,10 +65,11 @@ public final class ServerCompatibility {
           "mcpvp",
           "MCPvP",
           List.of("mcpvp.club"),
-          List.of("Observed single-round duels"),
-          false,
+          List.of("Observed single-round and first-to-two duels", "Observed XP/armor result block"),
+          true,
           "Start requires observed FIGHT title; opponent may remain unknown until combat. Match"
-              + " Complete supports observed 1-0/0-1 only.");
+              + " Complete supports observed 1-0/0-1/2-0 and health or XP/armor blocks. Resignation"
+              + " is an explicit end with unavailable result; never guessed as a win.");
   public static final Adapter CATPVP =
       observed(
           "catpvp",
@@ -107,7 +108,7 @@ public final class ServerCompatibility {
       String limitations) {
     return new Adapter(
         id,
-        1,
+        id.equals("mcpvp") ? 2 : 1,
         name,
         hosts,
         "REAL_LOG_AND_PACKET_FIXTURES",

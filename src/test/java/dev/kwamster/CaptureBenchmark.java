@@ -16,7 +16,7 @@ public final class CaptureBenchmark {
   private static volatile Object blackhole;
 
   public static void main(String[] args) throws Exception {
-    Path root = Path.of("build/performance/v015-capture");
+    Path root = Path.of(args.length > 0 ? args[0] : "build/performance/v015-capture");
     Files.createDirectories(root);
     Map<String, Object> result = new LinkedHashMap<>();
     String start = "Casual Match ● Map: Village ● Opponent: PlayerB ● Ping: 40 ms";

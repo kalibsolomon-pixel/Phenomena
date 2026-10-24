@@ -42,12 +42,12 @@ class DiagnosticCaptureTest {
         var r =
             AtomicJson.GSON.fromJson(
                 Files.readString(paths.findFirst().orElseThrow()), Diagnostics.Report.class);
-        assertEquals(2, r.schema());
+        assertEquals(3, r.schema());
         assertEquals(1, r.entries().size());
         var e = r.entries().getFirst();
         assertEquals("DISABLED", e.capturePolicy());
         assertEquals("mcpvp", e.adapterId());
-        assertEquals(1, e.adapterVersion());
+        assertEquals(2, e.adapterVersion());
         assertTrue(e.decision().contains("disabled"));
       }
     }

@@ -149,6 +149,7 @@ public final class KwamsterGameTest implements FabricClientGameTest {
               aimAt(mc, husk(mc), offsets[k][0] * .3, offsets[k][1]);
               mc.player.setSprinting(true);
               attackNow(mc);
+              attackNow(mc); // two actual vanilla observations in one client tick
               mc.player.setSprinting(false);
             });
       } else {
@@ -236,9 +237,15 @@ public final class KwamsterGameTest implements FabricClientGameTest {
                 "expected 4 fights, got " + KwamsterClient.history.size());
             int hits = KwamsterClient.history.stream().mapToInt(f -> f.statistics().hits).sum();
             int empty =
-                KwamsterClient.history.stream().mapToInt(f -> f.statistics().emptyMisses).sum();
+                KwamsterClient.history.stream().mapToInt(f -> f.statistics().excludedSwings).sum();
             check(hits >= 12, "too few correlated hits: " + hits);
-            check(empty >= 4, "empty swings not captured: " + empty);
+            check(
+                KwamsterClient.history.stream()
+                        .mapToInt(f -> f.statistics().deduplicatedAttacks)
+                        .sum()
+                    >= 1,
+                "real same-tick attack calls were not deduplicated");
+            check(empty >= 4, "unrelated swings were not excluded: " + empty);
             var all = KwamsterClient.history;
             check(
                 all.stream().mapToInt(f -> f.statistics().uncertain).sum() >= 1,
@@ -254,7 +261,7 @@ public final class KwamsterGameTest implements FabricClientGameTest {
                 "server critical-hit animation correlated with a confirmed hit");
             check(
                 all.stream().allMatch(f -> f.schemaVersion() == FightRecord.SCHEMA),
-                "new recordings use schema 3");
+                "new recordings use current schema");
             check(
                 KwamsterClient.history.stream().allMatch(f -> f.statistics().reachCount > 0),
                 "reach recorded");

@@ -1,0 +1,23 @@
+{
+  "runs": [
+    {
+      "exchangeInteractionOrTickNsPerOperation": 4.9335,
+      "classificationUpdateNsPerOperation": 11.5635,
+      "run": 1,
+      "dedupIncludingClassificationNsPerRawInput": 169.202
+    },
+    {
+      "exchangeInteractionOrTickNsPerOperation": 1.0825,
+      "classificationUpdateNsPerOperation": 14.3815,
+      "run": 2,
+      "dedupIncludingClassificationNsPerRawInput": 159.551
+    },
+    {
+      "exchangeInteractionOrTickNsPerOperation": 1.0595,
+      "classificationUpdateNsPerOperation": 9.028,
+      "run": 3,
+      "dedupIncludingClassificationNsPerRawInput": 63.0525
+    }
+  ],
+  "limits": "One discarded warmup; three synthetic runs. Dedup includes map/classification work, not immutable snapshot serialization. No per-frame entity scans or live FPS claim."
+}

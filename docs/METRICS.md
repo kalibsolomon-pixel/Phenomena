@@ -1,5 +1,15 @@
 # Measurement definitions and confidence
 
+## 0.1.6 current definitions (supersede earlier attack/exchange definitions)
+
+The [0.1.6 report](0.1.6.md) defines the complete partition and pipeline. Total swings are observed local outgoing inputs; unique attacks consolidate the inclusive first-input-anchored two-tick window. Duplicate inputs and excluded noncombat swings do not contribute to accuracy. Eligible aimed empty swings wait for bounded hit correlation before becoming inferred misses; opening misses do not require a prior hit. Direct entity calls with insufficient outcome evidence stay unresolved. Confirmed shield correlations are separate; blocking/facing alone is uncertain.
+
+**Combat accuracy = confirmed hits / (eligible unique attempts − confirmed shield blocks).** Other unresolved attempts and uncertain shields remain in the denominator. Confirmed shield attribution itself is inferred from locality/correlation, not a packet naming the attacker. No sample is unavailable, not proof of 0% accuracy. Historical recordings retain the measurement policy under which they were saved.
+
+Combat-active time is the sum of independently stored CombatExchange intervals, ending after the configurable 3-second default inactivity threshold or a round/recording boundary. It differs from both overall recording duration and dominance's sufficient-evidence time. Unique aimed attempts, correlated hits and attributed incoming hits can extend an exchange; unrelated swings/environmental damage/holding a weapon cannot. Exchange boundaries segment combos and reset momentum/dominance without ending the fight. Unanswered hit streaks retain their distinct gap-ignoring definition. Tick-based deduplication and monotonic exchange time are independent; see CONFIGURATION.md for lag/pause semantics and measurement limitations.
+
+Average hit interval retains its literal existing definition: attack-time gaps between consecutive confirmed hits, including breaks. It is distinct from weapon-readiness timing, which opens a fresh ungraded sequence at each exchange. Stored interval sums and derived graph data use the same literal gaps. An input exactly on a shared exchange endpoint belongs to the following interval, avoiding misplaced per-exchange hit counts.
+
 | Metric | Confidence | Meaning and limitations |
 | --- | --- | --- |
 | Attack attempt | Observed | Local entity attack call, or actual empty swing during an active engagement. Does not prove server acceptance. |

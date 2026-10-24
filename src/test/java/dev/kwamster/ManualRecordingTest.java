@@ -215,12 +215,14 @@ class ManualRecordingTest {
   }
 
   @Test
-  void dimensionChangeDoesNotResumeElsewhere() {
+  void dimensionChangeKeepsManualParentUntilExplicitEnd() {
     start();
     hit(1, "B");
     controller.context("minemen.club", "PlayerA", "other", Sim.ns(2), 60);
-    assertFalse(controller.manual());
-    assertEquals(FightRecord.Outcome.INTERRUPTED, saved.getFirst().outcome());
+    assertTrue(controller.manual());
+    assertTrue(saved.isEmpty());
+    controller.end(Sim.ns(3), 80);
+    assertEquals(FightRecord.Outcome.UNKNOWN, saved.getFirst().outcome());
   }
 
   @Test

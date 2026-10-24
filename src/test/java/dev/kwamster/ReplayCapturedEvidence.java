@@ -14,9 +14,11 @@ public final class ReplayCapturedEvidence {
   record Input(long at, CombatEvent event, Announcements.Message message) {}
 
   public static void main(String[] args) throws Exception {
-    Path root = Path.of(".local-diagnostics/0.1.5");
+    Path root = Path.of(args.length > 0 ? args[0] : ".local-diagnostics/0.1.5");
+    Path output = args.length > 1 ? Path.of(args[1]) : root;
     var fixtures =
-        JsonParser.parseString(Files.readString(root.resolve("captured-replay.json")))
+        JsonParser.parseString(
+                Files.readString(root.resolve(args.length > 2 ? args[2] : "captured-replay.json")))
             .getAsJsonArray();
     List<Map<String, Object>> results = new ArrayList<>();
     int passed = 0, events = 0;
@@ -55,18 +57,33 @@ public final class ReplayCapturedEvidence {
         if (input.event() != null) engine.accept(input.event());
         else engine.announcement(host, local, input.message(), input.at());
       }
-      boolean ok =
-          out.size() == 1
-              && out.getFirst().outcome().name().equals(f.get("ownerResult").getAsString());
-      if (ok) passed++;
+      String expected =
+          f.get(f.has("expectedResult") ? "expectedResult" : "ownerResult").getAsString();
+      if (f.has("finalTick")) engine.tick(f.get("finalTick").getAsLong());
+      boolean ok = out.size() == 1 && out.getFirst().outcome().name().equals(expected);
+      if (ok) {
+        passed++;
+        var record = out.getFirst();
+        var analytics = dev.kwamster.analytics.FightAnalytics.of(record);
+        if (analytics.hits.size() != record.statistics().hits)
+          throw new AssertionError("Canonical hit summary/graph disagreement");
+        dev.kwamster.sharing.ReportExporter.export(
+            output
+                .resolve(args.length > 2 ? "latest-replay-reports" : "captured-replay-reports")
+                .resolve(
+                    String.format(
+                        java.util.Locale.ROOT, "match-%02d-%s", f.get("match").getAsInt(), host)),
+            record,
+            dev.kwamster.sharing.ReportExporter.Options.DEFAULT);
+      }
       results.add(
           Map.of(
               "server",
               host,
               "match",
               f.get("match").getAsInt(),
-              "ownerResult",
-              f.get("ownerResult").getAsString(),
+              "expectedResult",
+              expected,
               "recordings",
               out.size(),
               "results",
@@ -77,13 +94,14 @@ public final class ReplayCapturedEvidence {
               ok));
     }
     AtomicJson.write(
-        root.resolve("captured-replay-result.json"),
+        output.resolve(
+            args.length > 2 ? "latest-replay-result.json" : "captured-replay-result.json"),
         Map.of(
             "matches",
             fixtures.size(),
             "passed",
             passed,
-            "actualEvents",
+            args.length > 2 ? "availableAndMappedEvents" : "actualEvents",
             events,
             "results",
             results,
@@ -98,7 +116,9 @@ public final class ReplayCapturedEvidence {
             + fixtures.size()
             + " matches; "
             + events
-            + " original events");
+            + (args.length > 2
+                ? " available/mapped input events (see fixture limits)"
+                : " original events"));
     if (passed != fixtures.size()) throw new AssertionError(AtomicJson.GSON.toJson(results));
   }
 }

@@ -173,7 +173,7 @@ final class SettingsPage implements KwamsterScreen.Page {
 
   private void measurement(Content c) {
     var cfg = c();
-    c.heading("Fight detection", "frozen into each new fight");
+    c.heading("Fight detection", "recording and combat measurement have separate timeouts");
     c.setting(
         "Inactivity timeout",
         "Applies only to generic combat capture on unconfigured servers.",
@@ -185,6 +185,17 @@ final class SettingsPage implements KwamsterScreen.Page {
             .5,
             v -> Format.number(v, 1) + " s",
             v -> cfg.inactivitySeconds = v));
+    c.setting(
+        "Combat-exchange timeout",
+        "Ends combat measurement after no qualifying interaction. The fight recording continues.",
+        slider(
+            "Combat-exchange timeout",
+            cfg.exchangeInactivitySeconds,
+            .5,
+            30,
+            .5,
+            v -> Format.number(v, 1) + " s",
+            v -> cfg.exchangeInactivitySeconds = v));
     c.setting(
         "Damage correlation window",
         "How long after an attack a server damage report may confirm it.",

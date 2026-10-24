@@ -3,6 +3,51 @@ package dev.kwamster.combat.metrics;
 import dev.kwamster.combat.events.CombatEvent.Attack;
 
 public final class Statistics {
+  private static final com.google.gson.Gson SUMMARY_JSON =
+      new com.google.gson.GsonBuilder()
+          .addSerializationExclusionStrategy(
+              new com.google.gson.ExclusionStrategy() {
+                public boolean shouldSkipClass(Class<?> c) {
+                  return false;
+                }
+
+                public boolean shouldSkipField(com.google.gson.FieldAttributes f) {
+                  return f.getDeclaringClass() == Statistics.class
+                      && java.util.Set.of(
+                              "attackCanonicalIds",
+                              "attackSamples",
+                              "attackClassifications",
+                              "attackTimings",
+                              "combatExchanges")
+                          .contains(f.getName());
+                }
+              })
+          .create();
+
+  /** Timeline metadata belongs in the lazy-loaded full recording, never every history summary. */
+  public Statistics summaryCopy() {
+    return dev.kwamster.recording.storage.AtomicJson.GSON.fromJson(
+        SUMMARY_JSON.toJson(this), Statistics.class);
+  }
+
+  /** Additive frozen 0.1.6 measurement metadata; absent on historical recordings. */
+  public int measurementVersion,
+      totalInputs,
+      uniqueAttacks,
+      deduplicatedAttacks,
+      excludedSwings,
+      eligibleMisses,
+      uncertainShield;
+
+  public java.util.Map<Long, Long> attackCanonicalIds = new java.util.LinkedHashMap<>();
+  public java.util.Map<Long, Long> attackSamples = new java.util.LinkedHashMap<>();
+  public java.util.Map<Long, String> attackClassifications = new java.util.LinkedHashMap<>();
+  public java.util.Map<Long, dev.kwamster.combat.quality.AttackTiming.Result> attackTimings =
+      new java.util.LinkedHashMap<>();
+  public double exchangeTimeoutSeconds = 3;
+  public java.util.List<dev.kwamster.combat.tracking.CombatExchange.Interval> combatExchanges =
+      java.util.List.of();
+
   /** Estimated momentum model, shared with derived timelines and the report viewer. */
   public static final double MOMENTUM_HIT = .2, MOMENTUM_INCOMING = .25, MOMENTUM_DECAY_NANOS = 3e9;
 
@@ -54,8 +99,10 @@ public final class Statistics {
   }
 
   public void hit(Attack a, long time, long evidenceTime, double comboSeconds) {
-    hits++;
-    uncertain--;
+    if (measurementVersion == 0) {
+      hits++;
+      uncertain--;
+    }
     if (a.reach() >= 0) {
       reachSum += a.reach();
       reachCount++;
@@ -127,8 +174,10 @@ public final class Statistics {
 
   /** A confirmed shield block consumes an attempt that would otherwise stay uncertain. */
   public void blocked() {
-    shieldBlocks++;
-    uncertain--;
+    if (measurementVersion == 0) {
+      shieldBlocks++;
+      uncertain--;
+    }
   }
 
   public double averageReach() {
@@ -152,6 +201,20 @@ public final class Statistics {
 
   /** Session totals sum observations; streaks use the maximum of independent exchanges. */
   public void add(Statistics s) {
+    measurementVersion = Math.max(measurementVersion, s.measurementVersion);
+    totalInputs += s.totalInputs;
+    uniqueAttacks += s.uniqueAttacks;
+    deduplicatedAttacks += s.deduplicatedAttacks;
+    excludedSwings += s.excludedSwings;
+    eligibleMisses += s.eligibleMisses;
+    uncertainShield += s.uncertainShield;
+    attackCanonicalIds.putAll(s.attackCanonicalIds);
+    attackSamples.putAll(s.attackSamples);
+    attackClassifications.putAll(s.attackClassifications);
+    attackTimings.putAll(s.attackTimings);
+    var intervals = new java.util.ArrayList<>(combatExchanges);
+    intervals.addAll(s.combatExchanges);
+    combatExchanges = java.util.List.copyOf(intervals);
     attempts += s.attempts;
     hits += s.hits;
     emptyMisses += s.emptyMisses;

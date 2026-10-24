@@ -1,5 +1,15 @@
 # Development log
 
+## 0.1.6 — lifecycle and combat measurement corrections
+
+Started clean at `f486b253dafc691d3abc78a10cd0b135f9e4a960` on the existing branch. Reviewed latest.log chronologically in full (4,322 lines), decoded/scanned 140 logging artifacts, correlated four diagnostic captures, read 269 recording/export receipts, and exported all 269 recordings elsewhere. Size/time/SHA-256 verification passes for all 1,490 original evidence files; all 223 original project files remain. No clean or original-data rewrite occurred.
+
+The tiny PVPHQ records started correctly, then the client misreported a changed world object as DISCONNECT. Real connection teardown now owns that event; arena/dimension loading remains inside configured/manual recordings. The exact Bo3tu screenshot remains uncorrelated: available evidence says Bo3tw and First to 1. MCPvP additionally needed observed score/decimal-health and XP/armor completion variants plus a participant-scoped resignation end without an invented result.
+
+Added CombatExchange independently of recording boundaries, a configurable three-second threshold, first-input-anchored inclusive two-tick local attack groups, raw/canonical maps, opening-miss evidence, noncombat exclusion, bounded hit/shield upgrades and explicit uncertainty. Canonical timing/reach/feedback/combos and graphs share the frozen stream. Breaks split combos/reset dominance; history summaries lazily omit attack maps. Schema 5 retains schemas 1–4; config stays schema 2; diagnostics schema 3 preserves raw events locally.
+
+Baseline: 293 cases, 292 pass/one platform skip. Final: 327 cases, 326 pass/one skip/zero failures. Final review added a regression preventing a long manual scope's event-cap handoff from splitting a canonical group or dropping a boundary input. Prior 18 owner outcomes still pass (16 W, 2 L); 26 latest lifecycle windows pass their observed-result expectations. Muted `v016-functional03` and four-mod `v016-compat01` pass, including real dimension changes, same-tick vanilla attack calls and actual disconnect; final post-review run labels are in VALIDATION.md. Static checks pass on 354 historical/replay/synthetic/client reports. The browser tool rejected file protocol; no workaround was attempted and browser interaction remains unverified. Performance measurements and limitations are committed with [0.1.6](0.1.6.md). Jar: `build/libs/kwamster-0.1.6.jar`. Local commit only; Aurora remains untouched.
+
 ## Initial inventory — 2026-10-21
 Workspace C:\Dev\Kwamster was empty, including hidden files. No Git repository, HEAD, tracked files, untracked files, or existing work. No ancestor AGENTS.md found. Initialized main locally. Installed Java 25 only; no global Gradle. Downloaded checksum-verified Temurin Java 21 into ignored .tools.
 

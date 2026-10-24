@@ -145,7 +145,7 @@ class CombatTest {
   @Test
   void interruptedOnTargetSwitch() {
     attack(1);
-    engine.accept(event(10, Kind.ATTACK, "local", "other", Confidence.OBSERVED, attack, ""));
+    engine.accept(event(200, Kind.ATTACK, "local", "other", Confidence.OBSERVED, attack, ""));
     assertEquals(FightRecord.Outcome.INTERRUPTED, records.getFirst().outcome());
     assertEquals(1, engine.stats().attempts);
   }
@@ -183,7 +183,7 @@ class CombatTest {
   }
 
   @Test
-  void plausibleEmptyDoesNotBecomeUncertainOrConfirm() {
+  void duplicatePlausibleEmptyDoesNotCreateAMiss() {
     attack(1);
     engine.accept(
         event(
@@ -196,8 +196,9 @@ class CombatTest {
             "empty-swing; plausible opponent"));
     hit(30);
     hit(40);
-    assertEquals(2, engine.stats().attempts);
-    assertEquals(1, engine.stats().emptyMisses);
+    assertEquals(1, engine.stats().attempts);
+    assertEquals(0, engine.stats().emptyMisses);
+    assertEquals(1, engine.stats().deduplicatedAttacks);
     assertEquals(1, engine.stats().hits);
     assertEquals(0, engine.stats().uncertain);
   }

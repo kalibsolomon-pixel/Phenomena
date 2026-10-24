@@ -13,6 +13,12 @@ import java.util.*;
 public final class Aggregate {
   public final int fights, timelineFights;
   public final int attempts, hits, emptyMisses, uncertain, contacts;
+  public final int measurementFights,
+      totalInputs,
+      uniqueAttacks,
+      excludedSwings,
+      deduplicatedAttacks,
+      uncertainShield;
   public final int criticalConditions, sprintHits, jumpCandidates, incoming, longestCombo;
   public final double reachSum, maxReach;
   public final int reachCount;
@@ -73,6 +79,7 @@ public final class Aggregate {
       List<FightRecord> newestFirst,
       java.util.function.Function<FightRecord, FightAnalytics> analytics) {
     fights = newestFirst.size();
+    int mf = 0, total = 0, unique = 0, excluded = 0, dedup = 0, us = 0;
     int at = 0,
         h = 0,
         em = 0,
@@ -91,6 +98,14 @@ public final class Aggregate {
     double rs = 0, mr = 0, is = 0, isq = 0;
     for (var f : newestFirst) {
       Statistics s = f.statistics();
+      if (s.measurementVersion > 0) {
+        mf++;
+        total += s.totalInputs;
+        unique += s.uniqueAttacks;
+        excluded += s.excludedSwings;
+        dedup += s.deduplicatedAttacks;
+        us += s.uncertainShield;
+      }
       ua += s.unattributedIncoming;
       tp += s.thirdPartyIncoming;
       ais += s.attacksIntoShield;
@@ -127,6 +142,12 @@ public final class Aggregate {
           summaryReachBins[i] += s.reachDistribution[i];
     }
     attempts = at;
+    measurementFights = mf;
+    totalInputs = total;
+    uniqueAttacks = unique;
+    excludedSwings = excluded;
+    deduplicatedAttacks = dedup;
+    uncertainShield = us;
     hits = h;
     emptyMisses = em;
     uncertain = un;

@@ -28,7 +28,43 @@ public final class Diagnostics {
       String decision,
       String capturePolicy,
       String adapterId,
-      Integer adapterVersion) {
+      Integer adapterVersion,
+      CombatEvent observation) {
+    public Entry(
+        long timestamp,
+        long nanos,
+        String server,
+        String channel,
+        String text,
+        String kind,
+        String rule,
+        String winner,
+        String loser,
+        String opponent,
+        String confidence,
+        String decision,
+        String capturePolicy,
+        String adapterId,
+        Integer adapterVersion) {
+      this(
+          timestamp,
+          nanos,
+          server,
+          channel,
+          text,
+          kind,
+          rule,
+          winner,
+          loser,
+          opponent,
+          confidence,
+          decision,
+          capturePolicy,
+          adapterId,
+          adapterVersion,
+          null);
+    }
+
     public Entry(
         long timestamp,
         long nanos,
@@ -70,7 +106,7 @@ public final class Diagnostics {
 
   private static final Pattern CANDIDATE =
       Pattern.compile(
-          "(?i)\\b(match|duel|round|game|fight|winner|loser|won|lost|killed|draw|forfeit|opponent|victory|defeat)\\b");
+          "(?i)\\b(match|duel|round|game|fight|winner|loser|won|lost|killed|draw|forfeit|resigned|opponent|victory|defeat)\\b");
   private static final Pattern PRIVATE =
       Pattern.compile(
           "(?i)(?:^<|^\\[.*?]\\s*[A-Za-z0-9_]{1,16}\\s*[:»>]|^(?!(?:Winner|Loser|Opponent|Round|Match|Duel|Results):)[A-Za-z0-9_]{1,16}\\s*[:»>]|\\b(?:whisper|whispers|whispered|private"
@@ -145,7 +181,10 @@ public final class Diagnostics {
     if (!enabled
         || !(e.kind() == CombatEvent.Kind.DEATH
             || e.kind() == CombatEvent.Kind.DISCONNECT
+            || e.kind() == CombatEvent.Kind.WORLD_CHANGE
             || e.kind() == CombatEvent.Kind.ATTACK
+            || e.kind() == CombatEvent.Kind.HURT
+            || e.kind() == CombatEvent.Kind.SHIELD
             || e.kind() == CombatEvent.Kind.DAMAGE_IN
             || e.kind() == CombatEvent.Kind.REMOVED
             || e.kind() == CombatEvent.Kind.TELEPORT)) return;
@@ -162,7 +201,11 @@ public final class Diagnostics {
             null,
             e.kind() == CombatEvent.Kind.ATTACK ? e.target() : e.actor(),
             e.confidence().name(),
-            "Observed; does not alone confirm a match result. " + limitation.get()));
+            "Raw observation; does not alone confirm a match result. " + limitation.get(),
+            null,
+            null,
+            null,
+            e));
   }
 
   public void outcome(FightRecord f) {
@@ -170,9 +213,7 @@ public final class Diagnostics {
     add(
         new Entry(
             System.currentTimeMillis(),
-            f.matchEvidence().timelineStartNanos() == null
-                ? 0
-                : f.matchEvidence().timelineStartNanos(),
+            f.resolution().establishedNanos(),
             f.matchEvidence().server(),
             "LIFECYCLE",
             f.reason(),
@@ -211,7 +252,8 @@ public final class Diagnostics {
             e.decision(),
             policy.mode().name(),
             adapter == null ? null : adapter.id(),
-            adapter == null ? null : adapter.version());
+            adapter == null ? null : adapter.version(),
+            e.observation());
     if (entries.size() >= 2048) {
       flush();
       entries.clear();
@@ -282,7 +324,7 @@ public final class Diagnostics {
         "correlationConfidence",
         rows.stream().filter(e -> "LIFECYCLE".equals(e.channel())).map(Entry::confidence).toList());
     summary.put("capturePolicies", rows.stream().map(Entry::capturePolicy).distinct().toList());
-    return new Report(2, Announcements.adapters(), rows, privacy, summary);
+    return new Report(3, Announcements.adapters(), rows, privacy, summary);
   }
 
   public void flush() {

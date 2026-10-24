@@ -346,8 +346,12 @@ class CombatIntelligenceTest {
     var a = FightAnalytics.of(s.finish(2));
     var sample = a.timingSamples.getFirst();
     assertEquals("minecraft:diamond_axe", sample.weapon());
-    assertEquals(-5, sample.deltaTicks(), 1e-9);
-    assertEquals("UNCERTAIN", sample.outcome());
+    assertEquals(
+        AttackTiming.Grade.OPENER,
+        sample.grade(),
+        "canonical timing is recomputed after deduplication");
+    assertTrue(Double.isNaN(sample.deltaTicks()));
+    assertEquals("UNRESOLVED", sample.outcome());
   }
 
   @Test

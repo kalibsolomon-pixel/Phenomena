@@ -191,6 +191,8 @@ function bars(parent,o){
 const hits=D.hits||[],misses=D.misses||[];
 const hitBySeq={};for(const h of hits)hitBySeq[h.seq]=h;
 const outcomes=D.attemptOutcomes||{};
+const canonicalId=e=>F.statistics?.attackCanonicalIds?.[e.sequence]??e.sequence;
+const isCanonical=e=>canonicalId(e)===e.sequence;
 const combos=D.combos||{marks:[],streaks:[],exchanges:[],gap:3};
 const comboList=(combos.streaks||[]).filter(s=>s.length>=2);
 const incoming=D.incomingDetail||[];
@@ -387,7 +389,10 @@ overview(p){
 offense(p){
   sections(p,[['o-acc','Accuracy'],['o-reach','Reach & spacing'],['o-aim','Aim'],['o-timing','Weapon timing'],['o-crit','Critical & sprint']]);
   h2(p,'Accuracy','denominator excludes confirmed shield blocks','o-acc');
-  cards(p,[[label('attempts','Attack attempts'),String(S.attempts),'observed','attempts'],[label('hits','Correlated hits'),String(S.hits),'confirmed source','hits'],[label('emptyMisses','Empty swings'),String(S.emptyMisses),'confirmed misses','emptyMisses'],[label('uncertain','Uncertain attacks'),String(S.uncertain),'not proven misses','uncertain'],[label('shieldBlocks','Confirmed shield blocks'),V3?String(shields.confirmedBlocks||0):NONE,V3?'excluded from denominator':'unavailable','shieldBlocks'],[label('accuracy','Hit accuracy'),pct(S.accuracy),S.hits+' / '+(S.accuracyDenominator??S.attempts),'accuracy']]);
+  if(S.measurementVersion){cards(p,[['Total swings',String(S.totalInputs),'raw local inputs'],['Unique attacks',String(S.uniqueAttacks),S.deduplicatedAttacks+' duplicate observations'],['Eligible combat attempts',String(S.attempts),'before shield exclusion'],['Eligible misses',String(S.eligibleMisses),'aimed opening misses included'],['Excluded noncombat swings',String(S.excludedSwings),'excluded from accuracy'],['Unresolved attacks',String(S.unresolved),'included in denominator'],['Uncertain shields',String(S.uncertainShield),'also in denominator']]);
+    note(p,'Inclusive two-client-tick deduplication is anchored to the first observation. Accuracy = confirmed hits / (unique eligible combat attempts minus confirmed shield blocks). Unresolved and uncertain shield attempts remain in the denominator. Excluded swings and duplicate observations never count as misses. Aimed empty swings wait for the bounded confirmation window before becoming eligible misses.');}
+  else note(p,'Historical measurement policy: new swing classifications and combat-active intervals are unavailable. Original recorded counts and outcomes are preserved.');
+  cards(p,[[label('attempts','Attack attempts'),String(S.attempts),'observed','attempts'],[label('hits','Correlated hits'),String(S.hits),'confirmed source','hits'],[S.measurementVersion?'Eligible misses':'Legacy empty swings',String(S.emptyMisses),S.measurementVersion?'inferred from aim evidence':'original measurement policy','emptyMisses'],[label('uncertain','Uncertain attacks'),String(S.uncertain),'not proven misses','uncertain'],[label('shieldBlocks','Confirmed shield blocks'),V3?String(shields.confirmedBlocks||0):NONE,V3?'excluded from denominator':'unavailable','shieldBlocks'],[label('accuracy','Hit accuracy'),pct(S.accuracy),S.hits+' / '+(S.accuracyDenominator??S.attempts),'accuracy']]);
   note(p,'Accuracy = confirmed hits / (attempts − confirmed shield blocks). A blocked attack met the shield: it is neither a hit nor a miss. Estimated blocks and other attacks without a server report stay uncertain and remain in the denominator.');
   h2(p,'Reach & spacing','eligible confirmed hits','o-reach');
   const r=D.reach||{};
@@ -453,6 +458,14 @@ flow(p){
   if(dom)cards(p,[[label('dominanceShare','Advantage share'),pct(dom.localShare),'you, of '+num(dom.active,1)+' s active','dominanceShare'],['Opponent advantage',pct(dom.opponentShare),'of active time'],['Neutral',pct(dom.neutralShare),'balanced evidence'],['Longest advantage',dom.longest?num(dom.longest.end-dom.longest.start,1)+' s':NONE,dom.longest?(dom.longest.side==='LOCAL'?'you':'opponent')+' from '+num(dom.longest.start,1)+' s':'none'],['Largest swing',dom.swing?sgn(dom.swing.toValue-dom.swing.fromValue,2):NONE,dom.swing?'within 3 s at '+num(dom.swing.from,1)+' s':'none'],['Dominance changes',String(dom.changes),'you ↔ opponent'],['No evidence / incomplete',num(dom.insufficient,1)+' s / '+num(dom.incomplete,1)+' s','excluded from shares']]);
   if(dom){const m=dom.model;note(p,'Model: each confirmed hit weighs '+m.hit+' (+'+m.streakBonus+' when it continues a combo); opponent blocks −'+m.shieldBlocked+', shield disables ±'+m.shieldDisabled+', your blocks +'+m.localBlock+'; every input decays with a '+m.tau+' s time constant. D = (you − opponent) / (you + opponent + 1), so thin evidence stays near zero and one event reaches at most 0.5. States: above +'+m.threshold+' you, below −'+m.threshold+' opponent; evidence mass under '+m.minMass+' is "no evidence"; unattributed damage mass of '+m.maxUnattributed+' or more is "incomplete". Accuracy, aim and reach are not inputs. This is combat advantage from observed hits, not physical momentum and not a win probability.');}
   h2(p,'Exchanges','separated by gaps over '+num(combos.gap,1)+' s','f-ex');
+  if(S.measurementVersion){const active=D.combatExchanges||[];h3Text(p,'Combat-active intervals');
+    const W=900,H=64,{svg}=chartBox(p,W,H,'Combat exchanges and breaks'),x=t=>10+880*t/dur;
+    svg.append(sv('rect',{x:10,y:10,width:880,height:22,fill:'#2a3036'}));
+    for(const e of active)svg.append(sv('rect',{x:x(e.start),y:10,width:Math.max(1,x(e.end)-x(e.start)),height:22,fill:'var(--you)'}));
+    svgText(svg,10,52,'0 s');svgText(svg,780,52,num(dur,1)+' s');
+    note(p,num(S.combatActiveSeconds,1)+' s combat-active in '+num(dur,1)+' s recorded. Filled intervals are combat; the background shows breaks. Exchange timeout: '+num(D.exchangeTimeoutSeconds,1)+' s, independent of recording timeout.');
+    table(p,['Exchange','Start / end (s)','Duration','Hits','Misses','Combos','Momentum turns','End'],active.map((e,i)=>['#'+(i+1),num(e.start,2)+' / '+num(e.end,2),num(e.end-e.start,2),String(e.hits),String(e.misses),String(e.combos),String(e.momentumChanges),cap(e.endedBy)]));
+    note(p,'Hit-only streak segments below retain the combo timeout. Exchange and round boundaries also split combos and reset dominance. Finalization: '+(F.reason||'unavailable'));}
   const ex=combos.exchanges||[];
   table(p,['Exchange','Time','Your hits','Opponent hits','Best combo (you / opp)','Advantage'],ex.map((e,i)=>['#'+(i+1),num(e.start,1)+'–'+num(e.end,1)+' s',String(e.local),String(e.opponent),e.longestLocal+' / '+e.longestOpponent,sgn(e.local-e.opponent,0)]),[false,true,true,true,true,true]);
   if(dom&&(dom.turningPoints||[]).length){h3Text(p,'Key turning points');table(p,['Time','Change','Dominance'],dom.turningPoints.map(t=>[s2(t[0]),t[1]>0?'Advantage to you':'Advantage to opponent',num(t[1],2)]),[true,false,true]);}
@@ -468,7 +481,7 @@ timeline(p){
   const tx=v=>L+(W-L-10)*v/dur;
   for(const[name,i]of lanes){const y=8+i*LH;svg.append(sv('line',{x1:L,x2:W-10,y1:y+LH/2,y2:y+LH/2,stroke:'#2a3036'}));svgText(svg,8,y+LH/2+4,name);}
   const marks=[];let sprintOn=null;
-  for(const e of E){const x=tx(sec(e));let m=null;const o=outcomes[e.sequence];
+  for(const e of E){if(e.kind==='ATTACK'&&!isCanonical(e))continue;const x=tx(sec(e));let m=null;const o=outcomes[e.sequence];
     if(e.kind==='ATTACK'){const y=8+LH/2;const h=hitBySeq[e.sequence];m=h?sv('circle',{cx:x,cy:y,r:5,fill:'var(--you)'}):o&&o.startsWith('SHIELD')?sv('path',{d:`M${x} ${y-6}L${x+6} ${y}L${x} ${y+6}L${x-6} ${y}Z`,fill:'var(--good)'}):!isEmpty(e)?sv('circle',{cx:x,cy:y,r:4.5,fill:'none',stroke:'var(--opp)','stroke-width':2}):sv('rect',{x:x-1,y:y-6,width:2,height:12,fill:'#9aa6ac'});m.dataset.k=h?'Correlated hit':o&&o.startsWith('SHIELD')?'Shield block':!isEmpty(e)?'No server report':'Empty swing';}
     else if(e.kind==='DAMAGE_IN'){const att=e.context?.attribution;const attributed=att?att.startsWith('OPPONENT'):!!e.actor;m=attributed?sv('rect',{x:x-4,y:8+LH+LH/2-4,width:8,height:8,fill:'var(--opp)'}):sv('rect',{x:x-4,y:8+LH+LH/2-4,width:8,height:8,fill:'none',stroke:'#9aa6ac','stroke-width':1.5});m.dataset.k=attributed?'Attributed incoming hit':'Unattributed damage';}
     else if(e.kind==='SHIELD'){const y=8+2*LH+LH/2;m=sv('rect',{x:x-3,y:y-5,width:6,height:10,fill:e.context?.shield==='DISABLE'?'var(--warn)':'var(--good)'});m.dataset.k='Shield '+(e.context?.shield||'').toLowerCase()+' ('+(e.context?.subject==='local'?'you':'opponent')+')';}
@@ -491,6 +504,8 @@ timeline(p){
   const times=E.filter(e=>e.kind!=='MOTION').map(sec);
   let T=0,playing=false,last=0;
   function describe(e){if(!e)return['Start of recording',''];const h=hitBySeq[e.sequence];const o=outcomes[e.sequence];
+    if(e.kind==='ATTACK'&&S.measurementVersion&&isCanonical(e)&&o==='UNRESOLVED')return['Unresolved attack','Outcome evidence is insufficient; included in the accuracy denominator.'];
+    if(e.kind==='ATTACK'&&S.measurementVersion){if(!isCanonical(e))return['Deduplicated observation','Canonical attack '+canonicalId(e)+'; no additional attempt, hit or miss.'];if(o==='EXCLUDED')return['Excluded noncombat swing','No aimed opponent evidence. Excluded from combat accuracy.'];if(o==='MISS')return['Eligible miss','Aimed empty swing; no hit confirmation in the bounded window.'];if(o==='UNCERTAIN_SHIELD')return['Uncertain shield interaction','Blocking/facing observation without a correlated shield sound; retained in the denominator.'];}
     if(e.kind==='ATTACK'){if(h)return['Correlated hit',m2(h.reach)+(h.contact?' ray contact':' nearest box')+' · '+(h.measurement?.timing?cap(h.measurement.timing.grade)+' attempt timing':'Timing unavailable')+' · combo '+h.combo+(h.serverCrit?' · server crit':h.critical?' · crit conditions':'')+(h.sprinting?' · sprinting':'')];if(o&&o.startsWith('SHIELD'))return['Shield '+(o==='SHIELD_DISABLE'?'disabled':'block'),'The opponent\'s shield blocked this attack; no damage event.'];if(!isEmpty(e))return['Attack without server report','Estimated distance '+m2(e.attack.reach)+'. Uncertain, not a proven miss.'];return['Empty swing','No entity selected. Confirmed miss.'+(e.attack?' Distance to the recent opponent '+m2(e.attack.reach)+'.':'')];}
     if(e.kind==='HURT')return['Server damage report','Local melee source; amount unavailable.'];
     if(e.kind==='DAMAGE_IN'){const a=e.context?.attribution;return[a&&!a.startsWith('OPPONENT')?'Unattributed damage':'Incoming hit',a?attrName[a]||a:'Server damage event'];}
@@ -503,7 +518,7 @@ timeline(p){
     const upTo=E.filter(e=>sec(e)<=T+1e-9);const shown=upTo.filter(e=>k==='All'?e.kind!=='MOTION':e.kind===k);
     tb.replaceChildren();for(const e of shown.slice(-200)){const r=el('tr');for(const c of[sec(e).toFixed(3),e.kind,cap(e.confidence),detailText(e)])r.append(el('td',null,c));tb.append(r);}if(tb.lastChild)tb.lastChild.className='cur';wrap.scrollTop=wrap.scrollHeight;
     const lastEv=[...upTo].reverse().find(e=>e.kind!=='MOTION');const[a,b]=describe(lastEv);annot.replaceChildren(el('b',null,a),document.createTextNode(b?' — '+b:''));
-    const hs=hits.filter(h=>h.t<=T),at=upTo.filter(e=>e.kind==='ATTACK').length,inc=(D.incoming||[]).filter(x=>x<=T).length;const k2=dom?Math.min((dom.values||[]).length-1,Math.max(0,Math.round(T/dom.step))):-1;const dv=dom&&k2>=0?dom.values[k2]:null;
+    const hs=hits.filter(h=>h.t<=T),at=upTo.filter(e=>e.kind==='ATTACK'&&isCanonical(e)&&outcomes[e.sequence]!=='EXCLUDED').length,inc=(D.incoming||[]).filter(x=>x<=T).length;const k2=dom?Math.min((dom.values||[]).length-1,Math.max(0,Math.round(T/dom.step))):-1;const dv=dom&&k2>=0?dom.values[k2]:null;
     const cur=(combos.marks||[]).filter(m=>m.t<=T);let run=0;for(let i=cur.length-1;i>=0&&cur[i].side==='LOCAL'&&!cur[i].traded;i--)run++;
     now.replaceChildren(card('Hits so far',String(hs.length),at+' attempts'),card('Attributed incoming',String(inc),'opponent hits'),card('Current streak',String(run),'your unanswered hits'),card('Dominance',dv==null?NONE:num(dv,2),dom?{L:'you',O:'opponent',N:'neutral',C:'incomplete',I:'no evidence'}[(dom.states||'')[k2]]||'':'unavailable','dominance'));
     for(const m of marks)m.setAttribute('opacity',+m.dataset.t<=T?1:.35);}

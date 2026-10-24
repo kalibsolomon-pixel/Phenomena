@@ -23,8 +23,11 @@ public record FightRecord(
     MatchEvidence matchEvidence,
     Resolution resolution,
     SessionInfo session) {
-  /** Schema 4 adds optional manual-session scopes; readers retain schemas 1�3. */
-  public static final int SCHEMA = 4;
+  /**
+   * Schema 5 freezes canonical attack classifications and combat intervals in Statistics. Readers
+   * retain schemas 1–4 with their original counts and outcomes.
+   */
+  public static final int SCHEMA = 5;
 
   /** Compatibility constructor for ordinary duels and historical callers. */
   public FightRecord(
@@ -296,7 +299,7 @@ public record FightRecord(
         opponent,
         outcome,
         reason,
-        statistics,
+        statistics.summaryCopy(),
         List.of(),
         policy,
         List.of(),

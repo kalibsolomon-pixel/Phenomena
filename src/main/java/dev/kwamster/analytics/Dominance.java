@@ -92,7 +92,11 @@ public final class Dominance {
   }
 
   private Dominance(
-      double duration, List<Input> inputs, List<Double> unattributed, int attributedIncoming) {
+      double duration,
+      List<Input> inputs,
+      List<Double> unattributed,
+      int attributedIncoming,
+      List<double[]> activeIntervals) {
     this.inputs = List.copyOf(inputs);
     double span = Math.max(duration, inputs.isEmpty() ? 0 : inputs.getLast().time());
     step = Math.max(.05, span / 2000);
@@ -105,7 +109,7 @@ public final class Dominance {
     for (double ut : unattributed) sorted.add(new Input(ut, 0, "UNATTRIBUTED"));
     sorted.sort(Comparator.comparingDouble(Input::time));
     double p = 0, q = 0, u = 0, at = 0;
-    int i = 0;
+    int i = 0, intervalIndex = 0;
     for (int k = 0; k < n; k++) {
       double t = k * step;
       times[k] = t;
@@ -116,7 +120,9 @@ public final class Dominance {
         q *= f;
         u *= f;
         at = Math.max(at, in.time());
-        if ("UNATTRIBUTED".equals(in.kind())) u += 1;
+        if ("EXCHANGE_RESET".equals(in.kind())) {
+          p = q = u = 0;
+        } else if ("UNATTRIBUTED".equals(in.kind())) u += 1;
         else if (in.weight() > 0) p += in.weight();
         else q -= in.weight();
       }
@@ -130,6 +136,12 @@ public final class Dominance {
               : ut >= MAX_UNATTRIBUTED
                   ? State.INCOMPLETE
                   : d >= THRESHOLD ? State.LOCAL : d <= -THRESHOLD ? State.OPPONENT : State.NEUTRAL;
+      if (activeIntervals != null) {
+        while (intervalIndex < activeIntervals.size() && t >= activeIntervals.get(intervalIndex)[1])
+          intervalIndex++;
+        if (intervalIndex >= activeIntervals.size() || t < activeIntervals.get(intervalIndex)[0])
+          s = State.INSUFFICIENT;
+      }
       states[k] = s;
       values[k] = s == State.INSUFFICIENT ? Double.NaN : d;
     }
@@ -227,7 +239,16 @@ public final class Dominance {
    */
   public static Dominance of(
       double duration, List<Input> inputs, List<Double> unattributed, int attributedIncoming) {
-    return new Dominance(duration, inputs, unattributed, attributedIncoming);
+    return new Dominance(duration, inputs, unattributed, attributedIncoming, null);
+  }
+
+  public static Dominance of(
+      double duration,
+      List<Input> inputs,
+      List<Double> unattributed,
+      int attributedIncoming,
+      List<double[]> activeIntervals) {
+    return new Dominance(duration, inputs, unattributed, attributedIncoming, activeIntervals);
   }
 
   public double share(State s) {

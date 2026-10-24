@@ -95,3 +95,19 @@ tasks.register('replayCapturedEvidence', JavaExec) {
     mainClass = 'dev.kwamster.ReplayCapturedEvidence'
     javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
 }
+
+tasks.register('benchmarkCombatExchanges', JavaExec) {
+    group = 'verification'
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'dev.kwamster.ExchangeBenchmark'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+}
+
+tasks.register('generateExchangeExampleReport', JavaExec) {
+    group = 'verification'
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'dev.kwamster.ExchangeReportExample'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+}

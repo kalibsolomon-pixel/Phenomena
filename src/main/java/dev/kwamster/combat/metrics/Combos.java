@@ -97,6 +97,16 @@ public final class Combos {
       String opponent,
       double gapSeconds,
       List<MatchEvidence.Round> rounds) {
+    return analyze(events, evaluations, opponent, gapSeconds, rounds, List.of());
+  }
+
+  public static Result analyze(
+      List<CombatEvent> events,
+      List<Evaluation> evaluations,
+      String opponent,
+      double gapSeconds,
+      List<MatchEvidence.Round> rounds,
+      List<dev.kwamster.combat.tracking.CombatExchange.Interval> intervals) {
     long[] boundaries =
         rounds.stream()
             .flatMapToLong(
@@ -104,6 +114,12 @@ public final class Combos {
                     r.endNanos() == null
                         ? java.util.stream.LongStream.of(r.startNanos())
                         : java.util.stream.LongStream.of(r.startNanos(), r.endNanos()))
+            .distinct()
+            .sorted()
+            .toArray();
+    long[] exchangeBoundaries =
+        intervals.stream()
+            .flatMapToLong(i -> java.util.stream.LongStream.of(i.startNanos(), i.endNanos()))
             .distinct()
             .sorted()
             .toArray();
@@ -145,9 +161,16 @@ public final class Combos {
     int exLocal = 0, exOpp = 0, exLongLocal = 0, exLongOpp = 0;
     int run = 0, longestLocal = 0, longestOpp = 0;
     Side runSide = null;
-    int boundary = 0;
+    int boundary = 0, exchangeBoundaryIndex = 0;
     for (var m : marks) {
       boolean roundBoundary = false;
+      boolean exchangeBoundary = false;
+      while (exchangeBoundaryIndex < exchangeBoundaries.length
+          && exchangeBoundaries[exchangeBoundaryIndex] <= m.nanos()) {
+        if (last != Long.MIN_VALUE && exchangeBoundaries[exchangeBoundaryIndex] > last)
+          exchangeBoundary = true;
+        exchangeBoundaryIndex++;
+      }
       while (boundary < boundaries.length && boundaries[boundary] <= m.nanos()) {
         if (last != Long.MIN_VALUE && boundaries[boundary] > last) roundBoundary = true;
         boundary++;
@@ -156,7 +179,7 @@ public final class Combos {
         run = 0;
         runSide = null;
       }
-      if (last != Long.MIN_VALUE && (roundBoundary || m.nanos() - last > gap)) {
+      if (last != Long.MIN_VALUE && (roundBoundary || exchangeBoundary || m.nanos() - last > gap)) {
         if (side != null)
           streaks.add(
               streak(

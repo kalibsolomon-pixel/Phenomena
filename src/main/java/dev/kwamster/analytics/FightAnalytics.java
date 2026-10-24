@@ -230,12 +230,26 @@ public final class FightAnalytics {
   public final List<Boundary> boundaries;
   public final int serverCrits;
 
+  public record ActiveExchange(
+      double start,
+      double end,
+      int hits,
+      int misses,
+      int opponentHits,
+      int combos,
+      int momentumChanges,
+      String endedBy) {}
+
+  public final List<ActiveExchange> activeExchanges;
+  public final double combatActiveSeconds;
+
   /** Monotonic origin of every "seconds since fight start" value in this instance. */
   public final long baseNanos;
 
   private FightAnalytics(FightRecord f) {
     this.fight = f;
-    var events = f.events();
+    var events =
+        dev.kwamster.combat.tracking.AttackObservations.canonicalEvents(f.events(), f.statistics());
     var policy = f.policy();
     String opponent = f.opponent();
     long base =
@@ -253,6 +267,9 @@ public final class FightAnalytics {
             .filter(
                 e ->
                     e.kind() == Kind.ATTACK
+                        && dev.kwamster.combat.tracking.AttackObservations.outgoing(e)
+                        && !"EXCLUDED"
+                            .equals(f.statistics().attackClassifications.get(e.sequence()))
                         && e.attack() != null
                         && e.attack().measurement() != null)
             .map(
@@ -306,6 +323,7 @@ public final class FightAnalytics {
                 weapon));
         continue;
       }
+      if (!ev.hit()) continue;
       hitAttacks.add(ev.attackSequence());
       outcomes.put(ev.attackSequence(), "HIT");
       double h = a.rayContact() ? Geometry.faceHorizontal(a.aimX(), a.aimZ()) : -1;
@@ -375,7 +393,8 @@ public final class FightAnalytics {
             f.manual() ? List.of() : f.evaluations(),
             opponent,
             policy.comboSeconds(),
-            f.matchEvidence().rounds());
+            f.matchEvidence().rounds(),
+            f.statistics().combatExchanges);
     comboLengths =
         combos.streaks().stream()
             .filter(s -> s.side() == Combos.Side.LOCAL)
@@ -393,6 +412,11 @@ public final class FightAnalytics {
       double t = seconds(e.nanoTime(), base);
       switch (e.kind()) {
         case ATTACK -> {
+          if (!dev.kwamster.combat.tracking.AttackObservations.outgoing(e)) break;
+          String classification = f.statistics().attackClassifications.get(e.sequence());
+          if (classification != null
+              && !classification.equals("HIT")
+              && !classification.equals("SHIELD_BLOCK")) outcomes.put(e.sequence(), classification);
           var ctx = e.context();
           boolean empty =
               e.attack() == null || (e.detail() != null && e.detail().startsWith("empty-swing"));
@@ -402,7 +426,10 @@ public final class FightAnalytics {
             if (intoBlock) bypassed++;
             break;
           }
-          if (outcomes.containsKey(e.sequence())) break;
+          if (classification != null
+              && (classification.equals("EXCLUDED") || classification.equals("SHIELD_BLOCK")))
+            break;
+          if (classification == null && outcomes.containsKey(e.sequence())) break;
           var a = e.attack();
           boolean estimatedBlock = intoBlock && Boolean.TRUE.equals(ctx.targetFacing());
           if (estimatedBlock) {
@@ -415,8 +442,9 @@ public final class FightAnalytics {
                     e.sequence(),
                     a.measurement() == null ? "unknown" : a.measurement().item()));
           }
-          outcomes.put(
-              e.sequence(), empty ? "EMPTY" : estimatedBlock ? "ESTIMATED_BLOCK" : "UNCERTAIN");
+          if (classification == null)
+            outcomes.put(
+                e.sequence(), empty ? "EMPTY" : estimatedBlock ? "ESTIMATED_BLOCK" : "UNCERTAIN");
           missList.add(
               new Miss(
                   e.sequence(),
@@ -494,7 +522,8 @@ public final class FightAnalytics {
     jumpsWithoutDamage = noDamage;
     motionSamples = motion;
     sprintTransitions = sprint;
-    momentumChanges = List.copyOf(momentum(hits, incomingTimes));
+    momentumChanges =
+        List.copyOf(momentum(hits, incomingTimes, f.statistics().combatExchanges, base));
 
     // ---- incoming detail
     var built = incoming(events, base, opponent, policy.jumpWindowTicks());
@@ -517,9 +546,18 @@ public final class FightAnalytics {
     thirdPartyIncoming = third;
     jumpEffect = jumpEffect(incoming);
 
-    timingSamples = timingSamples(events, base, outcomes);
+    var eligibleEvents =
+        events.stream()
+            .filter(
+                e ->
+                    e.kind() != Kind.ATTACK
+                        || dev.kwamster.combat.tracking.AttackObservations.outgoing(e)
+                            && !"EXCLUDED"
+                                .equals(f.statistics().attackClassifications.get(e.sequence())))
+            .toList();
+    timingSamples = timingSamples(eligibleEvents, base, outcomes);
     reach = reach(hits, policy.perfectReachTarget(), policy.perfectReachTolerance());
-    aim = aim(events, base, hitAttacks);
+    aim = aim(eligibleEvents, base, hitAttacks);
 
     // ---- dominance
     List<Dominance.Input> inputs = new ArrayList<>();
@@ -552,8 +590,67 @@ public final class FightAnalytics {
         default -> {}
       }
     }
-    inputs.sort(Comparator.comparingDouble(Dominance.Input::time));
-    dominance = Dominance.of(duration, f.manual() ? List.of() : inputs, unattributedTimes, att);
+    for (var interval : f.statistics().combatExchanges) {
+      inputs.add(new Dominance.Input(seconds(interval.startNanos(), base), 0, "EXCHANGE_RESET"));
+      inputs.add(new Dominance.Input(seconds(interval.endNanos(), base), 0, "EXCHANGE_RESET"));
+    }
+    inputs.sort(
+        Comparator.comparingDouble(Dominance.Input::time)
+            .thenComparing(in -> !in.kind().equals("EXCHANGE_RESET")));
+    dominance =
+        f.statistics().measurementVersion > 0
+            ? Dominance.of(
+                duration,
+                f.manual() ? List.of() : inputs,
+                unattributedTimes,
+                att,
+                f.statistics().combatExchanges.stream()
+                    .map(
+                        ex ->
+                            new double[] {
+                              seconds(ex.startNanos(), base), seconds(ex.endNanos(), base)
+                            })
+                    .toList())
+            : Dominance.of(duration, f.manual() ? List.of() : inputs, unattributedTimes, att);
+    var active = new ArrayList<ActiveExchange>();
+    var comboStarts = new HashSet<Long>();
+    for (var streak : combos.streaks())
+      if (streak.combo() && streak.side() == Combos.Side.LOCAL)
+        comboStarts.add(streak.sequences().getFirst());
+    int eventIndex = 0, turningIndex = 0;
+    var turning = dominance.turningPoints();
+    double activeSeconds = 0;
+    var measuredIntervals = f.statistics().combatExchanges;
+    for (int intervalIndex = 0; intervalIndex < measuredIntervals.size(); intervalIndex++) {
+      var interval = measuredIntervals.get(intervalIndex);
+      boolean includeEnd =
+          intervalIndex + 1 == measuredIntervals.size()
+              || measuredIntervals.get(intervalIndex + 1).startNanos() > interval.endNanos();
+      int hitCount = 0, missCount = 0, oppCount = 0, comboCount = 0, changes = 0;
+      while (eventIndex < events.size()
+          && events.get(eventIndex).nanoTime() < interval.startNanos()) eventIndex++;
+      while (eventIndex < events.size()
+          && (events.get(eventIndex).nanoTime() < interval.endNanos()
+              || includeEnd && events.get(eventIndex).nanoTime() == interval.endNanos())) {
+        var event = events.get(eventIndex++);
+        if (hitAttacks.contains(event.sequence())) hitCount++;
+        if ("MISS".equals(f.statistics().attackClassifications.get(event.sequence()))) missCount++;
+        if (event.attributedTo(opponent)) oppCount++;
+        if (comboStarts.contains(event.sequence())) comboCount++;
+      }
+      double from = seconds(interval.startNanos(), base), to = seconds(interval.endNanos(), base);
+      while (turningIndex < turning.size() && turning.get(turningIndex)[0] < from) turningIndex++;
+      while (turningIndex < turning.size() && turning.get(turningIndex)[0] <= to) {
+        changes++;
+        turningIndex++;
+      }
+      activeSeconds += Math.max(0, to - from);
+      active.add(
+          new ActiveExchange(
+              from, to, hitCount, missCount, oppCount, comboCount, changes, interval.endedBy()));
+    }
+    activeExchanges = List.copyOf(active);
+    combatActiveSeconds = activeSeconds;
 
     List<Boundary> bs = new ArrayList<>();
     for (var entry : f.matchEvidence().entries())
@@ -901,20 +998,30 @@ public final class FightAnalytics {
    * on server evidence time, -incoming on attributed opponent damage, clipped to [-1, 1],
    * exponential decay between changes. Superseded for display by {@link Dominance}.
    */
-  private static List<Point> momentum(List<Hit> hits, List<Double> incoming) {
-    record Change(double time, boolean hit) {}
+  private static List<Point> momentum(
+      List<Hit> hits,
+      List<Double> incoming,
+      List<dev.kwamster.combat.tracking.CombatExchange.Interval> exchanges,
+      long base) {
+    record Change(double time, boolean hit, boolean reset) {}
     List<Change> changes = new ArrayList<>();
-    for (var h : hits) changes.add(new Change(h.evidenceTime(), true));
-    for (var t : incoming) changes.add(new Change(t, false));
-    changes.sort(Comparator.comparingDouble(Change::time));
+    for (var h : hits) changes.add(new Change(h.evidenceTime(), true, false));
+    for (var t : incoming) changes.add(new Change(t, false, false));
+    for (var ex : exchanges) {
+      changes.add(new Change(seconds(ex.startNanos(), base), false, true));
+      changes.add(new Change(seconds(ex.endNanos(), base), false, true));
+    }
+    changes.sort(Comparator.comparingDouble(Change::time).thenComparing(ch -> !ch.reset()));
     List<Point> points = new ArrayList<>();
     double value = 0, at = 0;
     for (var ch : changes) {
       double decayed = decay(value, ch.time() - at);
       value =
-          ch.hit()
-              ? Math.min(1, decayed + Statistics.MOMENTUM_HIT)
-              : Math.max(-1, decayed - Statistics.MOMENTUM_INCOMING);
+          ch.reset()
+              ? 0
+              : ch.hit()
+                  ? Math.min(1, decayed + Statistics.MOMENTUM_HIT)
+                  : Math.max(-1, decayed - Statistics.MOMENTUM_INCOMING);
       at = ch.time();
       points.add(new Point(at, value));
     }

@@ -104,6 +104,9 @@ final class CaptureEnvironmentClientTest {
                 .orElseThrow(),
             time += 1_000_000);
         check(engine.engaged(), "configured start missing " + host);
+        recording.accept(event(++sequence, time += 1_000_000, Kind.WORLD_CHANGE));
+        recording.context(host, "PlayerA", "arena", ++time, 1);
+        check(engine.engaged(), "arena level replacement ended configured match " + host);
         recording.tick(time += 600_000_000_000L, 12000);
         check(engine.engaged(), "configured inactivity ended match " + host);
         if (i == 1) {

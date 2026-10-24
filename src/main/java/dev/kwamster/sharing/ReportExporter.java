@@ -22,7 +22,7 @@ import java.util.*;
  */
 public final class ReportExporter {
   public static final String PLACEHOLDER = "__KWAMSTER_PAYLOAD__";
-  public static final int FORMAT_VERSION = 5;
+  public static final int FORMAT_VERSION = 6;
   private static final Gson COMPACT = new GsonBuilder().disableHtmlEscaping().create();
 
   public record Options(boolean anonymize, boolean includeMotion, boolean reducedMotion) {
@@ -398,6 +398,16 @@ public final class ReportExporter {
     var s = full.statistics();
     Map<String, Object> summary = new LinkedHashMap<>();
     summary.put("attempts", s.attempts);
+    summary.put("measurementVersion", s.measurementVersion);
+    summary.put("totalInputs", s.measurementVersion > 0 ? s.totalInputs : null);
+    summary.put("uniqueAttacks", s.measurementVersion > 0 ? s.uniqueAttacks : null);
+    summary.put("excludedSwings", s.measurementVersion > 0 ? s.excludedSwings : null);
+    summary.put("deduplicatedAttacks", s.measurementVersion > 0 ? s.deduplicatedAttacks : null);
+    summary.put("eligibleMisses", s.measurementVersion > 0 ? s.eligibleMisses : null);
+    summary.put("uncertainShield", s.measurementVersion > 0 ? s.uncertainShield : null);
+    summary.put(
+        "unresolved", s.measurementVersion > 0 ? s.uncertain - s.uncertainShield : s.uncertain);
+    summary.put("combatActiveSeconds", s.measurementVersion > 0 ? a.combatActiveSeconds : null);
     summary.put("hits", s.hits);
     summary.put("emptyMisses", s.emptyMisses);
     summary.put("uncertain", s.uncertain);
@@ -513,6 +523,8 @@ public final class ReportExporter {
     // Interpretations restate measured values; they contain no names.
     derived.put("interpretations", Interpretation.of(a));
     derived.put("combos", combos(full, a));
+    derived.put("combatExchanges", a.activeExchanges);
+    derived.put("exchangeTimeoutSeconds", s.exchangeTimeoutSeconds);
     derived.put("dominance", dominance(a.dominance));
     derived.put("shields", a.shields);
     derived.put("incomingDetail", a.incoming);

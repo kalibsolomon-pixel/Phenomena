@@ -1,4 +1,8 @@
-# Server compatibility and evidence collection (0.1.5)
+# Server compatibility and evidence collection (0.1.6)
+
+The [latest investigation](0.1.6.md) covers all 4,322 lines of latest.log, four diagnostic captures and 269 recordings. Latest.log revisits PVPHQ, MCPvP, CatPvP East and Minemen. FishFFA/PvPLegacy use earlier available evidence and the preserved 18-match regression corpus; no new live visit is claimed for them.
+
+MCPvP is now **v2**: its exact observed Match Complete grammar additionally accepts score 2–0, decimal health, and XP/armor blocks. The observed nonfinal round-winner block stays inside the match. A participant-scoped `resigned` line is an explicit end; a missing separately announced result produces Unknown, never an invented win. PVPHQ's validated start/report/winner grammar is retained; the premature saves came from the client level/disconnect mapping, not a missing announcement rule. Decorative prefixes no longer consume leading underscores from names. The table below records the prior 0.1.5 adapter evidence; these additions supersede MCPvP's older limits.
 
 Six configured environments use the [explicit capture policy](CAPTURE_POLICY.md). All are validated against captured announcements and real recorded combat events from the owner's October 24 diagnostic session. None has new external-server acceptance with the 0.1.5 jar. Three matches per server cannot establish broad server accuracy.
 

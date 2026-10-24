@@ -22,7 +22,8 @@ class AnalyticsTest {
     assertEquals(s.emptyMisses, a.misses.stream().filter(FightAnalytics.Miss::empty).count());
     assertEquals(s.uncertain, a.misses.stream().filter(m -> !m.empty()).count());
     assertEquals(s.longestCombo, a.longestCombo());
-    assertEquals(s.averageInterval(), a.intervals.stream().mapToDouble(d -> d).average().orElse(0), 1e-9);
+    assertEquals(
+        s.averageInterval(), a.intervals.stream().mapToDouble(d -> d).average().orElse(0), 1e-9);
     assertEquals(s.reachCount, Arrays.stream(a.hitReachBins).sum());
     assertEquals(s.centerAim, a.center);
     assertEquals(s.edgeAim, a.edge);
@@ -64,8 +65,8 @@ class AnalyticsTest {
     assertEquals(1, uncertain.size());
     assertEquals(3.4, uncertain.getFirst().estimatedReach(), 1e-9);
     assertTrue(uncertain.getFirst().geometry());
-    var empty = a.misses.stream().filter(FightAnalytics.Miss::empty).findFirst().orElseThrow();
-    assertFalse(empty.geometry());
+    assertTrue(a.misses.stream().noneMatch(FightAnalytics.Miss::empty));
+    assertEquals(1, a.fight.statistics().excludedSwings, "unrelated empty swing is excluded");
     assertEquals(1, Arrays.stream(a.missReachBins).sum());
   }
 
@@ -75,7 +76,9 @@ class AnalyticsTest {
     var a = FightAnalytics.of(fight);
     assertEquals(2, a.jumps.size());
     assertEquals(1, a.jumps.stream().filter(FightAnalytics.Jump::candidate).count());
-    assertEquals(fight.statistics().jumpCandidates, a.jumps.stream().filter(FightAnalytics.Jump::candidate).count());
+    assertEquals(
+        fight.statistics().jumpCandidates,
+        a.jumps.stream().filter(FightAnalytics.Jump::candidate).count());
     assertEquals(80, a.jumps.getFirst().offsetMillis(), 1);
     assertEquals(1, a.jumpsWithoutDamage);
     assertEquals(1, a.motionSamples);
@@ -148,18 +151,34 @@ class AnalyticsTest {
   @Test
   void historyFilteringAndSorting() {
     var a = withTime(Fixtures.sample(), 100, FightRecord.Outcome.UNKNOWN);
-    var b = withTime(new Fixtures().attackAt(0, attack(1, 3, .5, .5, false, false, true)).finish(1), 200, FightRecord.Outcome.LOSS);
+    var b =
+        withTime(
+            new Fixtures().attackAt(0, attack(1, 3, .5, .5, false, false, true)).finish(1),
+            200,
+            FightRecord.Outcome.LOSS);
     var c = withTime(Fixtures.sample(), 300, FightRecord.Outcome.INTERRUPTED);
     var all = List.of(c, b, a);
-    assertEquals(List.of(c, b, a), HistoryQuery.apply(all, HistoryQuery.OutcomeFilter.ALL, HistoryQuery.Sort.NEWEST, false));
-    assertEquals(List.of(a, b, c), HistoryQuery.apply(all, HistoryQuery.OutcomeFilter.ALL, HistoryQuery.Sort.OLDEST, false));
-    assertEquals(List.of(b), HistoryQuery.apply(all, HistoryQuery.OutcomeFilter.LOSS, HistoryQuery.Sort.NEWEST, false));
-    assertEquals(List.of(c, a), HistoryQuery.apply(all, HistoryQuery.OutcomeFilter.ALL, HistoryQuery.Sort.NEWEST, true));
-    var byReach = HistoryQuery.apply(all, HistoryQuery.OutcomeFilter.ALL, HistoryQuery.Sort.REACH, false);
+    assertEquals(
+        List.of(c, b, a),
+        HistoryQuery.apply(all, HistoryQuery.OutcomeFilter.ALL, HistoryQuery.Sort.NEWEST, false));
+    assertEquals(
+        List.of(a, b, c),
+        HistoryQuery.apply(all, HistoryQuery.OutcomeFilter.ALL, HistoryQuery.Sort.OLDEST, false));
+    assertEquals(
+        List.of(b),
+        HistoryQuery.apply(all, HistoryQuery.OutcomeFilter.LOSS, HistoryQuery.Sort.NEWEST, false));
+    assertEquals(
+        List.of(c, a),
+        HistoryQuery.apply(all, HistoryQuery.OutcomeFilter.ALL, HistoryQuery.Sort.NEWEST, true));
+    var byReach =
+        HistoryQuery.apply(all, HistoryQuery.OutcomeFilter.ALL, HistoryQuery.Sort.REACH, false);
     assertEquals(b, byReach.getLast(), "missing reach sorts last");
-    var byHits = HistoryQuery.apply(all, HistoryQuery.OutcomeFilter.ALL, HistoryQuery.Sort.HITS, false);
+    var byHits =
+        HistoryQuery.apply(all, HistoryQuery.OutcomeFilter.ALL, HistoryQuery.Sort.HITS, false);
     assertEquals(c, byHits.getFirst(), "ties fall back to newest");
-    assertTrue(HistoryQuery.apply(all, HistoryQuery.OutcomeFilter.WIN, HistoryQuery.Sort.NEWEST, false).isEmpty());
+    assertTrue(
+        HistoryQuery.apply(all, HistoryQuery.OutcomeFilter.WIN, HistoryQuery.Sort.NEWEST, false)
+            .isEmpty());
   }
 
   @Test
@@ -172,7 +191,19 @@ class AnalyticsTest {
   }
 
   static FightRecord withTime(FightRecord f, long start, FightRecord.Outcome outcome) {
-    return new FightRecord(f.schemaVersion(), UUID.randomUUID().toString(), start, start + 1, f.durationNanos(), f.opponent(),
-        outcome, f.reason(), f.statistics(), f.events(), f.policy(), f.evaluations(), f.opponentLabel());
+    return new FightRecord(
+        f.schemaVersion(),
+        UUID.randomUUID().toString(),
+        start,
+        start + 1,
+        f.durationNanos(),
+        f.opponent(),
+        outcome,
+        f.reason(),
+        f.statistics(),
+        f.events(),
+        f.policy(),
+        f.evaluations(),
+        f.opponentLabel());
   }
 }

@@ -13,6 +13,7 @@ public final class Config {
   public double alertSeconds = 6;
   public double perfectReachTarget = 3.0, perfectReachTolerance = .06, timingToleranceTicks = 1;
   public double serverInactivitySeconds = 60, resultGraceSeconds = 3;
+  public double exchangeInactivitySeconds = 3;
   public int jumpWindowTicks = 4;
   public boolean perfectReachSound = true;
   public boolean animate = true, floatingText = false;
@@ -160,6 +161,7 @@ public final class Config {
     retention = Math.max(1, Math.min(1000, retention));
     trendWindow = Math.max(5, Math.min(100, trendWindow));
     inactivitySeconds = clamp(inactivitySeconds, 2, 120);
+    exchangeInactivitySeconds = clamp(exchangeInactivitySeconds, .5, 30);
     correlationMillis = clamp(correlationMillis, 50, 500);
     comboSeconds = clamp(comboSeconds, .5, 10);
     jumpWindowMillis = clamp(jumpWindowMillis, 50, 300);

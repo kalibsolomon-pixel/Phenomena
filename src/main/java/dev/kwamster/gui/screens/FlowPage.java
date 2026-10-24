@@ -372,6 +372,48 @@ final class FlowPage implements KwamsterScreen.Page {
   }
 
   private void exchanges(Content c, FightAnalytics f) {
+    if (f.fight.statistics().measurementVersion > 0) {
+      c.heading(
+          "Combat exchanges",
+          f.activeExchanges.size()
+              + " exchanges / "
+              + number(f.combatActiveSeconds, 1)
+              + " s combat-active / "
+              + number(f.duration, 1)
+              + " s recorded");
+      c.block(48, new FlowCharts.ExchangeTimeline(f.duration, f.activeExchanges));
+      c.note(
+          "Filled intervals show combat; empty intervals show breaks. The independent exchange"
+              + " timeout is "
+              + number(f.fight.statistics().exchangeTimeoutSeconds, 1)
+              + " s. Ending an exchange keeps the recording active.");
+      List<String[]> measuredRows = new ArrayList<>();
+      int i = 1;
+      for (var e : f.activeExchanges)
+        measuredRows.add(
+            new String[] {
+              "#" + i++,
+              number(e.start(), 1) + "-" + number(e.end(), 1),
+              number(e.end() - e.start(), 1),
+              "" + e.hits(),
+              "" + e.misses(),
+              "" + e.combos(),
+              "" + e.momentumChanges()
+            });
+      c.block(
+          Table.height(measuredRows.size()),
+          new Table(
+              new String[] {
+                "Exchange", "Time (s)", "Duration", "Hits", "Misses", "Combos", "Turns"
+              },
+              new float[] {1, 1.6f, 1, .7f, .7f, .8f, .7f},
+              new boolean[] {false, true, true, true, true, true, true},
+              measuredRows));
+      c.block(FlowCharts.ComboTimeline.height(), timeline(f, -1));
+      c.block(FlowCharts.DominanceChart.height(c.compact), chart(f));
+      c.text("Finalization: " + f.fight.reason());
+      return;
+    }
     var ex = f.combos.exchanges();
     c.heading(
         "Exchanges",

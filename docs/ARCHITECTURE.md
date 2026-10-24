@@ -1,5 +1,11 @@
 # Architecture
 
+## 0.1.6 measurement separation
+
+RecordingController owns automatic/manual parent recordings; configured CombatEngine boundaries remain adapter-controlled. Fabric play-connection teardown emits DISCONNECT. Client world replacement emits WORLD_CHANGE and cannot independently finalize a configured match or manual parent.
+
+AttackObservations preserves raw inputs and freezes canonical identity/sample/classification/timing maps. Its local-outgoing-only inclusive two-tick window runs before attack analytics and feedback. Canonical unresolved attempts remain pending within a bounded correlation window. CombatExchange independently stores active intervals and has no recorder callback. Round/exchange boundaries segment combos and reset momentum; dominance masks breaks without changing evidence weights. GUI and HTML consume the same frozen canonical analytics. History summaries omit full attack maps and interval timelines; full recordings reload lazily. Details and schema compatibility are in [0.1.6](0.1.6.md).
+
 The Fabric entrypoint is the composition root. Minecraft state is read on the client thread; the storage worker receives finalized snapshots and never accesses world state. No rendering replacement, packet cancellation, packet mutation or input automation is installed by the production mod. Test-only input simulation and frame probes live in src/gametest and are excluded from the release jar.
 
 ## Capture and ordering

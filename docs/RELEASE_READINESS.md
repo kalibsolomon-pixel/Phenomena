@@ -1,6 +1,12 @@
 # Release readiness
 
-**Current: 0.1.5 development build for owner review; public release is not approved.** See [0.1.5 evidence, validation and remaining gates](0.1.5.md). The sections below retain historical release assessments and do not describe the current capture policy.
+## 0.1.6 local review status
+
+Development jar: `build/libs/kwamster-0.1.6.jar`. The [full report](0.1.6.md) establishes the PVPHQ premature-finalization code path, preserves the Bo3tu/Bo3tw screenshot uncertainty, documents additional MCPvP failures and corrections, and defines canonical two-tick attack groups and independent combat exchanges. Automated build/unit/replay/history validation passes; muted client and compatibility evidence is in VALIDATION.md. Original owner data remains unchanged; local commit only.
+
+Remaining review limits: new external-server acceptance with this jar, exact screenshot identity/target-score discrepancy, unvalidated server grammar and spear paths, opponent-side shield use with two players, the preserved CatPvP round-count discrepancy, interactive browser QA blocked by protocol policy, and long live-session frame/memory measurements. These limits do not authorize pushing, publishing or installing into Aurora.
+
+**Historical 0.1.5 assessment:** development build for owner review; public release was not approved. See [0.1.5 evidence, validation and remaining gates](0.1.5.md). The sections below retain historical release assessments and do not describe the current capture policy.
 
 The jar compiles against Minecraft 1.21.11 using Java 21 and official mappings. The unit suite (78 tests) and the actual Fabric client sequence pass. 0.1.1 replaces the HUD-oriented screens with a tabbed analytics dashboard and a local browser replay workflow. Nothing has been pushed, uploaded or published.
 

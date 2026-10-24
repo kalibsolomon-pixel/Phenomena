@@ -1,5 +1,31 @@
 # Performance validation — 2026-10-21
 
+## 0.1.6 lifecycle, deduplication and exchanges
+
+Raw synthetic results: [exchanges](performance/0.1.6/exchanges.json), [capture](performance/0.1.6/capture.json), [analytics/storage/history](performance/0.1.6/analytics.json). One discarded warmup plus three recorded runs for the focused exchange/capture microbenchmarks; analytics/history/export uses the benchmark's existing warmup/best-of procedure. No zero-overhead or causal FPS claim follows from these measurements.
+
+| Workload | Measured cost |
+| --- | ---: |
+| Two-tick grouping including classification/map updates | 63–169 ns per raw input |
+| Already-active exchange interaction/tick | 1.06–4.93 ns/op |
+| Classification update | 9.0–14.4 ns/op |
+| Empty configured match lifecycle | 24.6–32.4 μs/match |
+| Host/policy lookup | 21.7–24.9 ns/op |
+| Adapter rule matching | 1.07–1.22 μs/op |
+| Candidate diagnostics disabled / enabled | 5.4–15.9 ns / 2.92–3.49 μs per operation |
+| Attack/hit pipeline, including periodic finalization | 1.05 μs/event, about 1,166 allocated bytes/event |
+| Rich mixed pipeline | 1.63 μs/event, about 1,101 allocated bytes/event |
+| 10,000-event fight analytics | 45.4 ms |
+| 10,000-event offline report | 253.7 ms, 4.61 MB |
+| 1,000-event offline report | 120.9 ms, 659 KB |
+| 1,000-fight aggregate, 50k timeline events | 31.2 ms |
+| 1,000-fight aggregate, 22k rich timeline events | 50.5 ms |
+| Small atomic recording replacement | 3.62 ms mean |
+
+The tiny active-exchange benchmark is readily optimized by the JVM and excludes interval closure/snapshot allocation; it is a narrow hot-path observation, not a full exchange cost guarantee. The 250-round/5,000-event capture scenario includes boundaries and finalization: one recording through 15,501 simulated seconds, 12.96 μs/event, 277 ms export for a 2.33 MB report. Simulated duration is not a four-hour wall-clock soak. The 269 historical source files analyzed/exported in 229.6/3,537.8 ms total, zero failures.
+
+Canonical metadata has real allocation/storage cost. Correlation remains bounded at 64 pending groups; attack-time near-miss queries inspect a bounded spatial region, never every render frame. Active exchange ticking does not copy the accumulated interval list. Full attack maps are removed from memory-only history summaries and restored on timeline load. Five-second manual snapshots still scale with accumulated parent data. Exports/diagnostic serialization remain on the storage worker; snapshots/final analytics retain their existing client-thread costs. The muted functional/compatibility runs are smoke acceptance, not new live multiplayer frame-time measurements.
+
 Measured on Windows 11 Home 10.0.26300, Intel i7-14700F (20 cores / 28 logical processors), Radeon RX 9070 XT (driver 32.0.32015.7029), approximately 32 GiB RAM, Temurin Java 21.0.12.1. Minecraft 1.21.11, Loader 0.19.5, Fabric API 0.141.6+1.21.11. Optional optimization mods were excluded from these runs.
 
 ## Workload and method

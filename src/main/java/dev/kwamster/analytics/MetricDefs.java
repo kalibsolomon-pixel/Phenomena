@@ -13,7 +13,7 @@ public final class MetricDefs {
       List.of(
           new Def(
               "accuracy",
-              "Hit accuracy",
+              "Combat accuracy",
               "%",
               "Inferred",
               "Correlated hits / (attempts minus confirmed shield blocks). Uncertain attempts stay"
@@ -29,13 +29,16 @@ public final class MetricDefs {
               "Attack attempts",
               "",
               "Observed",
-              "Entity attacks plus empty swings during an engagement."),
+              "Unique eligible combat attempts. Noncombat inputs and duplicates are excluded in"
+                  + " 0.1.6; historical measurements keep their original policy."),
           new Def(
               "emptyMisses",
-              "Empty swings",
+              "Eligible misses",
               "",
               "Observed",
-              "Swings with no entity selected. The only confirmed misses."),
+              "Aimed empty swings with opponent geometry and no confirmation within the correlation"
+                  + " window. Inferred misses, not proof of server rejection. Historical"
+                  + " empty-swing counts retain their older policy."),
           new Def(
               "uncertain",
               "Uncertain attacks",
