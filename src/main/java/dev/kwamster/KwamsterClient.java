@@ -35,6 +35,9 @@ public final class KwamsterClient implements ClientModInitializer {
   public static Path dataDir;
   public static String status = "Local by default / K opens KWAMSTER";
   public static final List<FightRecord> history = new ArrayList<>();
+  public static final ExportNotifications exportNotifications =
+      new ExportNotifications(System::nanoTime);
+  private static boolean initialized;
 
   /** Incremented on every history change so derived GUI data is recomputed only when needed. */
   public static long historyVersion;
@@ -45,6 +48,10 @@ public final class KwamsterClient implements ClientModInitializer {
 
   @Override
   public void onInitializeClient() {
+    synchronized (KwamsterClient.class) {
+      if (initialized) return;
+      initialized = true;
+    }
     var loader = FabricLoader.getInstance();
     configStore = new ConfigStore(loader.getConfigDir().resolve("kwamster.json"));
     try {
@@ -71,11 +78,12 @@ public final class KwamsterClient implements ClientModInitializer {
                   .execute(
                       () -> {
                         status = error;
-                        if (error.contains("ready")
-                            || error.contains("failed")
-                            || error.contains("exhausted")) notice(error);
+                        if (error.contains("failed") || error.contains("exhausted")) notice(error);
                       });
-            });
+            },
+            (folder, fight, options) ->
+                dev.kwamster.sharing.ReportExporter.export(folder, fight, options),
+            exportNotifications::offer);
     recovery = new SessionRecovery(store, dataDir, KwamsterClient::notice);
     diagnostics = new Diagnostics(store, dataDir, KwamsterClient::notice);
     diagnostics.policy(() -> engine.capturePolicy(), () -> engine.captureLimitation());
@@ -121,6 +129,7 @@ public final class KwamsterClient implements ClientModInitializer {
         client -> {
           ClientCapture.tick();
           autoReports.tick(ClientCapture.now());
+          exportNotifications.tick(client.player != null, KwamsterClient::notice);
           diagnostics.tick(ClientCapture.now());
           // The persistent HUD is dormant: tracking never depends on it.
           if (config.hudOverlay) CombatHud.tick();

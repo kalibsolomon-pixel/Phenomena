@@ -182,6 +182,7 @@ public final class KwamsterGameTest implements FabricClientGameTest {
 
   @Override
   public void runTest(ClientGameTestContext ctx) {
+    NotificationClientTest.startup(ctx);
     boolean realOpen = Boolean.getBoolean("kwamster.realOpen");
     if (!realOpen)
       SystemOpener.setLauncher(
@@ -216,6 +217,7 @@ public final class KwamsterGameTest implements FabricClientGameTest {
               "summon minecraft:husk 0.5 -60 2.8"
                   + " {NoAI:1b,Silent:1b,PersistenceRequired:1b,Health:1000f,attributes:[{id:\"minecraft:max_health\",base:1000}]}");
       ctx.waitTicks(30);
+      NotificationClientTest.joined(ctx);
 
       // Keybind opens and closes the dashboard; gameplay keys stay out of the world while open.
       ctx.getInput().pressKey(GLFW.GLFW_KEY_K);
@@ -817,6 +819,7 @@ public final class KwamsterGameTest implements FabricClientGameTest {
       ManualClientTest.exercise(ctx, world);
     }
     ManualClientTest.afterDisconnect(ctx);
+    NotificationClientTest.reconnect(ctx);
     SystemOpener.setLauncher(null);
   }
 }

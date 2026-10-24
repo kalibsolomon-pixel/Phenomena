@@ -3,7 +3,8 @@
   "package": "dev.kwamster.testmixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "FrameProbeMixin"
+    "FrameProbeMixin",
+    "ChatProbeMixin"
   ],
   "injectors": {
     "defaultRequire": 1

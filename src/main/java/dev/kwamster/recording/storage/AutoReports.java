@@ -2,6 +2,7 @@ package dev.kwamster.recording.storage;
 
 import dev.kwamster.combat.fights.FightRecord;
 import dev.kwamster.platform.SafePaths;
+import dev.kwamster.recording.ExportNotifications;
 import dev.kwamster.sharing.ReportExporter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -22,7 +23,7 @@ public final class AutoReports {
     void export(Path folder, FightRecord fight, ReportExporter.Options options) throws IOException;
   }
 
-  private record Pending(FightRecord fight, ReportExporter.Options options) {}
+  private record Pending(FightRecord fight, ReportExporter.Options options, boolean announce) {}
 
   private record Receipt(
       String id, String digest, String folder, String htmlDigest, String jsonDigest) {}
@@ -31,6 +32,7 @@ public final class AutoReports {
   private final Path data;
   private final Consumer<String> status;
   private final Exporter exporter;
+  private final Consumer<ExportNotifications.Completion> completed;
   private final Map<String, Pending> pending = new ConcurrentHashMap<>();
   private final Set<String> running = ConcurrentHashMap.newKeySet();
   private final Map<String, String> available =
@@ -51,10 +53,20 @@ public final class AutoReports {
   }
 
   public AutoReports(FightStore store, Path data, Consumer<String> status, Exporter exporter) {
+    this(store, data, status, exporter, event -> status.accept(ExportNotifications.MESSAGE));
+  }
+
+  public AutoReports(
+      FightStore store,
+      Path data,
+      Consumer<String> status,
+      Exporter exporter,
+      Consumer<ExportNotifications.Completion> completed) {
     this.store = store;
     this.data = data;
     this.status = status;
     this.exporter = exporter;
+    this.completed = completed;
   }
 
   public String availability(String id) {
@@ -72,7 +84,7 @@ public final class AutoReports {
               + " History.");
       return false;
     }
-    pending.put(fight.id(), new Pending(fight, options));
+    pending.put(fight.id(), new Pending(fight, options, true));
     pump();
     return true;
   }
@@ -93,7 +105,7 @@ public final class AutoReports {
             try {
               for (int attempt = 1; attempt <= 3; attempt++) {
                 try {
-                  process(p.fight, p.options);
+                  process(p.fight, p.options, p.announce);
                   pending.remove(id, p);
                   return;
                 } catch (IOException | RuntimeException ex) {
@@ -116,12 +128,14 @@ public final class AutoReports {
   public void recover(List<FightRecord> records, ReportExporter.Options options) {
     for (var summary : records) {
       try {
-        process(store.readOne(summary.id()), options);
+        // Startup repairs (including format upgrades) are background work, not new fights.
+        process(store.readOne(summary.id()), options, false);
       } catch (IOException | RuntimeException ex) {
         status.accept("Report recovery deferred for " + summary.id() + ": " + ex.getMessage());
         if (pending.size() < 128)
           try {
-            pending.put(summary.id(), new Pending(store.readOne(summary.id()), options));
+            pending.putIfAbsent(
+                summary.id(), new Pending(store.readOne(summary.id()), options, false));
           } catch (IOException ignored) {
             /* damaged originals are preserved */
           }
@@ -129,8 +143,9 @@ public final class AutoReports {
     }
   }
 
-  private void process(FightRecord fight, ReportExporter.Options options) throws IOException {
-    Path recording = store.persistFinalized(fight);
+  private void process(FightRecord fight, ReportExporter.Options options, boolean notify)
+      throws IOException {
+    store.persistFinalized(fight);
     Path receipts = data.resolve("report-state");
     Files.createDirectories(receipts);
     Path receipt = receipts.resolve(SafePaths.requireUuid(fight.id()) + ".json");
@@ -167,7 +182,7 @@ public final class AutoReports {
             fileDigest(folder.resolve("index.html")),
             fileDigest(folder.resolve("report.json"))));
     available.put(fight.id(), "Report ready: " + data.relativize(folder.resolve("index.html")));
-    status.accept("Fight saved; automatic HTML report ready");
+    if (notify) completed.accept(new ExportNotifications.Completion(fight.id(), digest));
   }
 
   private static String fileDigest(Path p) throws IOException {
