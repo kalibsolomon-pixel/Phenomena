@@ -18,22 +18,52 @@ class InterfaceTest {
   @Test
   void tabSwitchingPreservesScrollAndFilters() {
     var s = new UiState();
-    s.select(Tab.ANALYTICS);
-    s.analytics = UiState.AnalyticsSection.REACH;
+    s.select(Tab.OFFENSE);
+    s.offense = UiState.OffenseSection.REACH;
     s.setScroll(120);
     s.select(Tab.HISTORY);
     s.outcome = dev.kwamster.analytics.HistoryQuery.OutcomeFilter.LOSS;
     s.setScroll(40);
     s.select(Tab.SETTINGS);
     assertEquals(0, s.scroll());
-    s.select(Tab.ANALYTICS);
-    assertEquals(UiState.AnalyticsSection.REACH, s.analytics);
+    s.select(Tab.OFFENSE);
+    assertEquals(UiState.OffenseSection.REACH, s.offense);
     assertEquals(120, s.scroll());
-    s.analytics = UiState.AnalyticsSection.AIM;
+    s.offense = UiState.OffenseSection.AIM;
     assertEquals(0, s.scroll(), "each section has its own position");
+    s.select(Tab.DEFENSE);
+    s.defense = UiState.DefenseSection.SHIELDS;
+    s.setScroll(30);
+    s.select(Tab.FLOW);
+    assertEquals(0, s.scroll());
+    s.select(Tab.DEFENSE);
+    assertEquals(30, s.scroll());
     s.select(Tab.HISTORY);
     assertEquals(40, s.scroll());
     assertEquals(dev.kwamster.analytics.HistoryQuery.OutcomeFilter.LOSS, s.outcome);
+  }
+
+  @Test
+  void informationArchitectureHasSixShallowTabs() {
+    assertEquals(
+        List.of("Overview", "Offense", "Defense", "Fight Flow", "History", "Settings"),
+        java.util.Arrays.stream(Tab.values()).map(t -> t.label).toList());
+    assertEquals(6, UiState.OffenseSection.values().length);
+    assertEquals(4, UiState.DefenseSection.values().length);
+    assertEquals(3, UiState.FlowSection.values().length);
+  }
+
+  @Test
+  void flowFocusClampsAndClearsComboSelection() {
+    var s = new UiState();
+    s.combo = 2;
+    s.focus(5, 3);
+    assertEquals(2, s.focus);
+    assertEquals(-1, s.combo);
+    s.focus(-1, 3);
+    assertEquals(0, s.focus);
+    s.focus(4, 0);
+    assertEquals(0, s.focus);
   }
 
   @Test

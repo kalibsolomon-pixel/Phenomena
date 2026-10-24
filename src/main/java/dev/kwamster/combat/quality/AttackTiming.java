@@ -9,7 +9,11 @@ public final class AttackTiming {
     PERFECT,
     TOO_FAST,
     TOO_SLOW,
-    UNAVAILABLE
+    UNAVAILABLE,
+    /**
+     * Expected cooldown is not longer than the tick tolerance; fast and perfect are inseparable.
+     */
+    BELOW_RESOLUTION
   }
 
   public record Result(Grade grade, double intervalTicks, double expectedTicks) {}
@@ -46,9 +50,11 @@ public final class AttackTiming {
         && interval >= 0
         && interval <= 2 * previousCooldown) {
       grade =
-          Math.abs(interval - previousCooldown) <= tolerance
-              ? Grade.PERFECT
-              : interval < previousCooldown ? Grade.TOO_FAST : Grade.TOO_SLOW;
+          previousCooldown <= Math.max(tolerance, 1)
+              ? Grade.BELOW_RESOLUTION
+              : Math.abs(interval - previousCooldown) <= tolerance
+                  ? Grade.PERFECT
+                  : interval < previousCooldown ? Grade.TOO_FAST : Grade.TOO_SLOW;
     }
     weapon = key;
     previousTick = tick;

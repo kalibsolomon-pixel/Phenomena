@@ -76,6 +76,7 @@ final class SettingsPage implements KwamsterScreen.Page {
       case GENERAL -> general(c);
       case CONTROLS -> controls(c);
       case FEEDBACK -> feedback(c);
+      case MEASUREMENT -> measurement(c);
       case STORAGE -> storage(c);
       case INTERFACE -> ui(c);
     }
@@ -149,7 +150,30 @@ final class SettingsPage implements KwamsterScreen.Page {
             1,
             v -> (int) v + " MiB",
             v -> cfg.maxStorageMb = v));
-    c.heading("Fight detection", "applies to new fights");
+    c.heading("Reset");
+    c.setting(
+        "Reset all settings",
+        "Restores defaults. Recordings are not affected.",
+        new KButton(
+                "Reset...",
+                KButton.Style.DANGER,
+                () ->
+                    s.confirm(
+                        "Reset settings?",
+                        "Restore every KWAMSTER setting to its default? Recordings and exports are"
+                            + " kept.",
+                        "Reset",
+                        () -> {
+                          KwamsterClient.resetConfig();
+                          Notices.post("Settings reset to defaults", Notices.Level.OK);
+                          s.rebuild();
+                        }))
+            .content());
+  }
+
+  private void measurement(Content c) {
+    var cfg = c();
+    c.heading("Fight detection", "frozen into each new fight");
     c.setting(
         "Inactivity timeout",
         "A fight ends as Unknown after this long without combat.",
@@ -205,25 +229,44 @@ final class SettingsPage implements KwamsterScreen.Page {
             5,
             v -> (int) v + " s",
             v -> cfg.serverInactivitySeconds = v));
-    c.heading("Reset");
+    c.heading("Reach and timing thresholds", "frozen into each new fight");
     c.setting(
-        "Reset all settings",
-        "Restores defaults. Recordings are not affected.",
-        new KButton(
-                "Reset...",
-                KButton.Style.DANGER,
-                () ->
-                    s.confirm(
-                        "Reset settings?",
-                        "Restore every KWAMSTER setting to its default? Recordings and exports are"
-                            + " kept.",
-                        "Reset",
-                        () -> {
-                          KwamsterClient.resetConfig();
-                          Notices.post("Settings reset to defaults", Notices.Level.OK);
-                          s.rebuild();
-                        }))
-            .content());
+        "Target reach",
+        "Eye to interpolated target box ray contact, in blocks.",
+        slider(
+            "Target reach",
+            cfg.perfectReachTarget,
+            .1,
+            6,
+            .01,
+            v -> Format.number(v, 2) + " blocks",
+            v -> cfg.perfectReachTarget = v));
+    c.setting(
+        "Reach tolerance",
+        "Inclusive window around target reach.",
+        slider(
+            "Reach tolerance",
+            cfg.perfectReachTolerance,
+            0,
+            .5,
+            .01,
+            v -> "±" + Format.number(v, 2),
+            v -> cfg.perfectReachTolerance = v));
+    c.setting(
+        "Timing tolerance",
+        "Quantization allowance around one effective cooldown.",
+        slider(
+            "Timing tolerance",
+            cfg.timingToleranceTicks,
+            0,
+            2,
+            .25,
+            v -> "±" + Format.number(v, 2) + " ticks",
+            v -> cfg.timingToleranceTicks = v));
+    c.note(
+        "Thresholds are recorded with every fight, so changing them later never reinterprets an"
+            + " earlier recording. Reach is client geometry; a hit beyond the target is not"
+            + " evidence of a rule violation.");
   }
 
   private void controls(Content c) {
@@ -278,7 +321,7 @@ final class SettingsPage implements KwamsterScreen.Page {
             .content());
     c.heading("In this window");
     c.text(
-        "1-4 switch tabs. Tab and Shift+Tab move focus; Enter or Space activates. Arrow keys adjust"
+        "1-6 switch tabs. Tab and Shift+Tab move focus; Enter or Space activates. Arrow keys adjust"
             + " sliders and move list selection. Mouse wheel, Page Up/Down and Home/End scroll."
             + " Escape closes a dropdown or dialog first, then the window. The dashboard key also"
             + " closes it unless a text field is focused.");
@@ -306,39 +349,6 @@ final class SettingsPage implements KwamsterScreen.Page {
         "Perfect-reach sound",
         "Uses the Perfect sound below, independently of timing.",
         toggle("Perfect reach sound", () -> cfg.perfectReachSound, v -> cfg.perfectReachSound = v));
-    c.setting(
-        "Target reach",
-        "Eye to interpolated target box ray contact, in blocks.",
-        slider(
-            "Target reach",
-            cfg.perfectReachTarget,
-            .1,
-            6,
-            .01,
-            v -> Format.number(v, 2) + " blocks",
-            v -> cfg.perfectReachTarget = v));
-    c.setting(
-        "Reach tolerance",
-        "Inclusive window around target reach.",
-        slider(
-            "Reach tolerance",
-            cfg.perfectReachTolerance,
-            0,
-            .5,
-            .01,
-            v -> "±" + Format.number(v, 2),
-            v -> cfg.perfectReachTolerance = v));
-    c.setting(
-        "Timing tolerance",
-        "Quantization allowance around one effective cooldown.",
-        slider(
-            "Timing tolerance",
-            cfg.timingToleranceTicks,
-            0,
-            2,
-            .25,
-            v -> "±" + Format.number(v, 2) + " ticks",
-            v -> cfg.timingToleranceTicks = v));
     c.heading(
         "Sound styles", "Perfect is used for perfect reach; other styles are retained for preview");
     var chips = new KButton[4];

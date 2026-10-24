@@ -41,3 +41,39 @@ Raw frame arrays, heap/CPU/GC counters and benchmark output are in [performance/
 | Atomic replacement of a small recording | 2.9 ms mean |
 
 The aggregate runs only when history changes or the scope changes. Results are cached per scope, and per-fight analytics are cached in an LRU. Charts map precomputed arrays to pixels without re-deriving data per frame. Report generation and folder or browser opening run on the storage worker and a short-lived launcher thread, never on the render thread. The frame-time comparison above was not repeated for 0.1.1. Its HUD and recording modes now exercise the dormant overlay through `hudOverlay`. Raw output is in build/performance/analytics.json.
+
+
+## 0.1.3 — 2026-10-24
+
+Same machine, Java and Minecraft stack as above. Raw files are in [performance/0.1.3/](performance/0.1.3/); the earlier files are kept unchanged.
+
+### Frame time (same gametest loop as the 0.1.0 table)
+
+| Mode | Samples | Mean ms | P95 ms | P99 ms | 0.1.0 mean / P95 |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Fabric baseline (KWAMSTER disabled) | 5690 | 0.262 | 0.441 | 0.702 | 0.274 / 0.472 |
+| Inactive | 6386 | 0.229 | 0.390 | 0.606 | 0.255 / 0.469 |
+| Tracking | 6360 | 0.235 | 0.401 | 0.642 | 0.255 / 0.483 |
+| HUD (dormant overlay forced on) | 5966 | 0.249 | 0.439 | 0.784 | 0.276 / 0.493 |
+| Recording | 5773 | 0.258 | 0.479 | 0.796 | 0.279 / 0.520 |
+
+The tracking and recording modes now include the new capture work: sound and animate observations, per-tick health, teleport and removal checks, and richer finalization. They stayed within the baseline's run-to-run variation. As before, this is a synthetic high-frame-rate loop with one pass per mode, not interactive FPS, and no causal overhead percentage follows from it.
+
+### Analytics and storage (`./scripts/dev.ps1 benchmarkAnalytics`)
+
+| Measure | 0.1.3 | 0.1.1/0.1.2 |
+| --- | ---: | ---: |
+| Engine, attack/hit pairs, finalizing every 1,000 pairs | 318–400 ns/event, 170 B/event | 204 ns, 103 B |
+| Engine, 0.1.3 mixed events (attempts, hits, attributed incoming, velocity, health, jumps, shield, motion) after warm-up | 938–1,266 ns/event, 475 B/event | — |
+| Per-fight analytics of a 10,000-event fight (the recording cap), best of 5 | 48–55 ms | — |
+| Dashboard aggregate, 1,000 fights / 50,000 timeline events (best of 7) | 31–38 ms | 5.3 ms |
+| Dashboard aggregate, 1,000 fights with 20 context-rich timelines | 15–28 ms | — |
+| Report export, 1,000-event fight | 111–124 ms, 621 KB | 59 ms, 432 KB |
+| Report export, 10,000-event fight | 188–232 ms, 3.9 MB | — |
+| Atomic replacement of a small recording | 3.2–4.1 ms | 2.9 ms |
+
+Per-event engine cost rose because every finalization now runs the shared combo analysis, jump analysis and health summary. Profiling with Java Flight Recorder found two hot spots, both fixed before these numbers were taken: a quadratic largest-swing search (now a linear sliding window, verified against brute force) and a per-event hash map in the combo analysis (now binary search). The remaining cost per 1,000-event fight is spread across the dominance sampling, combo, incoming and aim summaries.
+
+Analytics run only when history or scope changes and are cached per fight; they never run per frame. On the client thread, the worst case at the in-memory caps is one page build of a few tens of milliseconds after a fight ends. Exports run on the storage worker. Reports are larger because they embed dominance samples, combo structure and per-attempt data. A 10,000-event fight produces a report of about 4 MB.
+
+Ranges span three back-to-back runs after the optimizations. This machine shows about ±20 % variation between runs, and the 0.1.1/0.1.2 values come from earlier sessions. Treat the comparison as indicative.

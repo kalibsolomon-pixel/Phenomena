@@ -199,15 +199,24 @@ final class HistoryPage implements KwamsterScreen.Page {
             .content(),
         new KButton("Export", () -> FightActions.export(f)).content(),
         new KButton("Delete", KButton.Style.DANGER, () -> confirmDelete(f)).content());
+    var r = f.resolution();
     c.heading(
-        outcome(f.outcome()) + " / " + duration(f.durationNanos()),
+        r.classification().label + " / " + duration(f.durationNanos()),
         opponent(f.opponentLabel(), f.opponent()));
     c.text(
-        "Outcome evidence: "
-            + f.matchEvidence().confidence()
-            + "; "
-            + f.matchEvidence().entries().stream().filter(e -> e.accepted()).count()
-            + " accepted announcement(s).");
+        "Established by: "
+            + r.source().label
+            + "; confidence "
+            + r.confidence().name().toLowerCase(Locale.ROOT)
+            + "; scope "
+            + r.scope().name().toLowerCase(Locale.ROOT)
+            + (r.derived() ? "; derived from a recording made before 0.1.3" : "")
+            + ".");
+    if (r.evidenceIndex() != null && r.evidenceIndex() < f.matchEvidence().entries().size()) {
+      var e = f.matchEvidence().entries().get(r.evidenceIndex());
+      c.text("Establishing announcement: " + e.rule() + ": " + e.text());
+    }
+    for (var n : r.notes()) c.text("Note: " + n);
     if (KwamsterClient.autoReports != null) c.text(KwamsterClient.autoReports.availability(f.id()));
     for (var evidence : f.matchEvidence().entries())
       c.text(
@@ -242,8 +251,16 @@ final class HistoryPage implements KwamsterScreen.Page {
                 "averageInterval",
                 seconds(Aggregate.trendValue(f, TrendMetric.TIMING)),
                 "SD " + seconds(st.intervalCount == 0 ? Double.NaN : st.intervalDeviation())),
-            stat("longestCombo", Integer.toString(st.longestCombo), "inferred"),
-            stat("jumpCandidates", Integer.toString(st.jumpCandidates), "success unavailable")));
+            stat("longestCombo", Integer.toString(st.longestCombo), st.comboCount + " combos"),
+            stat(
+                "incoming",
+                Integer.toString(st.incoming),
+                st.unattributedIncoming + " unattributed"),
+            stat(
+                "shieldBlocks",
+                Integer.toString(st.shieldBlocks),
+                st.attacksIntoShield + " into shields"),
+            stat("jumpCandidates", Integer.toString(st.jumpCandidates), "success not measured")));
 
     var full = DataCache.full(f.id());
     if (full == null) {
@@ -286,22 +303,12 @@ final class HistoryPage implements KwamsterScreen.Page {
             cfg.chartGrid,
             true,
             "No reach samples"));
-    c.heading("Estimated momentum", "illustrative, not win probability");
-    double[] m = a.momentumSamples(160);
-    double[] mx = new double[m.length];
-    for (int i = 0; i < m.length; i++) mx[i] = a.duration * i / (m.length - 1);
-    c.block(
-        c.chartHeight(),
-        new Chart(
-            List.of(new Series("Momentum (estimate)", mx, m, Theme.SERIES_1, Mark.LINE)),
-            -1,
-            1,
-            "",
-            "s",
-            null,
-            cfg.chartGrid,
-            false,
-            "No exchanges"));
+    c.heading("Encounter dominance", a.dominance.availability.label);
+    c.block(FlowCharts.DominanceChart.height(c.compact), FlowPage.chart(a));
+    c.heading("Combo timeline", "x = combo length");
+    c.block(FlowCharts.ComboTimeline.height(), FlowPage.timeline(a, -1));
+    c.heading("Interpretation");
+    for (var line : Interpretation.of(a)) c.text(line);
 
     c.heading("Event timeline", full.events().size() + " events / monotonic time");
     long base =

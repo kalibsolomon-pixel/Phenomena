@@ -55,16 +55,41 @@ public final class MeleeAim {
         eye.distance(nearest) <= reach);
   }
 
+  /** Blocks between a recorded normalized contact and the ideal point of its region. */
+  public static double distance(Vec normalized, Region region, Box box) {
+    if (region == null || normalized == null || box == null) return Double.NaN;
+    Vec i = region.ideal();
+    return new Vec(
+            (normalized.x() - i.x()) * (box.maxX() - box.minX()),
+            (normalized.y() - i.y()) * (box.maxY() - box.minY()),
+            (normalized.z() - i.z()) * (box.maxZ() - box.minZ()))
+        .distance(new Vec(0, 0, 0));
+  }
+
+  /** Contacted face of a normalized point: the coordinate closest to a box boundary. */
+  public static String face(Vec n) {
+    double[] v = {n.x(), n.y(), n.z()};
+    int axis = 0;
+    double best = 2;
+    for (int k = 0; k < 3; k++) {
+      double edge = Math.min(v[k], 1 - v[k]);
+      if (edge < best) {
+        best = edge;
+        axis = k;
+      }
+    }
+    boolean high = v[axis] > .5;
+    return switch (axis) {
+      case 0 -> high ? "EAST" : "WEST";
+      case 1 -> high ? "TOP" : "BOTTOM";
+      default -> high ? "SOUTH" : "NORTH";
+    };
+  }
+
   public static Grade classify(Vec normalized, Region region, Box box, boolean visibleContact) {
     if (region == null) return Grade.UNAVAILABLE;
     if (!visibleContact || !region.reachable()) return Grade.POOR;
-    Vec i = region.ideal();
-    double distance =
-        new Vec(
-                (normalized.x() - i.x()) * (box.maxX() - box.minX()),
-                (normalized.y() - i.y()) * (box.maxY() - box.minY()),
-                (normalized.z() - i.z()) * (box.maxZ() - box.minZ()))
-            .distance(new Vec(0, 0, 0));
+    double distance = distance(normalized, region, box);
     return distance <= region.idealRadius()
         ? Grade.IDEAL
         : distance <= region.goodRadius()

@@ -203,18 +203,36 @@ class AnnouncementsTest {
   }
 
   @Test
-  void sameOpponentRematchNeedsIndependentEndpointForDelayedResults() {
+  void rematchAfterResolvedRoundIsConfirmed() {
+    // Minemen sends the result, then the next Duel block one second later (owner logs).
     begin();
     chat(2500, WIN);
-    chat(3000, START);
+    chat(3500, START);
     event(5100, Kind.ATTACK, "B");
-    chat(5500, WIN);
-    assertEquals(1, records.size());
+    chat(9000, LOSS);
+    assertEquals(2, records.size());
+    var second = records.getLast();
+    assertEquals(FightRecord.Outcome.LOSS, second.outcome());
+    assertEquals(Resolution.Classification.CONFIRMED_LOSS, second.resolution().classification());
+    assertTrue(second.resolution().notes().stream().anyMatch(n -> n.contains("Rematch")));
+  }
+
+  @Test
+  void rematchAfterUnresolvedRoundNeedsIndependentEndpoint() {
+    begin();
+    engine.tick(70_000_000_000L); // round 1 ends by inactivity, no result
+    assertEquals(FightRecord.Outcome.UNKNOWN, records.getFirst().outcome());
+    chat(71000, START);
+    event(73100, Kind.ATTACK, "B");
+    chat(73500, WIN);
+    assertEquals(1, records.size(), "a late round-1 result cannot resolve round 2");
     assertTrue(engine.engaged());
-    event(5600, Kind.DEATH, "B");
-    chat(7600, WIN + "\n");
+    event(73600, Kind.DEATH, "B");
+    chat(75600, WIN + "\n");
     assertEquals(2, records.size());
     assertEquals(Confidence.INFERRED, records.getLast().matchEvidence().confidence());
+    assertEquals(
+        Resolution.Classification.INFERRED_WIN, records.getLast().resolution().classification());
   }
 
   @Test

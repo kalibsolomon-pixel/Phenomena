@@ -59,7 +59,7 @@ public final class FightList extends AbstractWidget {
                 Format.dateTime(f.startEpochMillis()),
                 Format.duration(f.durationNanos()),
                 Format.opponent(f.opponentLabel(), f.opponent()),
-                Format.outcome(f.outcome()),
+                Format.result(f.resolution()),
                 Integer.toString(s.hits),
                 Format.percent(Aggregate.trendValue(f, TrendMetric.ACCURACY)),
                 Format.meters(Aggregate.trendValue(f, TrendMetric.REACH)),
@@ -74,8 +74,8 @@ public final class FightList extends AbstractWidget {
 
   /** Chooses visible columns for the current width: least important columns drop first. */
   private void layoutColumns(Font font) {
-    String[] titles = {"Date", "Duration", "Opponent", "Outcome", "Hits", "Accuracy", "Reach", ""};
-    String[] samples = {"0000-00-00 00:00", "00m 00s", "Opponent", "Interrupted", "000", "100.0%", "0.00 m", "Browser"};
+    String[] titles = {"Date", "Duration", "Opponent", "Result", "Hits", "Accuracy", "Reach", ""};
+    String[] samples = {"0000-00-00 00:00", "00m 00s", "Opponent", "Loss (confirmed)", "000", "100.0%", "0.00 m", "Browser"};
     int[] widths = new int[titles.length];
     for (int i = 0; i < titles.length; i++)
       widths[i] = Math.max(font.width(titles[i]), font.width(samples[i])) + (i >= 4 ? 12 : 8);

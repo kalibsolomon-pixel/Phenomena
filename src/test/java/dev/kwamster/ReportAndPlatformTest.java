@@ -68,8 +68,7 @@ class ReportAndPlatformTest {
             ReportExporter.export(dir, Fixtures.sample(), ReportExporter.Options.DEFAULT));
     assertTrue(html.contains("default-src 'none'"));
     assertTrue(html.contains("connect-src 'none'"));
-    for (String tab :
-        List.of("'summary'", "'timeline'", "'reach'", "'aim'", "'timing'", "'movement'"))
+    for (String tab : List.of("'overview'", "'offense'", "'defense'", "'flow'", "'timeline'"))
       assertTrue(html.contains(tab), tab);
     String code = html.replace("http://www.w3.org/2000/svg", "");
     for (String bad :

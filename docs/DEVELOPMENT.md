@@ -49,3 +49,27 @@ Defects found and fixed during the work:
 The client test now generates genuine fights, including uncertain, sprint and critical-condition samples, and drives the GUI through real cursor and key input. A run with -PrealOpen=true opened File Explorer for the fights and exports folders and the default browser for the report. Screenshots were reviewed and the layout corrected: compact chrome on short windows, keyboard-only focus rings, column widths, swatch placement, label truncation and card tags.
 
 The unit suite now has 78 tests, one of them skipped on Windows (symbolic-link privilege). Both client sequences pass. All development test clients stayed muted.
+
+
+## 0.1.3 combat intelligence and detection accuracy - 2026-10-24
+
+Starting point: `977f1ffe` on `codex/0.1.2-combat-corrections`, clean tree, 158 tests passing with one Windows skip. Starting state and SHA-256 digests of the owner's instance data are stored in the ignored `.local-diagnostics/v013`. No clean commands were used. The six empty root directories noted in 0.1.1 are still untouched.
+
+Key evidence and changes:
+
+- The owner's 0.1.2 recordings contained no win or loss at all. That led to host and format fixes in the adapters, plus a ranked-evidence lifecycle with deferred round starts and implicit best-of rounds. See MEASUREMENT_AUDIT.md.
+- A labeled, anonymized fixture set (1,200 matches) is extracted from the logs by a read-only script and replayed in `OutcomeFixtureTest`. The 0.1.2 engine compiled from Git decides 0 of the same matches.
+- Bytecode inspection of 1.21.11 `LivingEntity.hurtServer` showed that a shield-blocked hit sends no damage event. The capture layer now observes shield sounds, crit animations, the death packet and titles at the TAIL of vanilla handlers.
+
+Defects found during the work and fixed:
+
+- The viewer referenced an undefined SVG text helper, which broke the reach histogram; the browser check found it.
+- A best-of countdown produced an empty pre-round recording.
+- A kill message's 3-second grace could not be extended by the following match result.
+- Results arriving between best-of rounds were dropped.
+- The largest-swing search was quadratic; it is now a linear sliding window, checked against brute force.
+- Combo analysis built a per-event hash map at every finalization; it now uses binary search.
+
+Removed file: `gui/screens/AnalyticsPage.java`, replaced by the Offense, Defense and Fight Flow pages. Shared logic moved to `AnalysisSupport`.
+
+The client test needed to hold `keyUse`/`keyJump` mappings directly, because Fabric's test input did not reach them while the window was ungrabbed. All test clients stayed muted, and every run used a new `build/run/v013-*` directory.

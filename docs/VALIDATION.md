@@ -107,3 +107,58 @@ The final combined command was:
 The run directory was new and included the four compatibility jars in its mods folder. It captured 27 GUI screenshots; selected images and a synthetic, anonymized report are in docs/screenshots/0.1.2 and docs/example-report-0.1.2. Previous run directories remain intact. The test harness disables Fabric's packet synchronizer because its low-level packet-observation guard explicitly requires it; the first exploratory run failed on that restriction and subsequent runs passed. No manual multiplayer acceptance or audible sound acceptance is claimed. Browser visual acceptance remains unverified because the browser policy blocked the local file URL. The final generated JavaScript passes Node syntax checking.
 
 See 0.1.2.md for the evidence investigation, changed definitions, preservation guarantees, paths and remaining limits.
+
+
+## 0.1.3 validation
+
+### A. Unit tests
+
+`./scripts/dev.ps1 build` runs 224 JUnit cases: 223 passed, 1 skipped (the existing Windows symbolic-link privilege test), 0 failures or errors. The baseline at 0.1.2 was 158 tests with the same single skip. New suites:
+
+| Suite | Coverage |
+| --- | --- |
+| `OutcomeLifecycleTest` (23) | Minemen `.club` host; every observed start-block mode; paired, one-name and round results; PVPHQ best-of rounds and match report; round-score checks; kill messages inferred then upgraded; third-party kills; contradictions; delayed results after the next start; deferred round starts; disconnect then result; countdown forfeits; spectator suffixes; teleports and titles; local and opponent death; exactly-once finalization; external finish keeping evidence; opponent removal; legacy derivation; draws |
+| `CombatIntelligenceTest` (22) | Unattributed and third-party damage; four-hit combo and opponent combo; same-tick trades; disengagement; duplicate observations; dominance shift, decay, prior bound and incomplete attribution; a brute-force check of the largest swing; confirmed, estimated and bypassed shield blocks; axe disable and follow-ups; local shield events; server crit correlation; jump categories and signed offsets; damage and knockback pairing; unexplained health drops; the experimental jump effect; reach window and per-weapon summary; below-resolution timing; aim face and distance; legacy availability |
+| `SimulatedFightsTest` (17) | The 15 planned scenarios plus the example report and escaping. Each exports a real report and checks that the embedded graph data agrees with analytics and the stored summary |
+| `OutcomeFixtureTest` | Precision and recall on 1,198 anonymized log fixtures (below) |
+| `AnnouncementsTest`, `InterfaceTest` | Rematch rules updated to the evidence-based rule; six-tab information architecture and focus state |
+
+### B. Labeled outcome fixtures
+
+`scripts/extract_outcome_fixtures.py` (read-only, anonymized; labels from an independent consensus rule) produced 1,200 match fixtures from the owner's Minemen and PVPHQ logs. Two ambiguous segmentation groups were excluded.
+
+| | WIN (826 labeled) | LOSS (172 labeled) | No decisive statement (200) |
+| --- | --- | --- | --- |
+| 0.1.2 engine, same harness | 0 tp, 0 fp; recall 0.000 | 0 tp, 0 fp; recall 0.000 | 200 undecided |
+| 0.1.3 engine | 826 tp, 0 fp; precision 1.000, recall 1.000 | 172 tp, 0 fp; precision 1.000, recall 1.000 | 200 undecided |
+
+All 998 decided matches are confirmed server-declared results. This measures parsing and lifecycle against the servers' own statements on two servers, with simulated melee. It is not independent ground truth or real-world accuracy elsewhere.
+
+### C. Minecraft development client
+
+`./scripts/dev.ps1 runClientGameTest -PvalidationRun=v013-final` (muted, new run directory) passed. Beyond the 0.1.2 sequence it checks:
+
+- **Server crits.** The server critical-hit animation is correlated with confirmed hits.
+- **Schema.** New recordings use schema 3.
+- **Incoming damage.** Real `/damage … by` husk hits are attributed to the opponent, with knockback velocity and health drop linked. Fall damage stays unattributed.
+- **Jump pairing.** A jump just before a hit is paired on the tick axis.
+- **Shield block.** A real off-hand shield block produces no damage event and a block sound, recorded as a local block.
+- **Navigation.** Every Offense, Defense and Fight Flow section is visited, including fight focus and combo selection. Layout is checked at GUI scales 1–4, at 854×480 and in compact density.
+
+It captured 37 screenshots; a selection is in `docs/screenshots/0.1.3`. The test client cannot raise a shield on a mob opponent, so opponent-side blocks are validated by unit and simulated tests only.
+
+Driving held input during these tests: Fabric's test input did not reach `keyUse`/`keyJump` while the window was ungrabbed. The test holds those key mappings directly and starts the off-hand use through `MultiPlayerGameMode.useItem`, the vanilla path a right-click takes.
+
+### D. Compatibility
+
+The same full sequence passed with Sodium 0.8.14+mc1.21.11, Lithium 0.21.4+mc1.21.11, FerriteCore 8.2.0 and ImmediatelyFast 1.14.3+1.21.11 loaded together (`v013-compat`, then `v013-final-compat`). The jars are the existing ones; their SHA-512 matched the Modrinth metadata. The new sound, animate, combat-kill and title injections caused no mixin conflicts.
+
+### E. Browser reports
+
+- **Example report.** The synthetic report (`docs/example-report-0.1.3`) was served from `127.0.0.1` in the in-app browser pane. Every tab was checked: combo selection, the dominance graph, shield and jump timelines, reach histogram and filters, aim face filters, the timing scatter and filters, and playback. There were no console errors, and the only network request was the page itself. At 375 px, no tab scrolls horizontally.
+- **Historical recordings.** All 222 of the owner's recordings were exported read-only and anonymized into the session scratchpad (0 failures; 52 schema 1, 170 schema 2) and loaded tab by tab in a harness: 1,110 tab checks, 0 script errors, 0 empty panels, 0 horizontal overflow.
+- **Syntax and escaping.** The generated JavaScript passes `node --check`. Escaping and the offline constraints are covered by the existing report tests.
+
+### F. Performance
+
+See PERFORMANCE.md (0.1.3 section).

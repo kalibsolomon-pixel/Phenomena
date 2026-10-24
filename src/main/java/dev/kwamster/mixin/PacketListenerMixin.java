@@ -2,17 +2,20 @@ package dev.kwamster.mixin;
 
 import dev.kwamster.combat.tracking.ClientCapture;
 import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.network.protocol.game.ClientboundDamageEventPacket;
-import net.minecraft.network.protocol.game.ClientboundSystemChatPacket;
+import net.minecraft.network.protocol.game.*;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+/**
+ * Read-only observations at the TAIL of vanilla handlers, after the main-thread dispatch guard. No
+ * packet is cancelled, delayed or modified. Every handler here is low frequency except sound, which
+ * returns after two identity comparisons unless a shield sound arrives during an engagement.
+ */
 @Mixin(ClientPacketListener.class)
 public abstract class PacketListenerMixin {
   @Inject(method = "handleSetEntityMotion", at = @At("TAIL"))
-  private void kwamster$velocity(
-      net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket p, CallbackInfo ci) {
+  private void kwamster$velocity(ClientboundSetEntityMotionPacket p, CallbackInfo ci) {
     ClientCapture.velocity(p);
   }
 
@@ -24,5 +27,25 @@ public abstract class PacketListenerMixin {
   @Inject(method = "handleDamageEvent", at = @At("TAIL"))
   private void kwamster$damage(ClientboundDamageEventPacket p, CallbackInfo ci) {
     ClientCapture.damage(p);
+  }
+
+  @Inject(method = "handleSoundEvent", at = @At("TAIL"))
+  private void kwamster$sound(ClientboundSoundPacket p, CallbackInfo ci) {
+    ClientCapture.sound(p);
+  }
+
+  @Inject(method = "handleAnimate", at = @At("TAIL"))
+  private void kwamster$animate(ClientboundAnimatePacket p, CallbackInfo ci) {
+    ClientCapture.animate(p);
+  }
+
+  @Inject(method = "handlePlayerCombatKill", at = @At("TAIL"))
+  private void kwamster$combatKill(ClientboundPlayerCombatKillPacket p, CallbackInfo ci) {
+    ClientCapture.combatKill(p);
+  }
+
+  @Inject(method = "setTitleText", at = @At("TAIL"))
+  private void kwamster$title(ClientboundSetTitleTextPacket p, CallbackInfo ci) {
+    ClientCapture.title(p.text().getString());
   }
 }

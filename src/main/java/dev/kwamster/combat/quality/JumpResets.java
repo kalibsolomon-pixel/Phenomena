@@ -15,8 +15,23 @@ public final class JumpResets {
   public record Sample(
       long jumpSequence, Long damageSequence, Long offsetTicks, Double offsetMillis, Grade grade) {}
 
+  /** Legacy form: every incoming damage observation is a candidate reference. */
   public static List<Sample> analyze(List<CombatEvent> events, int window) {
-    var damage = events.stream().filter(e -> e.kind() == CombatEvent.Kind.DAMAGE_IN).toList();
+    return analyze(events, window, null);
+  }
+
+  /**
+   * Pairs each actual jump with the nearest incoming hit attributed to {@code opponent}. A null
+   * opponent keeps the pre-0.1.3 behaviour of using every incoming damage observation.
+   */
+  public static List<Sample> analyze(List<CombatEvent> events, int window, String opponent) {
+    var damage =
+        events.stream()
+            .filter(
+                e ->
+                    e.kind() == CombatEvent.Kind.DAMAGE_IN
+                        && (opponent == null || e.attributedTo(opponent)))
+            .toList();
     List<Sample> out = new ArrayList<>();
     Set<Long> seen = new HashSet<>();
     for (var jump : events) {

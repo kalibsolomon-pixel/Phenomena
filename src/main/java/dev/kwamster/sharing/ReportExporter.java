@@ -6,6 +6,7 @@ import dev.kwamster.analytics.*;
 import dev.kwamster.combat.events.CombatEvent;
 import dev.kwamster.combat.fights.FightRecord;
 import dev.kwamster.combat.fights.MatchEvidence;
+import dev.kwamster.combat.metrics.Combos;
 import dev.kwamster.combat.quality.HitQuality.Grade;
 import dev.kwamster.recording.storage.AtomicJson;
 import java.io.*;
@@ -21,7 +22,7 @@ import java.util.*;
  */
 public final class ReportExporter {
   public static final String PLACEHOLDER = "__KWAMSTER_PAYLOAD__";
-  public static final int FORMAT_VERSION = 3;
+  public static final int FORMAT_VERSION = 4;
   private static final Gson COMPACT = new GsonBuilder().disableHtmlEscaping().create();
 
   public record Options(boolean anonymize, boolean includeMotion, boolean reducedMotion) {
@@ -104,8 +105,25 @@ public final class ReportExporter {
                                 "Announcement text redacted",
                                 e.accepted()))
                     .toList(),
-                f.matchEvidence().timelineStartNanos())
-            : f.matchEvidence());
+                f.matchEvidence().timelineStartNanos(),
+                f.matchEvidence().matchId(),
+                f.matchEvidence().roundNumber())
+            : f.matchEvidence(),
+        options.anonymize() ? redactResolution(f) : f.resolution());
+  }
+
+  private static dev.kwamster.combat.fights.Resolution redactResolution(FightRecord f) {
+    var r = f.resolution();
+    return new dev.kwamster.combat.fights.Resolution(
+        r.classification(),
+        r.source(),
+        r.confidence(),
+        r.scope(),
+        r.establishedNanos(),
+        r.evidenceIndex(),
+        r.eventSequence(),
+        r.notes().stream().map(n -> redact(n, f)).toList(),
+        r.derived());
   }
 
   private static String redact(String text, FightRecord f) {
@@ -144,6 +162,171 @@ public final class ReportExporter {
     return Double.isFinite(v) ? v : null;
   }
 
+  private static Map<String, Object> resolution(FightRecord shared) {
+    var r = shared.resolution();
+    Map<String, Object> m = new LinkedHashMap<>();
+    m.put("classification", r.classification().name());
+    m.put("label", r.classification().label);
+    m.put("source", r.source().label);
+    m.put("confidence", r.confidence().name());
+    m.put("scope", r.scope().name());
+    m.put("evidenceIndex", r.evidenceIndex());
+    m.put("eventSequence", r.eventSequence());
+    m.put("notes", r.notes());
+    m.put("derived", r.derived());
+    return m;
+  }
+
+  private static Map<String, Object> combos(FightRecord full, FightAnalytics a) {
+    long base =
+        full.matchEvidence().timelineStartNanos() != null
+            ? full.matchEvidence().timelineStartNanos()
+            : full.events().isEmpty() ? 0 : full.events().getFirst().nanoTime();
+    List<Map<String, Object>> marks = new ArrayList<>();
+    for (var mk : a.combos.marks())
+      marks.add(
+          Map.of(
+              "seq", mk.sequence(),
+              "t", (mk.nanos() - base) / 1e9,
+              "side", mk.side().name(),
+              "traded", mk.traded()));
+    List<Map<String, Object>> streaks = new ArrayList<>();
+    for (var st : a.combos.streaks())
+      streaks.add(
+          Map.of(
+              "side", st.side().name(),
+              "length", st.length(),
+              "start", (st.startNanos() - base) / 1e9,
+              "end", (st.endNanos() - base) / 1e9,
+              "seqs", st.sequences(),
+              "endedBy", st.endedBy().name()));
+    List<Map<String, Object>> exchanges = new ArrayList<>();
+    for (var ex : a.combos.exchanges())
+      exchanges.add(
+          Map.of(
+              "start", (ex.startNanos() - base) / 1e9,
+              "end", (ex.endNanos() - base) / 1e9,
+              "local", ex.localHits(),
+              "opponent", ex.opponentHits(),
+              "longestLocal", ex.longestLocal(),
+              "longestOpponent", ex.longestOpponent()));
+    return Map.of(
+        "marks",
+        marks,
+        "streaks",
+        streaks,
+        "exchanges",
+        exchanges,
+        "gap",
+        full.policy().comboSeconds());
+  }
+
+  private static Map<String, Object> dominance(Dominance d) {
+    Map<String, Object> dom = new LinkedHashMap<>();
+    dom.put("step", d.step);
+    List<Double> values = new ArrayList<>(d.values.length);
+    for (double v : d.values) values.add(Double.isFinite(v) ? Math.round(v * 1e4) / 1e4 : null);
+    dom.put("values", values);
+    StringBuilder states = new StringBuilder(d.states.length);
+    for (var st : d.states) states.append(st.code);
+    dom.put("states", states.toString());
+    dom.put("availability", d.availability.name());
+    dom.put("availabilityLabel", d.availability.label);
+    dom.put("active", d.activeSeconds);
+    dom.put("localShare", n(d.share(Dominance.State.LOCAL)));
+    dom.put("opponentShare", n(d.share(Dominance.State.OPPONENT)));
+    dom.put("neutralShare", n(d.share(Dominance.State.NEUTRAL)));
+    dom.put("incomplete", d.incompleteSeconds);
+    dom.put("insufficient", d.insufficientSeconds);
+    dom.put("changes", d.changes);
+    dom.put(
+        "longest",
+        d.longestAdvantage == null
+            ? null
+            : Map.of(
+                "side", d.longestAdvantage.side().name(),
+                "start", d.longestAdvantage.start(),
+                "end", d.longestAdvantage.end()));
+    dom.put(
+        "swing",
+        d.largestSwing == null
+            ? null
+            : Map.of(
+                "from", d.largestSwing.from(),
+                "to", d.largestSwing.to(),
+                "fromValue", d.largestSwing.fromValue(),
+                "toValue", d.largestSwing.toValue()));
+    dom.put("turningPoints", d.turningPoints());
+    Map<String, Object> model = new LinkedHashMap<>();
+    model.put("tau", Dominance.TAU_SECONDS);
+    model.put("threshold", Dominance.THRESHOLD);
+    model.put("minMass", Dominance.MIN_MASS);
+    model.put("maxUnattributed", Dominance.MAX_UNATTRIBUTED);
+    model.put("hit", Dominance.W_HIT);
+    model.put("streakBonus", Dominance.W_STREAK_BONUS);
+    model.put("shieldBlocked", Dominance.W_SHIELD_BLOCKED);
+    model.put("shieldDisabled", Dominance.W_SHIELD_DISABLED);
+    model.put("localBlock", Dominance.W_LOCAL_BLOCK);
+    dom.put("model", model);
+    return dom;
+  }
+
+  private static Map<String, Object> reach(FightAnalytics.ReachSummary r) {
+    Map<String, Object> reach = new LinkedHashMap<>();
+    reach.put("target", r.target());
+    reach.put("tolerance", r.tolerance());
+    reach.put("eligible", r.eligible());
+    reach.put("within", r.within());
+    reach.put("withinPercent", n(r.withinPercent()));
+    reach.put("mean", n(r.mean()));
+    reach.put("deviation", n(r.deviation()));
+    reach.put("max", n(r.max()));
+    reach.put("meanAbsoluteError", n(r.meanAbsoluteError()));
+    reach.put("values", r.values());
+    reach.put("weapons", r.weapons());
+    Map<String, Object> byWeapon = new LinkedHashMap<>();
+    r.byWeapon()
+        .forEach(
+            (k, v) -> {
+              Map<String, Object> w = new LinkedHashMap<>();
+              w.put("eligible", v.eligible());
+              w.put("within", v.within());
+              w.put("mean", n(v.mean()));
+              w.put("deviation", n(v.deviation()));
+              w.put("max", n(v.max()));
+              byWeapon.put(k, w);
+            });
+    reach.put("byWeapon", byWeapon);
+    return reach;
+  }
+
+  private static Map<String, Object> aim(FightAnalytics.AimSummary a) {
+    Map<String, Object> aim = new LinkedHashMap<>();
+    List<Map<String, Object>> samples = new ArrayList<>();
+    for (var sm : a.samples()) {
+      Map<String, Object> m = new LinkedHashMap<>();
+      m.put("seq", sm.sequence());
+      m.put("t", sm.time());
+      m.put("weapon", sm.weapon());
+      m.put("face", sm.face());
+      m.put("x", sm.x());
+      m.put("y", sm.y());
+      m.put("z", sm.z());
+      m.put("grade", sm.grade());
+      m.put("distance", n(sm.distance()));
+      m.put("band", sm.reachBand());
+      m.put("hit", sm.hit());
+      samples.add(m);
+    }
+    aim.put("samples", samples);
+    aim.put("grades", a.grades());
+    aim.put("meanDistance", n(a.meanDistance()));
+    aim.put("distanceDeviation", n(a.distanceDeviation()));
+    aim.put("byWeapon", a.byWeapon());
+    aim.put("byReach", a.byReach());
+    return aim;
+  }
+
   static Map<String, Object> payload(FightRecord full, FightRecord shared, Options options) {
     var a = FightAnalytics.of(full);
     var s = full.statistics();
@@ -153,7 +336,7 @@ public final class ReportExporter {
     summary.put("emptyMisses", s.emptyMisses);
     summary.put("uncertain", s.uncertain);
     summary.put("contacts", s.contacts);
-    summary.put("accuracy", n(100 * Aggregate.ratio(s.hits, s.attempts)));
+    summary.put("accuracy", n(100 * Aggregate.ratio(s.hits, s.accuracyDenominator())));
     summary.put("averageReach", n(Aggregate.ratio(s.reachSum, s.reachCount)));
     summary.put("maxReach", s.reachCount == 0 ? null : s.maxReach);
     summary.put("reachSamples", s.reachCount);
@@ -169,6 +352,21 @@ public final class ReportExporter {
     summary.put("longestCombo", s.longestCombo);
     summary.put("averageCombo", n(a.averageCombo()));
     summary.put("duration", a.duration);
+    summary.put("accuracyDenominator", s.accuracyDenominator());
+    summary.put("attributedIncoming", a.attributedIncoming);
+    summary.put("unattributedIncoming", a.unattributedIncoming);
+    summary.put("thirdPartyIncoming", a.thirdPartyIncoming);
+    summary.put("unexplainedHealthDrops", a.unexplainedHealthDrops);
+    boolean v3 = full.schemaVersion() >= FightRecord.SCHEMA;
+    summary.put("serverCrits", v3 ? a.serverCrits : null);
+    summary.put("damageTaken", v3 ? s.damageTaken : null);
+    summary.put("comboCount", a.combos.combos(Combos.Side.LOCAL).size());
+    summary.put("comboHits", a.combos.comboHits(Combos.Side.LOCAL));
+    summary.put("averageLocalCombo", n(a.averageCombo()));
+    summary.put("longestOpponentCombo", a.combos.longest(Combos.Side.OPPONENT));
+    summary.put("longestUnanswered", a.combos.longestUnansweredLocal());
+    summary.put("opponentComboAvailability", a.opponentComboAvailability());
+    summary.put("contextAvailable", a.contextAvailable);
 
     Map<String, Object> derived = new LinkedHashMap<>();
     derived.put("summary", summary);
@@ -190,6 +388,11 @@ public final class ReportExporter {
       m.put("momentum", h.momentum());
       m.put("measurement", h.measurement());
       m.put("perfectReach", full.schemaVersion() >= 2 ? h.perfectReach() : null);
+      m.put("weapon", h.weapon());
+      m.put("serverCrit", h.serverCrit());
+      m.put("face", h.face());
+      m.put("aimDistance", n(h.aimDistance()));
+      m.put("tick", h.tick());
       hits.add(m);
     }
     derived.put("hits", hits);
@@ -239,6 +442,43 @@ public final class ReportExporter {
     derived.put("jumpsWithoutDamage", a.jumpsWithoutDamage);
     derived.put("motionSamples", a.motionSamples);
     derived.put("sprintTransitions", a.sprintTransitions);
+    derived.put("schema", full.schemaVersion());
+    derived.put("resolution", resolution(shared));
+    // Interpretations restate measured values; they contain no names.
+    derived.put("interpretations", Interpretation.of(a));
+    derived.put("combos", combos(full, a));
+    derived.put("dominance", dominance(a.dominance));
+    derived.put("shields", a.shields);
+    derived.put("incomingDetail", a.incoming);
+    List<Map<String, Object>> timing = new ArrayList<>();
+    for (var t : a.timingSamples) {
+      Map<String, Object> m = new LinkedHashMap<>();
+      m.put("seq", t.sequence());
+      m.put("t", t.time());
+      m.put("weapon", t.weapon());
+      m.put("attackSpeed", n(t.attackSpeed()));
+      m.put("expected", n(t.expectedTicks()));
+      m.put("interval", n(t.intervalTicks()));
+      m.put("delta", n(t.deltaTicks()));
+      m.put("grade", t.grade().name());
+      m.put("outcome", t.outcome());
+      timing.add(m);
+    }
+    derived.put("timingSamples", timing);
+    derived.put("attemptOutcomes", a.attemptOutcomes);
+    derived.put("reach", reach(a.reach));
+    derived.put("aim", aim(a.aim));
+    derived.put(
+        "jumpEffect",
+        a.jumpEffect == null
+            ? null
+            : Map.of(
+                "candidates", a.jumpEffect.candidates(),
+                "candidateSpeed", a.jumpEffect.candidateSpeed(),
+                "others", a.jumpEffect.others(),
+                "otherSpeed", a.jumpEffect.otherSpeed()));
+    derived.put("jumpWindowTicks", full.policy().jumpWindowTicks());
+    derived.put("boundaries", a.boundaries);
 
     Map<String, Object> payload = new LinkedHashMap<>();
     payload.put("format", "kwamster-report");

@@ -1,6 +1,6 @@
 # Release readiness
 
-**Status: working development build 0.1.1; public release is not approved or ready.**
+**Status: working development build 0.1.3 (see the 0.1.3 section at the end); public release is not approved or ready.**
 
 The jar compiles against Minecraft 1.21.11 using Java 21 and official mappings. The unit suite (78 tests) and the actual Fabric client sequence pass. 0.1.1 replaces the HUD-oriented screens with a tabbed analytics dashboard and a local browser replay workflow. Nothing has been pushed, uploaded or published.
 
@@ -34,3 +34,20 @@ The jar compiles against Minecraft 1.21.11 using Java 21 and official mappings. 
 Known technical limits: a source-attributed damage report confirms the reported source, while matching it to a specific pending attack is inferred. Missing, late or custom packets can under-count hits. Raw recording is bounded to 10,000 events per fight. Per-hit dashboard views use only timelines held in memory (up to 50,000 events); older fights contribute their summary counts and load fully only when opened. Graceful shutdown drains the writer; abrupt shutdown may lose the active or queued fight. Unknown/corrupt files are preserved outside the managed retention budget. Player opponents' names are stored locally in recordings as display labels and removed from anonymized reports. The browser report uses the platform default font stack unless a Minecraft-style monospace font is installed.
 
 No manual gameplay validation, external-server trial, audible sound validation, manual user review, hosted report link or production performance guarantee is claimed.
+
+
+## 0.1.3 status
+
+**Working development build 0.1.3; public release is not approved.** The jar is `build/libs/kwamster-0.1.3.jar`. The unit suite, the Fabric client sequence and the four-mod compatibility sequence pass. Nothing was pushed or published, and the owner's Aurora instance was not modified.
+
+| Item | State after 0.1.3 | Still required |
+| --- | --- | --- |
+| Outcome detection | Minemen (`.net`/`.club`) and PVPHQ formats from the owner's logs. 998 of 998 decided fixture matches classified correctly, all confirmed; 0.1.2 decided 0. | Live acceptance on those servers with the new build; formats for other servers; titles if a server uses them for results. |
+| Incoming attribution | Server cause entity recorded and verified in the client test | Servers that rewrite cause entities |
+| Shields | Local block verified with a real shield in the client test; opponent blocks verified in unit and simulated tests | A two-player session with an opponent blocking |
+| Dominance / combos | Deterministic, bounded and documented; graphs agree with summaries in 17 scenario tests | Owner review of whether the weights read sensibly in real fights |
+| Jump resets | Categories and signed ticks per attributed hit; success still unavailable | A validated knockback baseline before any effectiveness claim |
+| Damage dealt | Unavailable (opponent health is not trusted) | An authoritative source |
+| Historical data | 222 recordings decode, analyze and render; stored outcomes unchanged | — |
+| Performance | No measurable frame-time difference in the gametest loop. Per-fight analytics cost more than in 0.1.2 and is computed on history change (PERFORMANCE.md). | Live long-session measurements |
+| Manual multiplayer acceptance | Not performed in this assignment | Run VALIDATION.md with two authorized accounts |

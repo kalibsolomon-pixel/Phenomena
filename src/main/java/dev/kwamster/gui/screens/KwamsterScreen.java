@@ -70,7 +70,9 @@ public final class KwamsterScreen extends Screen {
   public KwamsterScreen() {
     super(Component.literal("KWAMSTER"));
     pages.put(Tab.OVERVIEW, new OverviewPage(this));
-    pages.put(Tab.ANALYTICS, new AnalyticsPage(this));
+    pages.put(Tab.OFFENSE, new OffensePage(this));
+    pages.put(Tab.DEFENSE, new DefensePage(this));
+    pages.put(Tab.FLOW, new FlowPage(this));
     pages.put(Tab.HISTORY, new HistoryPage(this));
     pages.put(Tab.SETTINGS, new SettingsPage(this));
   }
@@ -371,7 +373,12 @@ public final class KwamsterScreen extends Screen {
           setScroll(contentHeight);
           return true;
         }
-        case GLFW.GLFW_KEY_1, GLFW.GLFW_KEY_2, GLFW.GLFW_KEY_3, GLFW.GLFW_KEY_4 -> {
+        case GLFW.GLFW_KEY_1,
+            GLFW.GLFW_KEY_2,
+            GLFW.GLFW_KEY_3,
+            GLFW.GLFW_KEY_4,
+            GLFW.GLFW_KEY_5,
+            GLFW.GLFW_KEY_6 -> {
           selectTab(Tab.values()[e.key() - GLFW.GLFW_KEY_1]);
           return true;
         }
@@ -386,7 +393,8 @@ public final class KwamsterScreen extends Screen {
     // Arrow keys on a focused tab switch tabs, matching common tab-strip behavior.
     if (getFocused() instanceof KButton b && tabButtons.contains(b)
         && (e.key() == GLFW.GLFW_KEY_LEFT || e.key() == GLFW.GLFW_KEY_RIGHT)) {
-      int i = (state.tab.ordinal() + (e.key() == GLFW.GLFW_KEY_LEFT ? 3 : 1)) % 4;
+      int count = Tab.values().length;
+      int i = (state.tab.ordinal() + (e.key() == GLFW.GLFW_KEY_LEFT ? count - 1 : 1)) % count;
       selectTab(Tab.values()[i]);
       setFocused(tabButtons.get(i));
       return true;
@@ -509,7 +517,7 @@ public final class KwamsterScreen extends Screen {
       text = Notices.text;
       color = Notices.level == Notices.Level.ERROR ? Theme.ERROR : Notices.level == Notices.Level.OK ? Theme.OK : Theme.MUTED;
     } else {
-      text = "Local only. 1-4 switch tabs, Tab moves focus, " + keyName() + " or Esc closes.";
+      text = "Local only. 1-6 switch tabs, Tab moves focus, " + keyName() + " or Esc closes.";
       color = Theme.DIM;
     }
     g.drawString(font, KButton.fit(font, text, frame.w() - 60), frame.x(), fy, color, false);

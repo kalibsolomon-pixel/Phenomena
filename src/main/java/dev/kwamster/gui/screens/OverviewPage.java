@@ -49,8 +49,10 @@ final class OverviewPage implements KwamsterScreen.Page {
           Theme.accent());
       c.heading("What you will see");
       c.text("Overview: accuracy, reach, critical and sprint hits, and hit timing across recent fights, with a trend chart.");
-      c.text("Combat Analytics: reach distribution, a hitbox map of where your attacks landed, readiness, combos and momentum.");
-      c.text("Fight History: every recorded fight, with an offline browser replay you can open with one click.");
+      c.text("Offense: accuracy, reach and spacing, aim, weapon timing and critical hits.");
+      c.text("Defense: incoming hits and who caused them, shields, jump-reset timing, damage and knockback.");
+      c.text("Fight Flow: combos, who held the advantage over time, and exchange-by-exchange breakdowns.");
+      c.text("History: every recorded fight, with an offline browser report you can open with one click.");
       c.row(
           new KButton("Hit sound settings", () -> {
                 s.state.settings = dev.kwamster.gui.ui.UiState.SettingsSection.FEEDBACK;
@@ -59,15 +61,49 @@ final class OverviewPage implements KwamsterScreen.Page {
           new KButton("Open Recordings Folder", () -> FightActions.openFolder(dev.kwamster.platform.SafePaths.Managed.FIGHTS)).content());
       return;
     }
+    var latest = KwamsterClient.history.getFirst();
+    var r = latest.resolution();
+    c.heading("Latest fight", dateTime(latest.startEpochMillis()) + " vs " + opponent(latest.opponentLabel(), latest.opponent()));
+    var full = DataCache.full(latest.id());
+    var fa = full == null ? null : DataCache.analytics(full);
+    var ls = latest.statistics();
     c.stats(
         List.of(
-            stat("accuracy", percent(a.accuracy()), a.hits + " / " + a.attempts + " attempts"),
+            new Stat(
+                "Result",
+                r.classification().label,
+                r.source().label + (r.derived() ? " (pre-0.1.3)" : ""),
+                "Result, evidence source and confidence are stored separately. Confidence: "
+                    + r.confidence().name().toLowerCase(Locale.ROOT)
+                    + "."),
+            new Stat("Duration", duration(latest.durationNanos()), ls.attempts + " attempts", "Recorded engagement length."),
+            stat("accuracy", percent(Aggregate.trendValue(latest, TrendMetric.ACCURACY)), ls.hits + " / " + ls.accuracyDenominator()),
+            stat(
+                "reachWithin",
+                fa == null || fa.reach.eligible() == 0 ? NONE : fa.reach.within() + " / " + fa.reach.eligible(),
+                fa == null ? "timeline not loaded" : "eligible hits"),
+            stat("longestCombo", Integer.toString(ls.longestCombo), ls.comboCount + " combos"),
+            stat(
+                "dominanceShare",
+                fa == null ? NONE : percent(fa.dominance.share(dev.kwamster.analytics.Dominance.State.LOCAL)),
+                fa == null ? "timeline not loaded" : fa.dominance.availability.label.toLowerCase(Locale.ROOT))));
+    if (fa != null) {
+      var lines = dev.kwamster.analytics.Interpretation.of(fa);
+      for (int i = 1; i < Math.min(5, lines.size()); i++) c.text(lines.get(i));
+    }
+    c.heading("Recent performance", a.fights + " fights");
+    c.stats(
+        List.of(
+            stat("accuracy", percent(a.accuracy()), a.hits + " / " + a.accuracyDenominator() + " attempts"),
             stat("hits", Integer.toString(a.hits), "server-confirmed source"),
-            stat("attempts", Integer.toString(a.attempts), a.uncertain + " uncertain"),
             stat("averageReach", meters(a.averageReach()), a.reachCount + " hit samples"),
-            stat("maxReach", meters(a.maxReachOrNaN()), "client geometry"),
+            stat("reachWithin", percent(a.reachWithinPercent()), a.reachWithin + " of " + a.reachEligible),
             stat("criticalRate", percent(a.criticalRate()), a.criticalConditions + " with crit conditions"),
-            stat("sprintRate", percent(a.sprintRate()), a.sprintHits + " sprint hits"),
+            stat("averageCombo", number(a.averageLocalCombo(), 2), "longest " + a.longestCombo),
+            stat(
+                "dominanceShare",
+                percent(a.dominanceShare(dev.kwamster.analytics.Dominance.State.LOCAL)),
+                "opponent " + percent(a.dominanceShare(dev.kwamster.analytics.Dominance.State.OPPONENT))),
             stat("averageInterval", seconds(a.averageInterval()), "SD " + seconds(a.intervalDeviation())),
             stat("fights", Integer.toString(KwamsterClient.history.size()), a.fights + " in this summary")));
 
@@ -128,10 +164,13 @@ final class OverviewPage implements KwamsterScreen.Page {
         FightList.heightFor(recent.size(), rowH));
     c.row(
         new KButton("All fights", () -> s.selectTab(UiState.Tab.HISTORY)).content(),
-        new KButton("Combat analytics", () -> s.selectTab(UiState.Tab.ANALYTICS)).content());
+        new KButton("Offense", () -> s.selectTab(UiState.Tab.OFFENSE)).content(),
+        new KButton("Fight Flow", () -> s.selectTab(UiState.Tab.FLOW)).content());
     c.note(
         "Hits are server-reported melee damage matched to your attacks; reach and aim are client"
-            + " geometry; outcomes are conservative (opponent death is Unknown, not a win).");
+            + " geometry. Results are confirmed only by an exact server announcement naming both"
+            + " players; a kill message or a death alone is inferred, and an opponent's death with no"
+            + " announcement stays Unknown.");
   }
 
   private void openDetail(String id) {

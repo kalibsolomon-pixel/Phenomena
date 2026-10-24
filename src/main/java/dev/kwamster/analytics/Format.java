@@ -62,6 +62,19 @@ public final class Format {
     return "Entity " + (uuid.length() > 8 ? uuid.substring(0, 8) : uuid);
   }
 
+  /** Short list label: the result with its evidence strength, e.g. "Win (confirmed)". */
+  public static String result(dev.kwamster.combat.fights.Resolution r) {
+    return switch (r.classification()) {
+      case CONFIRMED_WIN -> "Win (confirmed)";
+      case CONFIRMED_LOSS -> "Loss (confirmed)";
+      case INFERRED_WIN -> "Win (inferred)";
+      case INFERRED_LOSS -> "Loss (inferred)";
+      case DRAW -> "Draw";
+      case UNKNOWN -> "Unknown";
+      case INTERRUPTED -> "Interrupted";
+    };
+  }
+
   public static String outcome(FightRecord.Outcome o) {
     return switch (o) {
       case WIN -> "Win";

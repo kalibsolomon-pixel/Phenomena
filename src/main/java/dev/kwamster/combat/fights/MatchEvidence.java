@@ -10,7 +10,19 @@ public record MatchEvidence(
     String roundId,
     Confidence confidence,
     List<Entry> entries,
-    Long timelineStartNanos) {
+    Long timelineStartNanos,
+    String matchId,
+    Integer roundNumber) {
+  public MatchEvidence(
+      String server,
+      String localPlayer,
+      String roundId,
+      Confidence confidence,
+      List<Entry> entries,
+      Long timelineStartNanos) {
+    this(server, localPlayer, roundId, confidence, entries, timelineStartNanos, null, null);
+  }
+
   public MatchEvidence(
       String server,
       String localPlayer,

@@ -1,0 +1,20 @@
+{
+  "events": 200000,
+  "elapsedMs": 75.572,
+  "nsPerEvent": 377.86,
+  "allocatedBytesPerEvent": 170.43832,
+  "atomicReplaceMeanMs": 3.690507,
+  "storageErrors": [],
+  "dashboardAggregate1000Fights50kEventsMs": 37.9145,
+  "reportExport1000EventsMs": 114.4475,
+  "reportExport1000EventsBytes": 636120,
+  "richEvents": 22000,
+  "richNsPerEvent": 1265.5181818181818,
+  "richAllocatedBytesPerEvent": 474.52763636363636,
+  "cappedFightEvents": 10000,
+  "fightAnalytics10kEventsMs": 54.6169,
+  "reportExport10kEventsMs": 231.7953,
+  "reportExport10kEventsBytes": 4015312,
+  "dashboardAggregate1000FightsRich22kEventsMs": 27.7572,
+  "heapUsedAfterBenchmarkMiB": 2.8841781616210938
+}

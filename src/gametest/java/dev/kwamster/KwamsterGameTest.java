@@ -250,6 +250,12 @@ public final class KwamsterGameTest implements FabricClientGameTest {
                 all.stream().mapToInt(f -> f.statistics().criticalConditions).sum() >= 1,
                 "critical conditions observed");
             check(
+                all.stream().mapToInt(f -> f.statistics().serverCrits).sum() >= 1,
+                "server critical-hit animation correlated with a confirmed hit");
+            check(
+                all.stream().allMatch(f -> f.schemaVersion() == FightRecord.SCHEMA),
+                "new recordings use schema 3");
+            check(
                 KwamsterClient.history.stream().allMatch(f -> f.statistics().reachCount > 0),
                 "reach recorded");
             check(
@@ -363,6 +369,115 @@ public final class KwamsterGameTest implements FabricClientGameTest {
           });
       await(ctx);
 
+      // Defense through vanilla packets: attributed incoming damage, knockback and health, a jump
+      // right after it, then a real off-hand shield block (no damage event, block sound only).
+      world.getServer().runCommand("item replace entity @a weapon.offhand with minecraft:shield");
+      ctx.waitTicks(5);
+      ctx.runOnClient(
+          mc -> {
+            aimAt(mc, husk(mc), 0, 0);
+            attackNow(mc);
+          });
+      ctx.waitTicks(4);
+      for (int i = 0; i < 3; i++) {
+        // A jump-reset attempt: the jump leaves the ground just before the hit arrives.
+        for (int t = 0; t < 2; t++) {
+          ctx.runOnClient(mc -> mc.options.keyJump.setDown(true));
+          ctx.waitTick();
+        }
+        ctx.runOnClient(mc -> mc.options.keyJump.setDown(false));
+        world
+            .getServer()
+            .runCommand("damage @p 1 minecraft:mob_attack by @e[type=minecraft:husk,limit=1]");
+        ctx.waitTicks(16);
+        world.getServer().runCommand("tp @a 0.5 -60 0.5 0 0");
+        ctx.waitTicks(4);
+      }
+      world.getServer().runCommand("damage @p 1 minecraft:fall");
+      ctx.waitTicks(4);
+      world.getServer().runCommand("item replace entity @a weapon.mainhand with minecraft:air");
+      ctx.waitTicks(3);
+      // Look slightly over the husk: the use key then raises the shield instead of interacting.
+      ctx.runOnClient(mc -> mc.player.setXRot(-25));
+      // The test input's mouse hold does not reach keyUse while the window is ungrabbed, so the
+      // key mapping is held directly; vanilla then raises the off-hand shield itself.
+      ctx.runOnClient(
+          mc -> {
+            mc.options.keyUse.setDown(true);
+            mc.gameMode.useItem(mc.player, net.minecraft.world.InteractionHand.OFF_HAND);
+          });
+      for (int t = 0; t < 12; t++) {
+        ctx.runOnClient(mc -> mc.options.keyUse.setDown(true));
+        ctx.waitTick();
+      }
+      String blockingState =
+          ctx.computeOnClient(
+              mc ->
+                  "useDown="
+                      + mc.options.keyUse.isDown()
+                      + " hit="
+                      + (mc.hitResult == null ? null : mc.hitResult.getType())
+                      + " blocking="
+                      + mc.player.isBlocking()
+                      + " using="
+                      + mc.player.isUsingItem()
+                      + " offhand="
+                      + mc.player.getOffhandItem()
+                      + " incomingBefore="
+                      + KwamsterClient.engine.stats().incoming);
+      world
+          .getServer()
+          .runCommand("damage @p 1 minecraft:mob_attack by @e[type=minecraft:husk,limit=1]");
+      for (int t = 0; t < 4; t++) {
+        ctx.runOnClient(mc -> mc.options.keyUse.setDown(true));
+        ctx.waitTick();
+      }
+      ctx.runOnClient(mc -> mc.options.keyUse.setDown(false));
+      ctx.waitTicks(2);
+      ctx.runOnClient(
+          mc -> {
+            var st = KwamsterClient.engine.stats();
+            KwamsterClient.LOG.info(
+                "Shield diagnostic: {} incomingAfter={} localBlocks={} engaged={}",
+                blockingState,
+                st.incoming,
+                st.localShieldBlocks,
+                KwamsterClient.engine.engaged());
+            check(st.incoming >= 3, "attributed incoming hits: " + st.incoming);
+            check(st.unattributedIncoming >= 1, "fall damage stays unattributed");
+            check(st.localShieldBlocks >= 1, "real shield block observed from the block sound");
+            KwamsterClient.engine.finish(
+                ClientCapture.now(), FightRecord.Outcome.UNKNOWN, "Integration test: defense");
+            var f = KwamsterClient.history.getFirst();
+            var a = dev.kwamster.analytics.FightAnalytics.of(f);
+            check(a.attributedIncoming >= 3, "analytics agree on attribution");
+            check(
+                a.incoming.stream().anyMatch(i -> i.knockback() != null),
+                "knockback velocity linked to an incoming hit");
+            check(
+                a.incoming.stream().anyMatch(i -> i.damage() != null),
+                "health drop linked to an incoming hit");
+            check(
+                a.incoming.stream()
+                    .filter(i -> i.attributed())
+                    .anyMatch(i -> i.jumpOffsetTicks() != null),
+                "jump paired with an attributed hit on the tick axis: jumps="
+                    + f.events().stream()
+                        .filter(e -> e.kind() == dev.kwamster.combat.events.CombatEvent.Kind.JUMP)
+                        .count()
+                    + " inputs="
+                    + f.events().stream()
+                        .filter(
+                            e -> e.kind() == dev.kwamster.combat.events.CombatEvent.Kind.JUMP_INPUT)
+                        .count()
+                    + " classes="
+                    + a.incoming.stream().map(i -> i.jumpClass() + "@" + i.tick()).toList());
+          });
+      world.getServer().runCommand("item replace entity @a weapon.offhand with minecraft:air");
+      world.getServer().runCommand("effect give @a minecraft:instant_health 1 4 true");
+      ctx.waitTicks(10);
+      await(ctx);
+
       // ---- Overview (screenshots at 1600x900, GUI scale 3)
       ctx.getInput().resizeWindow(1600, 900);
       ctx.runOnClient(
@@ -383,25 +498,46 @@ public final class KwamsterGameTest implements FabricClientGameTest {
       shot(ctx, "kwamster-overview-reach-trend");
       click(ctx, "Accuracy");
 
-      // ---- Combat Analytics, each section
-      click(ctx, "Combat Analytics");
-      ctx.runOnClient(mc -> check(UiState.SESSION.tab == UiState.Tab.ANALYTICS, "analytics tab"));
-      for (var section : UiState.AnalyticsSection.values()) {
+      // ---- Offense, Defense and Fight Flow, each section
+      click(ctx, "Offense");
+      ctx.runOnClient(mc -> check(UiState.SESSION.tab == UiState.Tab.OFFENSE, "offense tab"));
+      for (var section : UiState.OffenseSection.values()) {
         click(ctx, section.label);
-        checkLayout(ctx, "analytics " + section);
-        shot(ctx, "kwamster-analytics-" + section.name().toLowerCase(Locale.ROOT));
+        checkLayout(ctx, "offense " + section);
+        shot(ctx, "kwamster-offense-" + section.name().toLowerCase(Locale.ROOT));
       }
       click(ctx, "Aim");
       click(ctx, "Aggregate density");
-      shot(ctx, "kwamster-analytics-aim-density");
+      shot(ctx, "kwamster-offense-aim-density");
       // Scroll position is preserved per section across tab switches.
       ctx.runOnClient(mc -> ((KwamsterScreen) mc.screen).setScroll(60));
       click(ctx, "Settings");
-      click(ctx, "Combat Analytics");
+      click(ctx, "Offense");
       ctx.runOnClient(mc -> check(UiState.SESSION.scroll() > 0, "scroll restored"));
+      click(ctx, "Defense");
+      for (var section : UiState.DefenseSection.values()) {
+        click(ctx, section.label);
+        checkLayout(ctx, "defense " + section);
+        shot(ctx, "kwamster-defense-" + section.name().toLowerCase(Locale.ROOT));
+      }
+      click(ctx, "Fight Flow");
+      ctx.runOnClient(mc -> check(UiState.SESSION.tab == UiState.Tab.FLOW, "flow tab"));
+      for (var section : UiState.FlowSection.values()) {
+        click(ctx, section.label);
+        checkLayout(ctx, "flow " + section);
+        shot(ctx, "kwamster-flow-" + section.name().toLowerCase(Locale.ROOT));
+      }
+      click(ctx, "Combos");
+      click(ctx, "Older fight");
+      click(ctx, "Next combo");
+      ctx.runOnClient(
+          mc ->
+              check(UiState.SESSION.focus == 1 && UiState.SESSION.combo >= -1, "flow focus moved"));
+      shot(ctx, "kwamster-flow-combo-selected");
+      click(ctx, "Newer fight");
 
-      // ---- Fight History
-      click(ctx, "Fight History");
+      // ---- History
+      click(ctx, "History");
       checkLayout(ctx, "history");
       String disposable = ctx.computeOnClient(mc -> KwamsterClient.history.getFirst().id());
       String keep = ctx.computeOnClient(mc -> KwamsterClient.history.get(1).id());
@@ -547,7 +683,7 @@ public final class KwamsterGameTest implements FabricClientGameTest {
                 "fight removed from history");
             check(
                 !Files.exists(KwamsterClient.store.recordingFile(disposable)), "recording deleted");
-            check(KwamsterClient.history.size() == 4, "other fights kept");
+            check(KwamsterClient.history.size() == 5, "other fights kept");
           });
 
       // ---- Settings
@@ -634,10 +770,12 @@ public final class KwamsterGameTest implements FabricClientGameTest {
       }
       ctx.runOnClient(
           mc -> KwamsterClient.config.density = dev.kwamster.config.Config.Density.COMPACT);
-      ctx.runOnClient(mc -> UiState.SESSION.tab = UiState.Tab.ANALYTICS);
-      ctx.setScreen(KwamsterScreen::new);
-      checkLayout(ctx, "small compact analytics");
-      shot(ctx, "kwamster-small-compact-analytics");
+      for (var tab : new UiState.Tab[] {UiState.Tab.OFFENSE, UiState.Tab.FLOW}) {
+        ctx.runOnClient(mc -> UiState.SESSION.tab = tab);
+        ctx.setScreen(KwamsterScreen::new);
+        checkLayout(ctx, "small compact " + tab);
+        shot(ctx, "kwamster-small-compact-" + tab.name().toLowerCase(Locale.ROOT));
+      }
       ctx.runOnClient(
           mc -> KwamsterClient.config.density = dev.kwamster.config.Config.Density.COMFORTABLE);
       ctx.getInput().resizeWindow(1280, 720);

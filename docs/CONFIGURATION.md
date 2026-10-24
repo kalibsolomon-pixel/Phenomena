@@ -2,7 +2,7 @@
 
 Press **K** in a world to open the dashboard. The key is a single vanilla key mapping (Controls > Key Binds > KWAMSTER). It can be rebound there or in Settings > Controls, which also has "Reset to K", "Open Minecraft Controls" and a warning when another mapping shares the key.
 
-Navigation: four tabs (Overview, Combat Analytics, Fight History, Settings); keys 1-4 switch tabs; Left/Right on a focused tab moves between tabs. Tab/Shift+Tab move focus and Enter or Space activates. Arrow keys adjust sliders and move the fight-list selection. Mouse wheel, the scrollbar, Page Up/Down and Home/End scroll. Escape closes an open dropdown or dialog first, then the window; the dashboard key also closes it unless a text field is focused. Tabs, sections, filters, selection and scroll positions are kept for the session.
+Navigation: six tabs (Overview, Offense, Defense, Fight Flow, History, Settings; see the 0.1.3 section below); keys 1-6 switch tabs; Left/Right on a focused tab moves between tabs. Tab/Shift+Tab move focus and Enter or Space activates. Arrow keys adjust sliders and move the fight-list selection. Mouse wheel, the scrollbar, Page Up/Down and Home/End scroll. Escape closes an open dropdown or dialog first, then the window; the dashboard key also closes it unless a text field is focused. Tabs, sections, filters, selection and scroll positions are kept for the session.
 
 Settings save asynchronously when the dashboard closes and on graceful shutdown. Invalid config files are backed up as config/kwamster.json.invalid-TIMESTAMP. The schema is 2. A schema-1 file is migrated on load and kept once as config/kwamster.json.v1-backup; unknown schema versions are preserved and defaults load.
 
@@ -75,3 +75,26 @@ Configuration schema remains 2; missing new fields take defaults, and existing s
 Reach and jump policies are frozen in each fight. Legacy readiness thresholds and jumpWindowMillis remain readable for older data; the new classifiers use the new fields. Generic result forms are conservative fallbacks, not claimed as observed log formats. New server adapters implement Announcements.Rules and register during initialization.
 
 Local recording folders always use a known opponent name, regardless of anonymizeExports. Shared folder names and HTML/JSON remove player identifiers by default. Auto-report receipts in kwamster/report-state store hashes and publication ownership for recovery. Automatic saves preserve existing recordings rather than applying destructive retention. Retention still bounds session history; legacy manual saves retain their previous pruning semantics.
+
+
+## 0.1.3 settings layout
+
+The configuration schema stays 2 and has no new fields; every 0.1.2 file loads unchanged. The Settings tab now has six sections. Measurement thresholds moved out of General and Combat feedback into **Measurement**:
+
+| Section | Contents |
+| --- | --- |
+| General | Combat tracking, recording, chat summary, retention, storage budget, reset |
+| Controls | Dashboard key |
+| Sounds (was Combat feedback) | Hit sounds, sound category, perfect-reach sound, sound styles |
+| Measurement | Inactivity timeout, damage correlation window, combo timeout (also the exchange gap), jump candidate window (±ticks), server round inactivity, target reach, reach tolerance, timing tolerance |
+| Recording & storage | Anonymization, motion traces, export options, folders |
+| Interface | Accent, density, reduced motion, chart markers and grid, Overview window |
+
+Every Measurement value is frozen into each new fight's policy, so a later change never reinterprets an existing recording. Fixed model constants are not configurable. They are documented in METRICS.md and embedded in each report:
+
+- The 8-second wait after a round result.
+- The 2-second deferral of a new round start.
+- The dominance weights and 3-second decay.
+- The 1.5-block shield-sound radius.
+
+Recording schema is now **3**. Readers accept 1–3; older files derive a read-only result classification and are never rewritten. Shared report payload format is **4**. Dashboard keys 1–6 switch tabs.

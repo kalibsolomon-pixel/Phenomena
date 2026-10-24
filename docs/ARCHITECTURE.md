@@ -62,3 +62,61 @@ ClientCapture snapshots effective weapon cooldowns and geometry. AttackTiming, J
 AutoReports uses FightStore's single bounded worker (128 queued operations), at most 128 pending retry snapshots and a bounded 1,000-entry availability cache. Raw JSON is atomically persisted before HTML publication. Each export file is atomically replaced; an ownership marker plus a final receipt containing source/options and HTML/JSON digests distinguishes complete, duplicate and partial exports. Recovery checks existing recordings on startup without rewriting legacy files. Three immediate retries are followed by 30-second retries; queue overflow is reported and retained pending jobs can be pumped again. A process termination before initial disk persistence can still lose queued data; disk exhaustion is explicitly reported.
 
 Local recordings use readable opponent folders with a UUID file inside; legacy UUID files at the fights root remain readable. Full UUID collision suffixes preserve occupied directories. Shared paths independently follow anonymization. Recording/export IDs match. No automatic pruning deletes prior recordings. Report schema 2 accepts absent optional fields; report-viewer payload format 3 shares the same Java-derived values with the GUI.
+
+
+## 0.1.3 additions
+
+### Capture
+
+`PacketListenerMixin` adds four read-only TAIL observations. None of them cancels, delays or modifies a packet:
+
+| Handler | Purpose | Cost |
+| --- | --- | --- |
+| `handleSoundEvent` | Shield block and break sounds within 1.5 blocks of you or the opponent | Two holder comparisons per sound packet; nothing else unless engaged |
+| `handleAnimate` | Server critical-hit animation (action 4) on the opponent or on you | Low frequency |
+| `handlePlayerCombatKill` | Death-screen packet for the local player | Rare |
+| `setTitleText` | Title text, kept as non-authoritative local evidence while engaged | Rare |
+
+`ClientCapture.damage` records the server-reported attribution (`OPPONENT_DIRECT`, `OPPONENT_INDIRECT`, `OTHER_ENTITY`, `UNATTRIBUTED`), the damage type, and your ground, sprint and movement state. During an engagement each client tick reads health and absorption (emitted only on change), checks for a single-tick position change over 8 blocks (teleport, recorded only), and checks opponent removal. Attacks record the target's blocking state and whether the shield faces you. All of this goes into the optional `CombatEvent.Context` record; older events keep it null.
+
+### Outcome lifecycle
+
+`CombatEngine` turns evidence into ranked `Candidate`s and finalizes exactly once with a `Resolution`:
+
+1. A trusted match-scope result finalizes immediately.
+2. Round results, kill messages, deaths, world changes and match-end markers open a grace period: 3 s, or 8 s after a round result. A stronger candidate may replace the pending one and extend the wait. A weaker one never does.
+3. A new start announcement while a fight without a result is still running is **deferred** for up to 2 s. A late result in that window belongs to the old round. The queued round then starts at its own announcement time.
+4. A round-scoped result keeps the match scoped. The next engagement against the announced opponent continues the same match even when the server sends no round-start message (PVPHQ best-of). A trusted round line directly after a trusted match-end marker is the match result.
+5. Results during the first 2 s of a round are accepted unless an earlier round's result is still outstanding (forfeits during the countdown).
+6. Announced rounds with no combat and no result are not recorded. A `Round 1 started!` that follows a match block continues the countdown recording.
+
+Third-party kills give Unknown (source `THIRD_PARTY_KILL`). Contradictions of equal rank give Unknown (source `CONFLICT`) with a note. Local death is an inferred loss. Opponent death, or removal followed by a new target, is Unknown.
+
+### Data model
+
+- Recording schema 3: `FightRecord.resolution` plus `MatchEvidence.matchId` and `roundNumber`. `Evaluation.result` separates `HIT`, `SHIELD_BLOCK` and `SHIELD_DISABLE`.
+- `Statistics` gains attribution, shield, critical, combo and health counters. `accuracyDenominator()` excludes confirmed blocks.
+- Schema 1 and 2 files still load. Their `resolution` is derived read-only when the record is constructed, and stored files are never rewritten.
+
+### Analytics
+
+`combat.metrics.Combos` is shared by the engine (frozen summary counts) and `FightAnalytics` (timeline), so the stored longest combo always equals the graph. `analytics.Dominance` implements the bounded decay model. `FightAnalytics` adds incoming detail (attribution, health drop, knockback, jump category, crit), shields, per-attempt outcomes, per-weapon timing samples, reach and aim summaries, an experimental jump effect and match boundaries. `Interpretation` writes deterministic sentences from those values. `Aggregate` pools all of it, together with dominance time shares, across fights in scope.
+
+### Interface
+
+Six primary tabs with one level of sections:
+
+| Tab | Sections |
+| --- | --- |
+| Overview | Latest result, summary and interpretations; recent performance; trend; recent fights |
+| Offense | Accuracy, Reach & spacing, Aim, Weapon timing, Critical hits, Sprint hits |
+| Defense | Incoming hits, Shields, Jump resets, Damage & knockback |
+| Fight Flow | Combos, Dominance, Exchanges, for a focused fight (Older / Newer) plus scope totals |
+| History | List and detail (result source, notes, dominance graph, combo timeline) |
+| Settings | General, Controls, Sounds, Measurement, Recording & storage, Interface |
+
+`FlowCharts` provides the combo timeline, dominance chart, reach histogram, timing scatter and jump-offset strip. Weapon and attempt filters are chips. Every chart has a title, units, legend, tooltip and empty state.
+
+### Report
+
+Payload format 4 adds `resolution`, `interpretations`, `combos` (marks, streaks, exchanges), `dominance` (values, one-letter states, summary, model constants), `shields`, `incomingDetail`, `timingSamples`, `attemptOutcomes`, `reach`, `aim`, `jumpEffect` and `boundaries`. The viewer tabs are Overview, Offense, Defense, Fight Flow and Timeline. Shared copies redact resolution notes the same way as announcement text.

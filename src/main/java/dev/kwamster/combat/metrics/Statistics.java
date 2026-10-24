@@ -18,6 +18,19 @@ public final class Statistics {
       longestCombo,
       incoming;
   public int perfectReachHits;
+
+  /**
+   * Schema 3 counters. {@code incoming} counts only server-attributed opponent hits; damage without
+   * a cause entity and damage from third parties are counted separately and never treated as
+   * retaliation.
+   */
+  public int unattributedIncoming, thirdPartyIncoming;
+
+  public int attacksIntoShield, shieldBlocks, estimatedShieldBlocks, shieldDisables;
+  public int localShieldBlocks, localShieldDisabled;
+  public int serverCrits, opponentCrits;
+  public int comboCount, comboHits, longestOpponentCombo, longestUnanswered;
+  public double damageTaken;
   public int centerAim, edgeAim, highAim, lowAim;
   public int[] reachDistribution = new int[8];
   public double[] recentReach = new double[16];
@@ -99,8 +112,23 @@ public final class Statistics {
     return Math.sqrt(Math.max(0, squares / recentReachCount - Math.pow(sum / recentReachCount, 2)));
   }
 
+  /**
+   * Hit accuracy denominator: every attempt except attacks confirmed as shield blocks. A blocked
+   * attack connected with the opponent's shield; it is neither a hit nor a miss.
+   */
+  public int accuracyDenominator() {
+    return Math.max(0, attempts - shieldBlocks);
+  }
+
   public double accuracy() {
-    return attempts == 0 ? 0 : 100.0 * hits / attempts;
+    int d = accuracyDenominator();
+    return d == 0 ? 0 : 100.0 * hits / d;
+  }
+
+  /** A confirmed shield block consumes an attempt that would otherwise stay uncertain. */
+  public void blocked() {
+    shieldBlocks++;
+    uncertain--;
   }
 
   public double averageReach() {

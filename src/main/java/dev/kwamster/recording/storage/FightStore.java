@@ -178,7 +178,7 @@ public final class FightStore implements AutoCloseable {
   public static FightRecord decode(String json) throws IOException {
     try {
       var f = AtomicJson.GSON.fromJson(json, FightRecord.class);
-      if (f == null || (f.schemaVersion() < 1 || f.schemaVersion() > 2))
+      if (f == null || (f.schemaVersion() < 1 || f.schemaVersion() > FightRecord.SCHEMA))
         throw new IOException("Unsupported report schema; preserved");
       UUID.fromString(f.id());
       if (f.statistics() == null

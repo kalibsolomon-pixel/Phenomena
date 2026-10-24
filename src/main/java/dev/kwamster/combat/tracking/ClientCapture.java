@@ -5,22 +5,49 @@ import dev.kwamster.combat.events.*;
 import dev.kwamster.combat.events.CombatEvent.*;
 import dev.kwamster.combat.metrics.Geometry;
 import dev.kwamster.combat.quality.*;
+import java.util.Objects;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
 import net.minecraft.network.protocol.game.ClientboundDamageEventPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
+import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
+import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.*;
 
+/**
+ * Reads Minecraft state on the client thread and turns it into immutable observations. All hooks
+ * are read-only. Packet observations are low frequency (damage, sound, animation, death, title);
+ * per-tick work is a few field reads during an engagement.
+ */
 public final class ClientCapture {
   private static Entity trackedTarget;
   private static net.minecraft.client.multiplayer.ClientLevel lastLevel;
   private static long sequence, clientTick;
   private static final AttackTiming TIMING = new AttackTiming();
   private static boolean jumpHeld, jumpConsumed;
+  private static boolean connected, wasGround, sprinting, localDeathReported;
+  private static double lastHealth = -1, lastAbsorption = -1;
+  private static Vec3 lastPosition;
+  private static String deadTarget, removedTarget;
+  private static final long ORIGIN = System.nanoTime();
+
+  /** Bounded entity UUID to display label (type or player name); local display metadata only. */
+  private static final java.util.Map<String, String> LABELS =
+      new java.util.LinkedHashMap<>(32, .75f, true) {
+        @Override
+        protected boolean removeEldestEntry(java.util.Map.Entry<String, String> eldest) {
+          return size() > 32;
+        }
+      };
+
+  private ClientCapture() {}
 
   public static void startTick() {
     clientTick++;
@@ -53,7 +80,7 @@ public final class ClientCapture {
         + ";slot="
         + p.getInventory().getSelectedSlot()
         + ";attributes="
-        + java.util.Objects.hashCode(stack.get(DataComponents.ATTRIBUTE_MODIFIERS));
+        + Objects.hashCode(stack.get(DataComponents.ATTRIBUTE_MODIFIERS));
   }
 
   /**
@@ -76,13 +103,18 @@ public final class ClientCapture {
         null,
         Confidence.OBSERVED,
         null,
-        "actual jumpFromGround; vy=" + entity.getDeltaMovement().y);
+        "actual jumpFromGround; vy=" + entity.getDeltaMovement().y,
+        Context.jump(entity.isSprinting()));
+  }
+
+  private static String host(Minecraft mc) {
+    return mc.getCurrentServer() == null ? "singleplayer" : mc.getCurrentServer().ip;
   }
 
   public static void systemMessage(String text, boolean overlay) {
     var mc = Minecraft.getInstance();
     if (mc.player == null || KwamsterClient.engine == null) return;
-    String host = mc.getCurrentServer() == null ? "singleplayer" : mc.getCurrentServer().ip;
+    String host = host(mc);
     Announcements.interpret(
             host, text, overlay ? Announcements.Origin.OVERLAY : Announcements.Origin.SYSTEM)
         .ifPresent(
@@ -91,20 +123,18 @@ public final class ClientCapture {
                     host, mc.player.getName().getString(), m, now()));
   }
 
-  private static boolean connected, wasGround, sprinting;
-  private static String deadTarget;
-  private static final long ORIGIN = System.nanoTime();
-
-  /** Bounded entity UUID to display label (type or player name); local display metadata only. */
-  private static final java.util.Map<String, String> LABELS =
-      new java.util.LinkedHashMap<>(32, .75f, true) {
-        @Override
-        protected boolean removeEldestEntry(java.util.Map.Entry<String, String> eldest) {
-          return size() > 32;
-        }
-      };
-
-  private ClientCapture() {}
+  /** Title text: kept as non-authoritative local evidence while engaged. */
+  public static void title(String text) {
+    var mc = Minecraft.getInstance();
+    if (mc.player == null || KwamsterClient.engine == null || !KwamsterClient.engine.engaged())
+      return;
+    String host = host(mc);
+    Announcements.interpret(host, text, Announcements.Origin.TITLE)
+        .ifPresent(
+            m ->
+                KwamsterClient.engine.announcement(
+                    host, mc.player.getName().getString(), m, now()));
+  }
 
   public static String label(String uuid) {
     return uuid == null ? null : LABELS.get(uuid);
@@ -124,9 +154,21 @@ public final class ClientCapture {
 
   private static void emit(
       Kind kind, String actor, String target, Confidence c, Attack a, String detail) {
+    emit(kind, actor, target, c, a, detail, null);
+  }
+
+  private static void emit(
+      Kind kind,
+      String actor,
+      String target,
+      Confidence c,
+      Attack a,
+      String detail,
+      Context context) {
     if (KwamsterClient.engine != null)
       KwamsterClient.engine.accept(
-          new CombatEvent(++sequence, now(), kind, actor, target, c, a, detail, clientTick));
+          new CombatEvent(
+              ++sequence, now(), kind, actor, target, c, a, detail, clientTick, context));
   }
 
   public static void emptySwing() {
@@ -171,7 +213,7 @@ public final class ClientCapture {
     var normalized = contact.map(box::normalize).orElse(new Geometry.Vec(-1, -1, -1));
     double cooldown = player.getAttackStrengthScale(.5f);
     boolean crit =
-        dev.kwamster.combat.quality.CriticalConditions.eligible(
+        CriticalConditions.eligible(
             cooldown,
             player.fallDistance,
             player.onGround(),
@@ -202,10 +244,18 @@ public final class ClientCapture {
     double duration = player.getCurrentItemAttackStrengthDelay();
     if (!KwamsterClient.engine.engaged()
         || KwamsterClient.engine.state() == CombatEngine.State.ENDING
-        || !java.util.Objects.equals(target.getUUID().toString(), KwamsterClient.engine.opponent()))
+        || !Objects.equals(target.getUUID().toString(), KwamsterClient.engine.opponent()))
       TIMING.reset();
     var timing =
         TIMING.attack(weapon, clientTick, duration, KwamsterClient.config.timingToleranceTicks);
+    boolean blocking = target instanceof LivingEntity le && le.isBlocking();
+    boolean facing = false;
+    if (blocking) {
+      // Vanilla blocks melee arriving in front of the blocker's horizontal view direction.
+      var look = target.getViewVector(1);
+      var toAttacker = player.position().subtract(target.position());
+      facing = look.x * toAttacker.x + look.z * toAttacker.z > 0;
+    }
     emit(
         Kind.ATTACK,
         "local",
@@ -235,7 +285,8 @@ public final class ClientCapture {
             + partial
             + "; margin="
             + target.getPickRadius()
-            + "; critical conditions observed");
+            + "; critical conditions observed",
+        Context.target(blocking, facing));
   }
 
   /** Called at TAIL, after vanilla's main-thread packet dispatch guard. Reads only. */
@@ -247,16 +298,41 @@ public final class ClientCapture {
     if (target == null) return;
     if (target == mc.player) {
       if (cause != null) remember(cause);
-      if (!KwamsterClient.engine.engaged()
-          || (cause != null && cause.getUUID().toString().equals(KwamsterClient.engine.opponent())))
-        trackedTarget = cause;
+      var engine = KwamsterClient.engine;
+      String opponent = engine.engaged() ? engine.opponent() : null;
+      boolean living = cause instanceof LivingEntity && cause != mc.player;
+      String causeId = living ? cause.getUUID().toString() : null;
+      boolean direct = living && packet.sourceDirectId() == cause.getId();
+      // Before an engagement the first living cause becomes the opponent.
+      boolean isOpponent =
+          living
+              && (opponent == null
+                  || causeId.equals(opponent)
+                  || (opponent.startsWith("announced:")
+                      && Objects.equals(label(causeId), opponent.substring(10))));
+      Attribution attribution =
+          !living
+              ? Attribution.UNATTRIBUTED
+              : !isOpponent
+                  ? Attribution.OTHER_ENTITY
+                  : direct ? Attribution.OPPONENT_DIRECT : Attribution.OPPONENT_INDIRECT;
+      if (!engine.engaged() || isOpponent) trackedTarget = cause;
+      var p = mc.player;
+      boolean valid = !p.isInWater() && !p.onClimbable() && !p.isPassenger();
       emit(
           Kind.DAMAGE_IN,
-          cause instanceof LivingEntity ? cause.getUUID().toString() : null,
+          causeId,
           "local",
           Confidence.CONFIRMED,
           null,
-          "server damage event; amount and knockback cancellation unavailable");
+          "server damage event; amount and knockback cancellation unavailable",
+          Context.incoming(
+              attribution,
+              packet.sourceType().unwrapKey().map(k -> k.identifier().toString()).orElse(null),
+              living ? direct : null,
+              p.onGround(),
+              p.isSprinting(),
+              valid));
     } else if (cause == mc.player
         && packet.sourceDirectId() == mc.player.getId()
         && (packet.sourceType().is(DamageTypes.PLAYER_ATTACK)
@@ -270,17 +346,85 @@ public final class ClientCapture {
           "local-melee-source");
   }
 
-  public static void velocity(
-      net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket packet) {
+  /**
+   * Shield block or disable sounds within 1.5 blocks of the local player or the opponent. Only two
+   * sound identities are compared; every other sound returns immediately.
+   */
+  public static void sound(ClientboundSoundPacket packet) {
     var mc = Minecraft.getInstance();
-    if (mc.player != null && packet.getId() == mc.player.getId() && KwamsterClient.engine.engaged())
+    var engine = KwamsterClient.engine;
+    if (mc.player == null || engine == null || !engine.engaged()) return;
+    var sound = packet.getSound();
+    boolean block = sound.is(SoundEvents.SHIELD_BLOCK);
+    boolean disable = !block && sound.is(SoundEvents.SHIELD_BREAK);
+    if (!block && !disable) return;
+    var at = new Vec3(packet.getX(), packet.getY(), packet.getZ());
+    double local = mc.player.position().distanceTo(at);
+    double opp =
+        trackedTarget != null
+                && Objects.equals(trackedTarget.getUUID().toString(), engine.opponent())
+            ? trackedTarget.position().distanceTo(at)
+            : Double.POSITIVE_INFINITY;
+    double nearest = Math.min(local, opp);
+    // The sound plays at the blocker's position; anything farther is someone else's shield.
+    if (nearest > 1.5) return;
+    emit(
+        Kind.SHIELD,
+        null,
+        null,
+        Confidence.OBSERVED,
+        null,
+        (block ? "shield block sound" : "shield disable sound") + "; nearest participant",
+        Context.shield(block ? "BLOCK" : "DISABLE", opp < local ? "opponent" : "local", nearest));
+  }
+
+  /** Server critical-hit animation (action 4) on the opponent or the local player. */
+  public static void animate(ClientboundAnimatePacket packet) {
+    var mc = Minecraft.getInstance();
+    var engine = KwamsterClient.engine;
+    if (mc.player == null
+        || mc.level == null
+        || engine == null
+        || !engine.engaged()
+        || packet.getAction() != ClientboundAnimatePacket.CRITICAL_HIT) return;
+    var entity = mc.level.getEntity(packet.getId());
+    if (entity == null) return;
+    boolean local = entity == mc.player;
+    String id = local ? "local" : entity.getUUID().toString();
+    if (!local && !id.equals(engine.opponent())) return;
+    emit(
+        Kind.CRIT,
+        null,
+        id,
+        Confidence.CONFIRMED,
+        null,
+        "server critical-hit animation",
+        Context.subject(local ? "local" : "opponent"));
+  }
+
+  /** Death-screen packet the server sends to the dying local player. */
+  public static void combatKill(ClientboundPlayerCombatKillPacket packet) {
+    var mc = Minecraft.getInstance();
+    if (mc.player == null || packet.playerId() != mc.player.getId() || localDeathReported) return;
+    localDeathReported = true;
+    emit(Kind.DEATH, null, "local", Confidence.CONFIRMED, null, "server combat-kill packet");
+  }
+
+  public static void velocity(ClientboundSetEntityMotionPacket packet) {
+    var mc = Minecraft.getInstance();
+    if (mc.player != null
+        && packet.getId() == mc.player.getId()
+        && KwamsterClient.engine.engaged()) {
+      var v = packet.getMovement();
       emit(
           Kind.VELOCITY,
           "local",
           null,
           Confidence.OBSERVED,
           null,
-          "server velocity update; cause unverified; " + packet.getMovement());
+          "server velocity update; cause unverified",
+          Context.velocity(v.x, v.y, v.z, mc.player.onGround()));
+    }
   }
 
   public static void tick() {
@@ -290,8 +434,10 @@ public final class ClientCapture {
         emit(Kind.DISCONNECT, "local", null, Confidence.OBSERVED, null, "world unavailable");
       connected = false;
       deadTarget = null;
+      removedTarget = null;
       trackedTarget = null;
       lastLevel = null;
+      lastPosition = null;
       KwamsterClient.engine.tick(now());
       return;
     }
@@ -300,9 +446,10 @@ public final class ClientCapture {
       connected = false;
       trackedTarget = null;
       deadTarget = null;
+      removedTarget = null;
+      lastPosition = null;
     }
-    String host = mc.getCurrentServer() == null ? "singleplayer" : mc.getCurrentServer().ip;
-    KwamsterClient.engine.context(host, mc.player.getName().getString());
+    KwamsterClient.engine.context(host(mc), mc.player.getName().getString());
     lastLevel = mc.level;
     if (!connected) {
       wasGround = mc.player.onGround();
@@ -310,15 +457,41 @@ public final class ClientCapture {
       connected = true;
     }
     if (KwamsterClient.config.tracking) {
+      var engine = KwamsterClient.engine;
       if (sprinting != mc.player.isSprinting()) {
         sprinting = mc.player.isSprinting();
         emit(Kind.SPRINT, "local", null, Confidence.OBSERVED, null, Boolean.toString(sprinting));
       }
       boolean ground = mc.player.onGround();
       wasGround = ground;
-      if (mc.player.isDeadOrDying())
-        emit(Kind.DEATH, null, "local", Confidence.OBSERVED, null, "local death");
-      if (KwamsterClient.engine.engaged()) {
+      if (mc.player.isDeadOrDying()) {
+        if (!localDeathReported)
+          emit(Kind.DEATH, null, "local", Confidence.OBSERVED, null, "local death");
+        localDeathReported = true;
+      } else localDeathReported = false;
+      var position = mc.player.position();
+      if (engine.engaged()) {
+        double health = mc.player.getHealth(), absorption = mc.player.getAbsorptionAmount();
+        if (health != lastHealth || absorption != lastAbsorption)
+          emit(
+              Kind.HEALTH,
+              "local",
+              null,
+              Confidence.OBSERVED,
+              null,
+              "client health",
+              Context.health(health, absorption));
+        lastHealth = health;
+        lastAbsorption = absorption;
+        if (lastPosition != null && lastPosition.distanceTo(position) > 8)
+          emit(
+              Kind.TELEPORT,
+              "local",
+              null,
+              Confidence.OBSERVED,
+              null,
+              "single-tick position change",
+              Context.distance(lastPosition.distanceTo(position)));
         if (mc.player.tickCount % 2 == 0) {
           var motion = mc.player.getDeltaMovement();
           emit(
@@ -329,10 +502,12 @@ public final class ClientCapture {
               null,
               "vx=" + motion.x + ";vy=" + motion.y + ";vz=" + motion.z + ";ground=" + ground);
         }
-        String opponent = KwamsterClient.engine.opponent();
-        if (trackedTarget != null
-            && opponent != null
-            && opponent.equals(trackedTarget.getUUID().toString())
+        String opponent = engine.opponent();
+        boolean isOpponent =
+            trackedTarget != null
+                && opponent != null
+                && opponent.equals(trackedTarget.getUUID().toString());
+        if (isOpponent
             && !opponent.equals(deadTarget)
             && trackedTarget instanceof LivingEntity living
             && living.isDeadOrDying()) {
@@ -345,7 +520,21 @@ public final class ClientCapture {
               null,
               "opponent death; attribution unavailable");
         }
+        if (isOpponent && trackedTarget.isRemoved() && !opponent.equals(removedTarget)) {
+          removedTarget = opponent;
+          emit(
+              Kind.REMOVED,
+              null,
+              opponent,
+              Confidence.OBSERVED,
+              null,
+              "opponent entity removed from client world: " + trackedTarget.getRemovalReason());
+        }
+      } else {
+        lastHealth = -1;
+        lastAbsorption = -1;
       }
+      lastPosition = position;
     }
     KwamsterClient.engine.tick(now());
   }

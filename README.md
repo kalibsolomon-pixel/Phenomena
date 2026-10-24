@@ -15,24 +15,38 @@ $env:JAVA_HOME = (Get-ChildItem .tools -Directory -Filter 'jdk-21*' | Select-Obj
 ./gradlew.bat runClientGameTest
 ~~~
 
-On another machine install Java 21 and set JAVA_HOME, then use the checked-in Gradle wrapper. The wrapper verifies its distribution checksum. Build output: build/libs/kwamster-0.1.2.jar. Install this jar and Fabric API 0.141.6+1.21.11 into a Fabric 1.21.11 client. Sources and integration-test mods are not required for installation.
+On another machine install Java 21 and set JAVA_HOME, then use the checked-in Gradle wrapper. The wrapper verifies its distribution checksum. Build output: build/libs/kwamster-0.1.3.jar. Install this jar and Fabric API 0.141.6+1.21.11 into a Fabric 1.21.11 client. Sources and integration-test mods are not required for installation.
 
 ## The dashboard
 
-One window with four persistent tabs. Keys 1-4 switch tabs; Escape or the dashboard key closes it. Tab, filter, section and scroll positions are remembered for the session.
+One window with six persistent tabs. Keys 1–6 switch tabs; Escape or the dashboard key closes it. Tab, section, filter, focused-fight and scroll positions are remembered for the session. Each analysis tab has one row of sections and a scope selector (last 10, last 25 or all fights).
 
 | Tab | Contents |
 | --- | --- |
-| Overview | Accuracy, hits, attempts, average/maximum reach, critical- and sprint-hit rates, average hit interval, fight count and longest combo over the last *N* fights (default 20); a per-fight trend chart switchable between accuracy, reach, critical-hit rate and hit timing; the five most recent fights with a Browser shortcut. |
-| Combat Analytics | Eight sections: Accuracy, Reach, Aim, Timing, Critical hits, Sprint hits, Jump resets, Combos. Scope: last 10, last 25 or all fights. Includes the reach histogram and progression, a normalized hitbox with individual impacts or aggregate density, weapon-specific attempt intervals and cooldown data, interval trend, signed tick timing around incoming damage, combo progression and the estimated momentum timeline. |
-| Fight History | Sortable, filterable list of local recordings (date, duration, opponent, outcome, hits, accuracy, average reach) with Details, View in Browser, Export and Delete (confirmed). **Open Recordings Folder** and **Open Exports Folder** open the real directories in the system file manager. Details load the recorded timeline on demand. |
-| Settings | General, Controls, Combat feedback (hit sounds, Minecraft sound category, presets or custom sound IDs, volume, pitch, perfect-reach window, sound styles and tick timing tolerances), Recording & storage (retention, budget, anonymization, motion traces, folders) and Interface (accent color, density, reduced motion, chart markers and grid). |
+| Overview | The latest fight's result (with how it was established), duration, accuracy, reach in the target window, longest combo and advantage share, plus generated plain-language interpretations; recent-performance cards; a per-fight trend chart; the five most recent fights. |
+| Offense | Accuracy (denominator excludes confirmed shield blocks), Reach & spacing (0.05-block histogram with the target window shaded, weapon filter, per-weapon table), Aim (measured contacts, derived grades, by weapon and reach band), Weapon timing (interval minus each weapon's cooldown, filters by weapon and result, resets marked), Critical hits (client conditions and server crit animations), Sprint hits. |
+| Defense | Incoming hits split into attributed, unattributed and third-party damage; Shields (confirmed, estimated, disables, your own blocks); Jump resets (signed tick offsets per attributed hit, movement state, knockback; success is not measured); Damage & knockback. |
+| Fight Flow | For a focused fight (Older / Newer): Combos timeline with selectable combos, the encounter dominance graph (above the centerline favors you, below the opponent, empty where there is no evidence, dotted where attribution is incomplete), and the exchange breakdown with turning points. Scope totals alongside. |
+| History | Sortable, filterable list of local recordings with result labels such as "Win (confirmed)" or "Loss (inferred)". Details, View in Browser, Export and confirmed Delete. **Open Recordings Folder** and **Open Exports Folder** open the real directories. Details show the result source, the establishing announcement, notes, the dominance graph and the combo timeline. |
+| Settings | General, Controls, Sounds, Measurement (fight detection, reach target and tolerance, timing tolerance, jump window), Recording & storage, Interface. |
 
-Charts show gaps where a fight has no samples; missing values are shown as a dash, never as zero. Hover any card or chart point for its definition or value.
+Charts show gaps where there are no samples. Missing values are a dash, never zero. Hover any card or chart for its definition or value.
+
+## Results and evidence (0.1.3)
+
+Every recording stores a result classification separately from its evidence source and confidence:
+
+- **Confirmed server-declared win or loss:** an exact, host-scoped server announcement names both players in the current round. This is either a paired winner/loser message, or a one-name winner or loser line inside a round whose start announcement named the opponent.
+- **Inferred win or loss:** a server kill message, generic result text with an endpoint, or your own death.
+- **Draw, Unknown, Interrupted:** Unknown covers an opponent's death without an announcement, a kill by a third party and contradictory evidence. Interrupted covers disconnects, world changes and target changes.
+
+Adapters cover the formats in the owner's logs: Minemen on `minemen.net` and `minemen.club` (all `<Mode> Duel` and `Casual Match` starts, round lines `PlayerA won! 1 - 0`, paired match results including spectator lists, kill messages), and PVPHQ (opponent line, kill line, `MATCH REPORT`, winner and loser lines, best-of rounds). A round result waits briefly for the match result that usually follows it. A late result after the next start belongs to the previous round, and forfeits during the countdown are accepted. On 1,198 labeled matches extracted from those logs, every decided match was classified correctly. That figure covers these two servers only; see [validation](docs/VALIDATION.md).
+
+Incoming damage counts as an opponent hit only when the server names the opponent as its cause. Fall, fire and third-party damage are kept separately and never break your combos. Shield blocks are detected from the shield sound and the absence of a damage event; a blocked attack is neither a hit nor a miss. See the [measurement audit](docs/MEASUREMENT_AUDIT.md) and [0.1.3 notes](docs/0.1.3.md).
 
 ## Multiplayer corrections in 0.1.2
 
-Server adapters recognize observed PVPHQ and Minemen duel announcements, using the system packet channel, local identity, opponent and round context. Ordinary player/disguised chat is excluded. Paired participants can provide a confirmed server-declared result; one-name results and same-opponent rematches require independent endpoint evidence and remain inferred. Ambiguous or expired results never become confirmed wins/losses. Death and world changes allow a three-second result grace period; announced duels have a separate 60-second inactivity fallback.
+(Superseded where noted by 0.1.3.) Server adapters recognize observed PVPHQ and Minemen duel announcements, using the system packet channel, local identity, opponent and round context. Ordinary player/disguised chat is excluded. Paired participants can provide a confirmed server-declared result; one-name results and same-opponent rematches require independent endpoint evidence and remain inferred. Ambiguous or expired results never become confirmed wins/losses. Death and world changes allow a three-second result grace period; announced duels have a separate 60-second inactivity fallback.
 
 Weapon timing uses attempted melee attacks and the held item's actual effective attack speed/cooldown, including modifiers. Openers are ungraded; one cooldown later is perfect within a configurable one-tick tolerance, earlier is fast, later through two cooldowns is slow. Switching weapons or exceeding two cooldowns resets the sequence. The special sound instead rewards source-correlated ray contacts at 3.00 ± 0.06 blocks, configurable independently of timing.
 
@@ -44,13 +58,13 @@ See [implementation and validation](docs/0.1.2.md). The [synthetic report](docs/
 
 Every finalized fight, with recording enabled (default), automatically writes its JSON recording and a self-contained HTML report without opening the GUI. **View in Browser** reuses the same export folder and opens it. Exports live in `kwamster/exports/Fight <date> <time>/index.html` when anonymization is on (default), or `Fight vs <opponent> <date> <time>` when off. Local recordings always retain known opponent names independently of sharing privacy.
 
-The page works offline: no hosted site, external scripts or network requests. Tabs: Summary, Timeline (play/pause, speed, scrubbing and annotations), Reach, Aim, Timing and Movement. Playback follows recorded event timestamps; it does not reconstruct the Minecraft world. Failed writes retry three times, then every 30 seconds while running, and missing or damaged exports recover on restart. Completed exports are checked by content digest and reused.
+The page works offline: no hosted site, external scripts or network requests. Tabs: Overview (result, evidence, interpretations), Offense (accuracy, reach histogram, aim faces, weapon timing), Defense (attribution, shields, tick-aligned jump timeline, damage and knockback), Fight Flow (clickable combo timeline, dominance graph, exchanges) and Timeline (play/pause, speed, scrubbing and annotations). Playback follows recorded event timestamps; it does not reconstruct the Minecraft world. Failed writes retry three times, then every 30 seconds while running, and missing or damaged exports recover on restart. Completed exports are checked by content digest and reused.
 
 Derived numbers in the report are computed by the same Java analytics code as the dashboard and embedded in the page, so both surfaces agree.
 
 ## Reading the numbers
 
-Accuracy is **correlated hits / combat attempts**, including unresolved attempts in the denominator. Unanswered entity attacks are uncertain, not proven misses; empty swings are the only confirmed misses. A server damage event identifies a melee source, but reports no damage amount or critical multiplier. Critical conditions and reach remain client observations. Attempt timing measures weapon intervals; cooldown strength remains a separate diagnostic. Perfect reach is a separate geometry metric. Jump-reset success is unavailable; only candidates and timing evidence are shown. Momentum is an illustrative estimate. Opponent death does not prove a win.
+Accuracy is **confirmed hits / (attempts − confirmed shield blocks)**, including unresolved attempts in the denominator. Unanswered entity attacks are uncertain, not proven misses; empty swings are the only confirmed misses. A server damage event identifies a melee source, but reports no damage amount or critical multiplier. Critical conditions and reach remain client observations. Attempt timing measures weapon intervals; cooldown strength remains a separate diagnostic. Perfect reach is a separate geometry metric. Jump-reset success is unavailable; only candidates and timing evidence are shown. Encounter dominance is a bounded, decaying share of confirmed hits and shield events, shown neutral or empty where evidence is thin or unattributed; it is not physical momentum or a win probability. Opponent death does not prove a win. Every metric's definition, inputs, formula, confidence and limits are in [METRICS.md](docs/METRICS.md).
 
 ## Files and privacy
 
