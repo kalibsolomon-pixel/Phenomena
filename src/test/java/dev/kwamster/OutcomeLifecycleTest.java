@@ -96,14 +96,14 @@ class OutcomeLifecycleTest {
     s.chat(5, "► Winner: PlayerA (5.3 ❤, 10/18 ⚗) [Click]");
     s.chat(5, "► Loser: PlayerB (0 ❤, 11/18 ⚗) [Click]");
     s.tick(14);
-    assertEquals(1, s.out.size());
-    assertEquals(Scope.ROUND, s.last().resolution().scope());
-    assertEquals(Classification.CONFIRMED_WIN, s.last().resolution().classification());
+    assertTrue(s.out.isEmpty());
+    assertTrue(s.engine.engaged());
     s.hit(20).incoming(21);
     s.chat(24, "🗡 PlayerA has been killed by PlayerB.");
     s.chat(24.1, "🏆 MATCH REPORT 🏆");
     s.chat(24.2, "► Winner: PlayerB (6 ❤, 18/18 ⚗) [Click]");
-    assertEquals(2, s.out.size());
+    assertEquals(1, s.out.size());
+    assertEquals(FightRecord.Outcome.WIN, s.last().matchEvidence().rounds().getFirst().outcome());
     assertEquals(Classification.CONFIRMED_LOSS, s.last().resolution().classification());
     assertEquals(Scope.MATCH, s.last().resolution().scope());
   }
@@ -117,13 +117,14 @@ class OutcomeLifecycleTest {
     s.chat(6, "PlayerB was killed by PlayerA!");
     s.chat(6, "\nPlayerA (8.5❤) won!\n 1 - 0\n");
     s.chat(12, "Round 2 started!");
-    assertEquals(Classification.CONFIRMED_WIN, s.out.getFirst().resolution().classification());
-    assertEquals(Scope.ROUND, s.out.getFirst().resolution().scope());
+    assertTrue(s.out.isEmpty());
+    assertTrue(s.engine.engaged());
     s.hit(15);
     s.chat(18, "PlayerB was killed by PlayerA!");
     s.chat(18, "\nPlayerA won!\n 2 - 0\n");
     s.chat(18.5, MM_WIN);
-    assertEquals(2, s.out.size());
+    assertEquals(1, s.out.size());
+    assertEquals(2, s.last().matchEvidence().rounds().size());
     assertEquals(Scope.MATCH, s.last().resolution().scope());
     assertEquals(Classification.CONFIRMED_WIN, s.last().resolution().classification());
   }
@@ -136,55 +137,49 @@ class OutcomeLifecycleTest {
     s.hit(3.5);
     s.chat(6, "\nPlayerA won!\n 2 - 0\n"); // score claims round 2
     s.tick(100);
+    assertTrue(s.out.isEmpty());
+    s.engine.finish(ns(101), FightRecord.Outcome.INTERRUPTED, "Client stopped");
     assertNotEquals(Classification.CONFIRMED_WIN, s.last().resolution().classification());
     assertTrue(s.last().resolution().notes().stream().anyMatch(n -> n.contains("does not match")));
   }
 
   @Test
-  void killMessageIsInferredUntilUpgradedByDeclaredResult() {
+  void killMessageCannotEndConfiguredMatch() {
     var s = duel();
-    s.chat(5, "PlayerB was killed by PlayerA!");
-    s.tick(9);
-    var r = s.last().resolution();
-    assertEquals(
-        Classification.INFERRED_WIN, r.classification(), "a kill is not a declared victory");
-    assertEquals(Source.SERVER_KILL_MESSAGE, r.source());
-
-    var t = duel();
-    t.chat(5, "PlayerB was killed by PlayerA!");
-    t.chat(6, MM_WIN);
-    assertEquals(1, t.out.size());
-    assertEquals(Classification.CONFIRMED_WIN, t.last().resolution().classification());
+    s.chat(5, "PlayerB was killed by PlayerA!").tick(1000);
+    assertTrue(s.out.isEmpty());
+    s.chat(1001, MM_WIN);
+    assertEquals(1, s.out.size());
+    assertEquals(Classification.CONFIRMED_WIN, s.last().resolution().classification());
   }
 
   @Test
   void thirdPartyKillNeverBecomesAWin() {
     var s = duel();
-    s.chat(5, "PlayerB was killed by PlayerC!");
-    s.tick(9);
-    var r = s.last().resolution();
-    assertEquals(Classification.UNKNOWN, r.classification());
-    assertEquals(Source.THIRD_PARTY_KILL, r.source());
+    s.chat(5, "PlayerB was killed by PlayerC!").tick(1000);
+    assertTrue(s.out.isEmpty());
+    s.engine.finish(ns(1001), FightRecord.Outcome.INTERRUPTED, "Client stopped");
+    assertEquals(Classification.INTERRUPTED, s.last().resolution().classification());
   }
 
   @Test
-  void localKilledByThirdPartyIsInferredLoss() {
+  void thirdPartyDeathCannotClassifyConfiguredMatch() {
     var s = duel();
-    s.chat(5, "PlayerA was killed by PlayerC!");
-    s.tick(9);
-    assertEquals(Classification.INFERRED_LOSS, s.last().resolution().classification());
+    s.chat(5, "PlayerA was killed by PlayerC!").tick(1000);
+    assertTrue(s.out.isEmpty());
+    s.chat(1001, MM_WIN);
+    assertEquals(Classification.CONFIRMED_WIN, s.last().resolution().classification());
   }
 
   @Test
-  void contradictoryEqualStrengthResultsBecomeUnknown() {
+  void contradictoryKillsCannotOverrideMatchResult() {
     var s = duel();
-    s.chat(5, "PlayerB was killed by PlayerA!");
-    s.chat(5.5, "PlayerA was killed by PlayerB!");
-    s.tick(10);
-    var r = s.last().resolution();
-    assertEquals(Classification.UNKNOWN, r.classification());
-    assertEquals(Source.CONFLICT, r.source());
-    assertFalse(r.notes().isEmpty());
+    s.chat(5, "PlayerB was killed by PlayerA!")
+        .chat(5.5, "PlayerA was killed by PlayerB!")
+        .tick(1000);
+    assertTrue(s.out.isEmpty(), "kill observations cannot classify the match");
+    s.chat(1001, MM_WIN);
+    assertEquals(Classification.CONFIRMED_WIN, s.last().resolution().classification());
   }
 
   @Test
@@ -203,23 +198,18 @@ class OutcomeLifecycleTest {
     s.chat(10, MM_START.replace("PlayerB", "PlayerC"));
     s.tick(12.5);
     assertEquals(1, s.out.size());
-    assertEquals(Classification.UNKNOWN, s.out.getFirst().resolution().classification());
+    assertEquals(Classification.INTERRUPTED, s.out.getFirst().resolution().classification());
     assertEquals(Source.ROUND_BOUNDARY, s.out.getFirst().resolution().source());
     assertTrue(s.engine.acceptsTarget("C", "PlayerC"));
   }
 
   @Test
-  void disconnectThenResultWithinGraceUsesResult() {
+  void disconnectPreservesInterruptedAndLateResultCannotRewrite() {
     var s = duel();
-    s.disconnect(5);
-    s.chat(6, MM_WIN);
-    assertEquals(Classification.CONFIRMED_WIN, s.last().resolution().classification());
-
-    var t = duel();
-    t.disconnect(5);
-    t.tick(9);
-    assertEquals(Classification.INTERRUPTED, t.last().resolution().classification());
-    assertEquals(Source.DISCONNECT, t.last().resolution().source());
+    s.disconnect(5).chat(6, MM_WIN).tick(9);
+    assertEquals(1, s.out.size());
+    assertEquals(Classification.INTERRUPTED, s.last().resolution().classification());
+    assertFalse(s.engine.engaged());
   }
 
   @Test
@@ -260,17 +250,12 @@ class OutcomeLifecycleTest {
   }
 
   @Test
-  void localDeathIsInferredLossOpponentDeathIsUnknown() {
+  void configuredDeathWaitsWhileGenericDeathRemainsConservative() {
     var s = duel();
-    s.death(5, "local");
-    s.tick(9);
-    assertEquals(Classification.INFERRED_LOSS, s.last().resolution().classification());
-    assertEquals(Source.LOCAL_DEATH, s.last().resolution().source());
-
-    var t = new Sim();
-    t.hit(1).hit(2);
-    t.death(3, B);
-    t.tick(7);
+    s.death(5, "local").tick(1000);
+    assertTrue(s.out.isEmpty());
+    var t = new Sim("unconfigured.test");
+    t.hit(1).hit(2).death(3, B).tick(7);
     assertEquals(Classification.UNKNOWN, t.last().resolution().classification());
     assertEquals(Source.OPPONENT_DEATH, t.last().resolution().source());
   }
@@ -286,18 +271,16 @@ class OutcomeLifecycleTest {
   }
 
   @Test
-  void externalFinishKeepsEstablishedResult() {
+  void shutdownDoesNotPromoteKillToMatchVictory() {
     var s = duel();
     s.chat(5, "PlayerB was killed by PlayerA!");
     s.engine.finish(ns(5.5), FightRecord.Outcome.INTERRUPTED, "Client stopped");
-    var r = s.last().resolution();
-    assertEquals(Classification.INFERRED_WIN, r.classification());
-    assertTrue(r.notes().stream().anyMatch(n -> n.contains("Client stopped")));
+    assertEquals(Classification.INTERRUPTED, s.last().resolution().classification());
   }
 
   @Test
   void opponentGoneThenNewTargetIsUnknownNotInterrupted() {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.hit(1);
     s.emit(
         2,
@@ -310,7 +293,7 @@ class OutcomeLifecycleTest {
         null);
     s.attack(3, C, 3, false, false);
     assertEquals(Source.OPPONENT_REMOVED, s.out.getFirst().resolution().source());
-    var t = new Sim();
+    var t = new Sim("unconfigured.test");
     t.hit(1).attack(2, C, 3, false, false);
     assertEquals(Classification.INTERRUPTED, t.out.getFirst().resolution().classification());
   }

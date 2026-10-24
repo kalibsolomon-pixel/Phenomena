@@ -2,6 +2,7 @@ package dev.kwamster.combat.metrics;
 
 import dev.kwamster.combat.events.CombatEvent;
 import dev.kwamster.combat.fights.FightRecord.Evaluation;
+import dev.kwamster.combat.fights.MatchEvidence;
 import java.util.*;
 
 /**
@@ -31,7 +32,8 @@ public final class Combos {
     RETALIATION,
     TRADE,
     DISENGAGE,
-    RECORDING_END
+    RECORDING_END,
+    ROUND_BOUNDARY
   }
 
   public record Mark(long sequence, long nanos, Long tick, Side side, boolean traded) {}
@@ -86,6 +88,25 @@ public final class Combos {
 
   public static Result analyze(
       List<CombatEvent> events, List<Evaluation> evaluations, String opponent, double gapSeconds) {
+    return analyze(events, evaluations, opponent, gapSeconds, List.of());
+  }
+
+  public static Result analyze(
+      List<CombatEvent> events,
+      List<Evaluation> evaluations,
+      String opponent,
+      double gapSeconds,
+      List<MatchEvidence.Round> rounds) {
+    long[] boundaries =
+        rounds.stream()
+            .flatMapToLong(
+                r ->
+                    r.endNanos() == null
+                        ? java.util.stream.LongStream.of(r.startNanos())
+                        : java.util.stream.LongStream.of(r.startNanos(), r.endNanos()))
+            .distinct()
+            .sorted()
+            .toArray();
     List<Mark> raw = new ArrayList<>(evaluations.size() + 16);
     for (var ev : evaluations) {
       if (!ev.hit()) continue;
@@ -124,9 +145,26 @@ public final class Combos {
     int exLocal = 0, exOpp = 0, exLongLocal = 0, exLongOpp = 0;
     int run = 0, longestLocal = 0, longestOpp = 0;
     Side runSide = null;
+    int boundary = 0;
     for (var m : marks) {
-      if (last != Long.MIN_VALUE && m.nanos() - last > gap) {
-        if (side != null) streaks.add(streak(side, current, streakStart, streakEnd, End.DISENGAGE));
+      boolean roundBoundary = false;
+      while (boundary < boundaries.length && boundaries[boundary] <= m.nanos()) {
+        if (last != Long.MIN_VALUE && boundaries[boundary] > last) roundBoundary = true;
+        boundary++;
+      }
+      if (roundBoundary) {
+        run = 0;
+        runSide = null;
+      }
+      if (last != Long.MIN_VALUE && (roundBoundary || m.nanos() - last > gap)) {
+        if (side != null)
+          streaks.add(
+              streak(
+                  side,
+                  current,
+                  streakStart,
+                  streakEnd,
+                  roundBoundary ? End.ROUND_BOUNDARY : End.DISENGAGE));
         exLongLocal = Math.max(exLongLocal, side == Side.LOCAL ? current.size() : 0);
         exLongOpp = Math.max(exLongOpp, side == Side.OPPONENT ? current.size() : 0);
         exchanges.add(new Exchange(exStart, exEnd, exLocal, exOpp, exLongLocal, exLongOpp));

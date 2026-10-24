@@ -196,7 +196,7 @@ const comboList=(combos.streaks||[]).filter(s=>s.length>=2);
 const incoming=D.incomingDetail||[];
 const shields=D.shields||{available:false,events:[]};
 const dom=D.dominance||null;
-const endWord={RETALIATION:'an attributed return hit',TRADE:'a same-tick trade',DISENGAGE:'disengagement',RECORDING_END:'the end of the recording'};
+const endWord={RETALIATION:'an attributed return hit',TRADE:'a same-tick trade',DISENGAGE:'disengagement',RECORDING_END:'the end of the recording',ROUND_BOUNDARY:'a round boundary'};
 const attrName={OPPONENT_DIRECT:'Opponent, melee',OPPONENT_INDIRECT:'Opponent, indirect',OPPONENT_LEGACY:'Opponent (pre-0.1.3)',OTHER_ENTITY:'Third party',UNATTRIBUTED:'Unattributed'};
 const gradeColor={IDEAL:'var(--ideal)',GOOD:'var(--goodaim)',PERIPHERAL:'var(--peripheral)',POOR:'var(--poor)',UNAVAILABLE:'#9aa6ac'};
 const timingColor={PERFECT:'var(--good)',TOO_FAST:'var(--opp)',TOO_SLOW:'var(--you)'};
@@ -365,6 +365,12 @@ overview(p){
     table(p,['Time','Kind','Rule','Evidence'],F.session.announcements.map(x=>[s2((x.nanoTime-base)/1e9),x.kind,x.rule,x.text]));
   }
   h2(p,'Result');
+  if(F.matchEvidence?.rounds?.length) {
+    h2(p,'Match rounds','Round outcomes are separate from the overall match result');
+    table(p,['Round','Start','End','Round outcome','Evidence'],F.matchEvidence.rounds.map(r=>[
+      String(r.number),s2((r.startNanos-base)/1e9),r.endNanos==null?'Unknown':s2((r.endNanos-base)/1e9),
+      r.outcome||'Not announced',r.rule||'Boundary observed; result unavailable']));
+  }
   const establishing=R.evidenceIndex!=null?(F.matchEvidence?.entries||[])[R.evidenceIndex]:null;
   cards(p,[[ 'Result',R.label,(R.source||'')+(R.derived?' · pre-0.1.3':''),null,'result'],['Evidence confidence',cap(R.confidence),'scope: '+cap(R.scope||'')],['Duration',num(dur,1)+' s',E.length+' events'],[label('accuracy','Hit accuracy'),pct(S.accuracy),S.hits+' / '+(S.accuracyDenominator??S.attempts)+' attempts','accuracy'],[label('reachWithin','Reach in target window'),D.reach&&D.reach.eligible?D.reach.within+' / '+D.reach.eligible:NONE,pct(D.reach?.withinPercent),'reachWithin'],[label('longestCombo','Longest combo'),String(S.longestCombo),(S.comboCount??0)+' combos','longestCombo'],[label('dominanceShare','Advantage share'),dom&&dom.availability==='AVAILABLE'?pct(dom.localShare):NONE,dom?dom.availabilityLabel:'unavailable','dominanceShare']]);
   if(establishing)p.append(el('p',{class:'muted'},'Established by '+establishing.kind.toLowerCase()+' announcement ('+establishing.rule+'): '+establishing.text));

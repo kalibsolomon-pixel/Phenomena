@@ -133,7 +133,9 @@ public final class ReportExporter {
                     .toList(),
                 f.matchEvidence().timelineStartNanos(),
                 f.matchEvidence().matchId(),
-                f.matchEvidence().roundNumber())
+                f.matchEvidence().roundNumber(),
+                f.matchEvidence().rounds(),
+                f.matchEvidence().serverSessionId())
             : f.matchEvidence(),
         options.anonymize() ? redactResolution(f) : f.resolution(),
         f.session() == null

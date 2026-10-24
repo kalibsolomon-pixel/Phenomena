@@ -93,6 +93,7 @@ public final class RecordingController {
       notice.accept("Join a world before starting a recording.");
       return false;
     }
+    host = Announcements.normalizeHost(host);
     this.server = host;
     this.local = local;
     this.world = world;
@@ -142,6 +143,7 @@ public final class RecordingController {
   }
 
   public void context(String host, String player, String dimension, long now, long tick) {
+    host = Announcements.normalizeHost(host);
     boolean changed =
         server != null
             && (!Objects.equals(host, server)
@@ -179,6 +181,7 @@ public final class RecordingController {
   }
 
   public void announcement(String host, String player, Announcements.Message message, long now) {
+    host = Announcements.normalizeHost(host);
     if (manual()) {
       if (!Objects.equals(host, server) || !Objects.equals(player, local)) return;
       announcements.add(

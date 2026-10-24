@@ -15,15 +15,21 @@ $env:JAVA_HOME = (Get-ChildItem .tools -Directory -Filter 'jdk-21*' | Select-Obj
 ./gradlew.bat runClientGameTest
 ~~~
 
-On another machine install Java 21 and set JAVA_HOME, then use the checked-in Gradle wrapper. The wrapper verifies its distribution checksum. Build output: build/libs/kwamster-0.1.4.jar. Install this jar and Fabric API 0.141.6+1.21.11 into a Fabric 1.21.11 client. Sources and integration-test mods are not required for installation.
+On another machine install Java 21 and set JAVA_HOME, then use the checked-in Gradle wrapper. The wrapper verifies its distribution checksum. Build output: build/libs/kwamster-0.1.5.jar. Install this jar and Fabric API 0.141.6+1.21.11 into a Fabric 1.21.11 client. Sources and integration-test mods are not required for installation.
 
-## Manual recording (0.1.4)
+## Capture environments (0.1.5)
+
+Automatic capture uses six observed server environments: `mcpvp.club`, `east.catpvp.net`, `minemen.club`, `pvphq.com`, `fishffa.gg` and `pvplegacy.net`, plus exact verified aliases. These start and end from their server signals; combat, death and inactivity never substitute for a missing match announcement. Round results stay inside one match recording. On unconfigured servers, qualifying combat starts capture and the owner’s inactivity setting ends it. Turning Automatic capture off disables both paths.
+
+Overview shows the policy, environment/version, match/round state, diagnostics and export status. The inactivity setting applies only to generic combat capture on unconfigured servers. See [capture policy](docs/CAPTURE_POLICY.md), [six-server evidence and all 18 correlations](docs/0.1.5.md), and [server formats and limitations](docs/SERVER_COMPATIBILITY.md). These are captured-evidence regressions, not new live-server acceptance.
+
+## Manual recording
 
 Type **`/kwm start`**, fight for as long as you want, then **`/kwm end`**. These commands run locally without server permissions. End automatically saves a recording and an anonymous offline HTML report, with status in chat. Repeating Start or End does not create duplicate recordings. Overview also has Start/End and folder buttons; K is unchanged.
 
 Manual sessions can contain several opponents, exchanges and rounds. Automatic announcements and inactivity do not stop the session. Starting during an automatic fight carries its observations into the manual session. Disconnect/world change/shutdown saves an Interrupted session; five-second atomic checkpoints recover after a crash without resuming on another server. The session's overall outcome stays Unknown unless interrupted; individual exchanges retain their own evidence/results. Browser reports filter by participant and exchange, with dominance kept separate for each exchange.
 
-Automatic Minemen/PVPHQ rules retain their real-log fixture coverage. Other servers are unknown until observed evidence supports an adapter. Use `/kwm diagnostics on` while playing, `/kwm diagnostics off` afterwards, then `/kwm diagnostics export` for a local redacted fixture bundle. Capture is off by default and nothing is uploaded. Read the [server inventory and evidence procedure](docs/SERVER_COMPATIBILITY.md) and [0.1.4 lifecycle, privacy, recovery and validation notes](docs/0.1.4.md).
+All six configured adapters have real-log and/or packet fixture coverage; individual formats and missing-signal limits remain explicit. Use `/kwm diagnostics on` while playing, `/kwm diagnostics off` afterwards, then `/kwm diagnostics export` for a local redacted fixture bundle. Capture is off by default and nothing is uploaded. Read the [server inventory and evidence procedure](docs/SERVER_COMPATIBILITY.md) and [0.1.4 lifecycle, privacy, recovery and validation notes](docs/0.1.4.md).
 
 ## The dashboard
 
@@ -40,15 +46,11 @@ One window with six persistent tabs. Keys 1–6 switch tabs; Escape or the dashb
 
 Charts show gaps where there are no samples. Missing values are a dash, never zero. Hover any card or chart for its definition or value.
 
-## Results and evidence (0.1.3)
+## Results and evidence
 
-Every recording stores a result classification separately from its evidence source and confidence:
+Recordings store classification, evidence source and confidence separately. Configured matches require a host-scoped match announcement identifying the local player or bound opponent; server-validated one-name winners do not require a death packet. Individual round outcomes and kill observations cannot finalize the whole match. Unknown and Interrupted preserve missing or abandoned evidence without manufacturing wins or losses. Generic combat results retain conservative inferred classification when authoritative server evidence is unavailable.
 
-- **Confirmed server-declared win or loss:** an exact, host-scoped server announcement names both players in the current round. This is either a paired winner/loser message, or a one-name winner or loser line inside a round whose start announcement named the opponent.
-- **Inferred win or loss:** a server kill message, generic result text with an endpoint, or your own death.
-- **Draw, Unknown, Interrupted:** Unknown covers an opponent's death without an announcement, a kill by a third party and contradictory evidence. Interrupted covers disconnects, world changes and target changes.
-
-Adapters cover the formats in the owner's logs: Minemen on `minemen.net` and `minemen.club` (all `<Mode> Duel` and `Casual Match` starts, round lines `PlayerA won! 1 - 0`, paired match results including spectator lists, kill messages), and PVPHQ (opponent line, kill line, `MATCH REPORT`, winner and loser lines, best-of rounds). A round result waits briefly for the match result that usually follows it. A late result after the next start belongs to the previous round, and forfeits during the countdown are accepted. On 1,198 labeled matches extracted from those logs, every decided match was classified correctly. That figure covers these two servers only; see [validation](docs/VALIDATION.md).
+The owner's 18 confirmed outcomes (16 wins, 2 losses) were investigated against the specified Aurora logs and packet diagnostics. All 18 replay with one recording/report each. CatPvP match 1 has an unresolved round-count discrepancy: owner label 3–1, captured final score 2–1; its overall win is unambiguous. The older 1,200-fixture Minemen/PVPHQ corpus remains intact: 977 decisive eligible cases and 200 negative cases pass; 21 round-only cases explicitly remain unresolved under the new policy, and two historically ambiguous labels remain excluded. See [validation](docs/VALIDATION.md) for denominators and limits.
 
 Incoming damage counts as an opponent hit only when the server names the opponent as its cause. Fall, fire and third-party damage are kept separately and never break your combos. Shield blocks are detected from the shield sound and the absence of a damage event; a blocked attack is neither a hit nor a miss. See the [measurement audit](docs/MEASUREMENT_AUDIT.md) and [0.1.3 notes](docs/0.1.3.md).
 

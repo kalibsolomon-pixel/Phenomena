@@ -13,6 +13,46 @@ import org.junit.jupiter.api.io.TempDir;
 class DiagnosticCaptureTest {
   @TempDir Path data;
 
+  @Test
+  void diagnosticsExposePolicyAdapterAndMissingEvidenceWithoutCountdownNoise() throws Exception {
+    try (var store = new FightStore(data.resolve("fights"), s -> {})) {
+      var d = new Diagnostics(store, data, s -> {});
+      d.policy(
+          () -> CapturePolicy.resolve("mcpvp.club", false, false),
+          () -> "Missing start; combat suppressed");
+      d.enabled(true);
+      d.announcement(
+          "mcpvp.club",
+          "3",
+          Announcements.Origin.TITLE,
+          Announcements.interpret("mcpvp.club", "3", Announcements.Origin.TITLE).orElseThrow(),
+          1,
+          "Rejected");
+      d.announcement(
+          "mcpvp.club",
+          "⚔ FIGHT! ⚔",
+          Announcements.Origin.TITLE,
+          Announcements.interpret("mcpvp.club", "⚔ FIGHT! ⚔", Announcements.Origin.TITLE)
+              .orElseThrow(),
+          2,
+          "Rejected: automatic capture disabled");
+      d.flush();
+      assertTrue(store.await(10000));
+      try (var paths = Files.list(data.resolve("diagnostics"))) {
+        var r =
+            AtomicJson.GSON.fromJson(
+                Files.readString(paths.findFirst().orElseThrow()), Diagnostics.Report.class);
+        assertEquals(2, r.schema());
+        assertEquals(1, r.entries().size());
+        var e = r.entries().getFirst();
+        assertEquals("DISABLED", e.capturePolicy());
+        assertEquals("mcpvp", e.adapterId());
+        assertEquals(1, e.adapterVersion());
+        assertTrue(e.decision().contains("disabled"));
+      }
+    }
+  }
+
   void capture(Diagnostics d, String text, Announcements.Origin origin) {
     d.announcement("private.example.net", text, origin, null, 100, "not accepted");
   }
@@ -125,7 +165,7 @@ class DiagnosticCaptureTest {
     assertTrue(
         Announcements.interpret("minemen.club", Sim.MM_START, Announcements.Origin.PLAYER_CHAT)
             .isEmpty());
-    assertEquals(1, Announcements.adapters().getFirst().version());
+    assertEquals(2, Announcements.adapters().getFirst().version());
     assertFalse(ServerCompatibility.unknown().winLoss());
   }
 

@@ -374,7 +374,8 @@ public final class FightAnalytics {
             f.manual() ? List.of() : events,
             f.manual() ? List.of() : f.evaluations(),
             opponent,
-            policy.comboSeconds());
+            policy.comboSeconds(),
+            f.matchEvidence().rounds());
     comboLengths =
         combos.streaks().stream()
             .filter(s -> s.side() == Combos.Side.LOCAL)

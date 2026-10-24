@@ -159,20 +159,21 @@ class AnnouncementsTest {
   }
 
   @Test
-  void resultBeyondGraceCannotRetroactivelyChange() {
+  void configuredResultHasNoCombatGraceExpiry() {
     begin();
     event(2200, Kind.DEATH, "B");
-    engine.tick(6_000_000_000L);
-    chat(6100, WIN);
-    assertEquals(FightRecord.Outcome.UNKNOWN, records.getFirst().outcome());
+    engine.tick(600_000_000_000L);
+    assertTrue(records.isEmpty());
+    chat(610000, WIN);
+    assertEquals(FightRecord.Outcome.WIN, records.getFirst().outcome());
   }
 
   @Test
-  void expiredResultRejectedEvenBeforeTick() {
+  void deathCannotExpireConfiguredResult() {
     begin();
     event(2200, Kind.DEATH, "B");
     chat(6000, WIN);
-    assertTrue(records.isEmpty());
+    assertEquals(FightRecord.Outcome.WIN, records.getFirst().outcome());
   }
 
   @Test
@@ -184,22 +185,24 @@ class AnnouncementsTest {
   }
 
   @Test
-  void bareEndStaysUnknown() {
+  void genericEndCannotEndConfiguredMatch() {
     begin();
     chat(2500, "Round ended!");
     engine.tick(6_000_000_000L);
-    assertEquals(FightRecord.Outcome.UNKNOWN, records.getFirst().outcome());
+    assertTrue(records.isEmpty());
+    assertTrue(engine.engaged());
   }
 
   @Test
-  void genericYouWonRequiresEndpointAndRemainsInferred() {
+  void genericYouWonCannotEndConfiguredMatch() {
     begin();
     chat(2400, "You Won");
-    assertTrue(records.isEmpty());
     event(2500, Kind.DEATH, "B");
     chat(4500, "You Won!");
-    assertEquals(FightRecord.Outcome.WIN, records.getFirst().outcome());
-    assertEquals(Confidence.INFERRED, records.getFirst().matchEvidence().confidence());
+    engine.tick(600_000_000_000L);
+    assertTrue(records.isEmpty());
+    chat(610000, WIN);
+    assertEquals(Confidence.CONFIRMED, records.getFirst().matchEvidence().confidence());
   }
 
   @Test
@@ -214,25 +217,20 @@ class AnnouncementsTest {
     var second = records.getLast();
     assertEquals(FightRecord.Outcome.LOSS, second.outcome());
     assertEquals(Resolution.Classification.CONFIRMED_LOSS, second.resolution().classification());
-    assertTrue(second.resolution().notes().stream().anyMatch(n -> n.contains("Rematch")));
+    assertNotEquals(records.getFirst().matchEvidence().matchId(), second.matchEvidence().matchId());
   }
 
   @Test
-  void rematchAfterUnresolvedRoundNeedsIndependentEndpoint() {
+  void duplicateStartCannotReplaceUnresolvedConfiguredMatch() {
     begin();
-    engine.tick(70_000_000_000L); // round 1 ends by inactivity, no result
-    assertEquals(FightRecord.Outcome.UNKNOWN, records.getFirst().outcome());
+    engine.tick(70_000_000_000L);
+    assertTrue(records.isEmpty());
     chat(71000, START);
     event(73100, Kind.ATTACK, "B");
+    assertTrue(records.isEmpty(), "duplicate named start cannot replace unresolved match");
     chat(73500, WIN);
-    assertEquals(1, records.size(), "a late round-1 result cannot resolve round 2");
-    assertTrue(engine.engaged());
-    event(73600, Kind.DEATH, "B");
-    chat(75600, WIN + "\n");
-    assertEquals(2, records.size());
-    assertEquals(Confidence.INFERRED, records.getLast().matchEvidence().confidence());
-    assertEquals(
-        Resolution.Classification.INFERRED_WIN, records.getLast().resolution().classification());
+    assertEquals(1, records.size());
+    assertEquals(Confidence.CONFIRMED, records.getFirst().matchEvidence().confidence());
   }
 
   @Test

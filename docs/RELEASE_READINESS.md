@@ -1,6 +1,6 @@
 # Release readiness
 
-**Status: working development build 0.1.3 (see the 0.1.3 section at the end); public release is not approved or ready.**
+**Current: 0.1.5 development build for owner review; public release is not approved.** See [0.1.5 evidence, validation and remaining gates](0.1.5.md). The sections below retain historical release assessments and do not describe the current capture policy.
 
 The jar compiles against Minecraft 1.21.11 using Java 21 and official mappings. The unit suite (78 tests) and the actual Fabric client sequence pass. 0.1.1 replaces the HUD-oriented screens with a tabbed analytics dashboard and a local browser replay workflow. Nothing has been pushed, uploaded or published.
 
@@ -51,3 +51,10 @@ No manual gameplay validation, external-server trial, audible sound validation, 
 | Historical data | 222 recordings decode, analyze and render; stored outcomes unchanged | — |
 | Performance | No measurable frame-time difference in the gametest loop. Per-fight analytics cost more than in 0.1.2 and is computed on history change (PERFORMANCE.md). | Live long-session measurements |
 | Manual multiplayer acceptance | Not performed in this assignment | Run VALIDATION.md with two authorized accounts |
+
+
+## 0.1.5 owner-review status
+
+Working local development jar: `build/libs/kwamster-0.1.5.jar`. Six explicit capture environments, generic capture only on unconfigured hosts, manual override/restoration, round metadata and diagnostic policy/version status are implemented. All 18 owner matches are investigated and replayed from captured announcements and original combat events; unit, functional, four-mod and historical export checks pass. See [the full validation report and matrix](0.1.5.md).
+
+Remaining gates are owner review, new live testing of the 0.1.5 jar on the six servers, resolution of CatPvP #1's 3–1 versus observed 2–1 discrepancy, evidence for other modes, and interactive browser QA (blocked by tool protocol policy). Incomplete signals intentionally do not fall back to generic combat. Schema 1–4 source data and original logs/exports remain unchanged. No distribution, push, publication or Aurora installation is authorized or performed.

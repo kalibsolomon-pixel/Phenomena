@@ -162,6 +162,7 @@ final class FlowPage implements KwamsterScreen.Page {
       case RETALIATION -> "a return hit";
       case TRADE -> "a same-tick trade";
       case DISENGAGE -> "disengagement";
+      case ROUND_BOUNDARY -> "a round boundary";
       case RECORDING_END -> "the end of the recording";
     };
   }

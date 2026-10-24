@@ -78,6 +78,7 @@ public final class KwamsterClient implements ClientModInitializer {
             });
     recovery = new SessionRecovery(store, dataDir, KwamsterClient::notice);
     diagnostics = new Diagnostics(store, dataDir, KwamsterClient::notice);
+    diagnostics.policy(() -> engine.capturePolicy(), () -> engine.captureLimitation());
     diagnostics.enabled(config.diagnosticCapture);
     store.submit(
         () -> {

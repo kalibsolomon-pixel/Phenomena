@@ -17,11 +17,9 @@ import java.util.function.*;
 /**
  * Client-thread confined. Event IDs must increase, times must be monotonic.
  *
- * <p>Outcome lifecycle: evidence is offered as ranked candidates. A match-scope server result
- * finalizes the round at once. Every other endpoint (round result, kill message, death, world
- * change, match-end marker) opens a bounded grace period in which a stronger announcement can
- * upgrade the result. Contradictory evidence of equal strength becomes Unknown. A recording is
- * finalized exactly once and is never changed afterwards.
+ * <p>Configured capture retains the entire match until an environment's end/result. Round outcomes
+ * and measurement exchanges are independent. Generic/manual measurement scopes retain ranked
+ * conservative endpoint candidates. Each recording finalizes once and is never rewritten.
  */
 public final class CombatEngine {
   public enum State {
@@ -71,6 +69,34 @@ public final class CombatEngine {
   private State state = State.IDLE;
   private boolean opponentGone;
   public boolean manualExchanges;
+  private boolean configuredMatch, roundClosed, missingEndNoted;
+  private final List<MatchEvidence.Round> rounds = new ArrayList<>();
+  private final LinkedHashMap<String, Long> recentConfiguredResults = new LinkedHashMap<>();
+  private String captureLimitation = "Waiting for start evidence";
+  private String serverSessionId;
+  private long decisionAt = -1;
+  private String decision;
+
+  public CapturePolicy capturePolicy() {
+    return CapturePolicy.resolve(server, config.tracking, manualExchanges);
+  }
+
+  public Integer currentRound() {
+    return configuredMatch ? roundNumber : null;
+  }
+
+  public String captureLimitation() {
+    return switch (capturePolicy().mode()) {
+      case MANUAL -> "Manual session controlled by Start/End";
+      case GENERIC_COMBAT -> "Combat uses the configured inactivity timeout";
+      case DISABLED -> "Manual recording remains available";
+      case CONFIGURED_SERVER -> captureLimitation;
+    };
+  }
+
+  private boolean configured() {
+    return !manualExchanges && config.tracking && Announcements.environment(server) != null;
+  }
 
   public long startNanos() {
     return start;
@@ -96,7 +122,16 @@ public final class CombatEngine {
         List.copyOf(evaluations),
         opponentLabel,
         new MatchEvidence(
-            server, localPlayer, roundId, Confidence.OBSERVED, List.copyOf(matchEntries), start));
+            server,
+            localPlayer,
+            roundId,
+            Confidence.OBSERVED,
+            List.copyOf(matchEntries),
+            start,
+            matchId,
+            roundNumber,
+            configuredMatch ? configuredRounds(now) : List.of(),
+            serverSessionId));
   }
 
   public List<CombatEvent> observations() {
@@ -108,6 +143,11 @@ public final class CombatEngine {
   }
 
   public void clearMatchContext() {
+    configuredMatch = false;
+    rounds.clear();
+    roundClosed = false;
+    roundNumber = null;
+    roundId = null;
     roundStart = -1;
     announcedOpponent = null;
     matchId = null;
@@ -158,6 +198,12 @@ public final class CombatEngine {
   /** Announcement interpretation lives in adapters; the tracker only applies scoped evidence. */
   public void announcement(String host, String local, Announcements.Message message, long now) {
     if ((!config.tracking && !manualExchanges) || now < lastTime) return;
+    if (!manualExchanges
+        && CapturePolicy.resolve(host, config.tracking, false).mode()
+            == CapturePolicy.Mode.CONFIGURED_SERVER) {
+      configuredAnnouncement(host, local, message, now);
+      return;
+    }
     if (engaged() && !Objects.equals(server, host)) {
       // A result from another connection must never resolve the previous server's fight.
       if (message.kind() != Announcements.Kind.START) return;
@@ -478,6 +524,7 @@ public final class CombatEngine {
   }
 
   public String evidenceDecision(long now) {
+    if (decisionAt == now) return decision;
     for (int i = matchEntries.size() - 1; i >= 0; i--) {
       var e = matchEntries.get(i);
       if (e.nanoTime() == now)
@@ -489,7 +536,7 @@ public final class CombatEngine {
   }
 
   private int addEvidence(Announcements.Message m, long now, boolean accepted) {
-    if (matchEntries.size() >= 64) return -1;
+    if (matchEntries.size() >= 512) return -1;
     matchEntries.add(
         new MatchEvidence.Entry(
             now, m.kind().name(), m.rule(), m.origin().name(), m.original(), accepted));
@@ -601,6 +648,10 @@ public final class CombatEngine {
   // ---- lifecycle helpers --------------------------------------------------------------------
 
   public void context(String host, String local) {
+    host = Announcements.normalizeHost(host);
+    if (serverSessionId == null
+        || !Objects.equals(server, host)
+        || !Objects.equals(localPlayer, local)) serverSessionId = UUID.randomUUID().toString();
     if (!engaged()) {
       if (!Objects.equals(server, host) || !Objects.equals(localPlayer, local)) {
         roundStart = -1;
@@ -641,6 +692,7 @@ public final class CombatEngine {
   public boolean acceptsTarget(String id, String name) {
     return manualExchanges
         || !engaged()
+        || (configuredMatch && opponentLabel == null)
         || roundStart < 0
         || Objects.equals(id, opponent)
         || (opponent != null
@@ -660,6 +712,22 @@ public final class CombatEngine {
     lastSequence = e.sequence();
     lastTime = e.nanoTime();
     if (e.kind() == Kind.DISCONNECT) {
+      if (configuredMatch) {
+        finalizeWith(
+            e.nanoTime(),
+            new Candidate(
+                Classification.INTERRUPTED,
+                Source.DISCONNECT,
+                Confidence.OBSERVED,
+                Scope.MATCH,
+                e.nanoTime(),
+                null,
+                e.sequence(),
+                RANK_ENDPOINT,
+                "Disconnected: " + e.detail()));
+        serverSessionId = null;
+        return;
+      }
       if (engaged())
         endpoint(
             e.nanoTime(),
@@ -677,6 +745,10 @@ public final class CombatEngine {
     }
     if (engaged() && endDeadline >= 0 && e.kind() == Kind.ATTACK) flush(e.nanoTime(), "Ended");
     if (!engaged()) {
+      if (configured()) {
+        captureLimitation = "Missing start announcement; combat capture suppressed";
+        return;
+      }
       if (e.kind() == Kind.JUMP || e.kind() == Kind.JUMP_INPUT) {
         if (prelude.size() == 32) prelude.removeFirst();
         prelude.addLast(e);
@@ -690,6 +762,16 @@ public final class CombatEngine {
               || e.context().attribution() != Attribution.UNATTRIBUTED))
         begin(e.actor(), e.nanoTime());
       else return;
+    }
+    if (configuredMatch && opponentLabel == null) {
+      String id =
+          e.kind() == Kind.ATTACK ? e.target() : e.kind() == Kind.DAMAGE_IN ? e.actor() : null;
+      String name = id == null ? null : labeler.apply(id);
+      if (name != null) {
+        opponent = id;
+        opponentLabel = announcedOpponent = name;
+        notes.add("Opponent bound from combat observation; start announcement did not name it");
+      }
     }
     if (opponent != null && opponent.startsWith("announced:")) {
       String id =
@@ -764,6 +846,11 @@ public final class CombatEngine {
       return;
     }
     events.add(e);
+    if (configuredMatch
+        && roundClosed
+        && ((e.kind() == Kind.ATTACK && e.target() != null && e.target().equals(opponent))
+            || (e.kind() == Kind.DAMAGE_IN && e.attributedTo(opponent))))
+      openConfiguredRound(roundNumber + 1, e.nanoTime());
     if (e.kind() == Kind.JUMP || e.attributedTo(opponent)) {
       if (jumpWindow.size() == 128) jumpWindow.removeFirst();
       jumpWindow.addLast(e);
@@ -815,6 +902,10 @@ public final class CombatEngine {
       }
       case JUMP -> updateJumpCandidates();
       case DEATH -> {
+        if (configuredMatch) {
+          if (Objects.equals(e.target(), opponent)) opponentGone = true;
+          break; // A death is an observation within a match, never its boundary.
+        }
         if ("local".equals(e.target()))
           endpoint(
               e.nanoTime(),
@@ -990,11 +1081,49 @@ public final class CombatEngine {
     if (!engaged()) return;
     if (stats.lastHit > 0 && now - stats.lastHit > policy.comboSeconds() * 1e9)
       stats.currentCombo = 0;
+    if (configuredMatch && !manualExchanges) {
+      if (!config.tracking) finish(now, Outcome.INTERRUPTED, "Automatic capture disabled");
+      else if (queuedStart != null && now - queuedAt >= 2_000_000_000L) {
+        finalizeWith(
+            now,
+            new Candidate(
+                Classification.INTERRUPTED,
+                Source.ROUND_BOUNDARY,
+                Confidence.OBSERVED,
+                Scope.MATCH,
+                queuedAt,
+                null,
+                null,
+                RANK_ENDPOINT,
+                "New named match; previous end announcement missing"));
+      } else if (matchEndMarker >= 0 && now - matchEndMarker >= graceNanos()) {
+        finalizeWith(
+            now,
+            new Candidate(
+                Classification.UNKNOWN,
+                Source.SERVER_MATCH_RESULT,
+                Confidence.OBSERVED,
+                Scope.MATCH,
+                matchEndMarker,
+                null,
+                null,
+                RANK_MATCH,
+                "Observed match end; result announcement missing"));
+      } else if (!missingEndNoted && now - lastActivity > config.inactivitySeconds * 1e9) {
+        missingEndNoted = true;
+        captureLimitation = "Awaiting match end; inactivity ignored on configured server";
+        notes.add(captureLimitation);
+      }
+      return;
+    }
     if (endDeadline >= 0) {
       if (now >= endDeadline) flush(now, "Ended");
       return;
     }
-    double inactivity = roundStart >= 0 ? config.serverInactivitySeconds : config.inactivitySeconds;
+    double inactivity =
+        manualExchanges && roundStart >= 0
+            ? config.serverInactivitySeconds
+            : config.inactivitySeconds;
     if (now - lastActivity > inactivity * 1e9)
       finalizeWith(
           now,
@@ -1048,7 +1177,7 @@ public final class CombatEngine {
   private void finalizeWith(long now, Candidate c) {
     if (!engaged()) return;
     state = State.FINALIZED;
-    if (!hasCombat() && !decisive(c.classification()) && roundStart >= 0) {
+    if (!configuredMatch && !hasCombat() && !decisive(c.classification()) && roundStart >= 0) {
       // An announced round with no combat and no result measured nothing; do not record it.
       endDeadline = -1;
       endpointAt = -1;
@@ -1071,7 +1200,13 @@ public final class CombatEngine {
                         j.grade() == JumpResets.Grade.IDEAL_CANDIDATE
                             || j.grade() == JumpResets.Grade.ATTEMPT_CANDIDATE)
                 .count();
-    var combos = Combos.analyze(events, evaluations, opponent, policy.comboSeconds());
+    var combos =
+        Combos.analyze(
+            events,
+            evaluations,
+            opponent,
+            policy.comboSeconds(),
+            configuredMatch ? configuredRounds(now) : List.of());
     stats.longestCombo = combos.longest(Combos.Side.LOCAL);
     stats.comboCount = combos.combos(Combos.Side.LOCAL).size();
     stats.comboHits = combos.comboHits(Combos.Side.LOCAL);
@@ -1112,7 +1247,9 @@ public final class CombatEngine {
                 List.copyOf(matchEntries),
                 start,
                 matchId,
-                roundNumber),
+                roundNumber,
+                configuredMatch ? configuredRounds(now) : List.of(),
+                serverSessionId),
             resolution));
     lastRoundOpponent = opponentLabel != null ? opponentLabel : announcedOpponent;
     lastRoundResolved = decisive(c.classification());
@@ -1121,6 +1258,19 @@ public final class CombatEngine {
     candidate = null;
     matchEndMarker = -1;
     pending.clear();
+    if (configuredMatch) {
+      var next = queuedStart;
+      long nextAt = queuedAt;
+      String nextHost = server, nextLocal = localPlayer;
+      clearMatchContext();
+      captureLimitation = "Waiting for next start announcement";
+      if (next != null
+          && config.tracking
+          && !manualExchanges
+          && (c.source() == Source.SERVER_MATCH_RESULT || c.source() == Source.ROUND_BOUNDARY))
+        configuredAnnouncement(nextHost, nextLocal, next, nextAt);
+      return;
+    }
     if (queuedStart == null) {
       if (c.scope() == Scope.ROUND && announcedOpponent != null && matchId != null) {
         // A best-of match continues: the next engagement belongs to the same scoped match even
@@ -1136,6 +1286,184 @@ public final class CombatEngine {
         announcedOpponent = null;
       }
     }
+  }
+
+  /** Configured environments own the whole match; measurement exchanges never own its ends. */
+  private void configuredAnnouncement(
+      String host, String local, Announcements.Message m, long now) {
+    host = Announcements.normalizeHost(host);
+    decisionAt = now;
+    decision = "Rejected: missing active match or trusted host/surface rule";
+    if (engaged() && (!Objects.equals(server, host) || !Objects.equals(localPlayer, local))) {
+      decision = "Rejected: different connection or local participant";
+      return;
+    }
+    if (!m.trusted()) {
+      if (engaged()) addEvidence(m, now, false);
+      return;
+    }
+    var environment = Announcements.environment(host);
+    if (environment == null || !m.rule().startsWith(environment.id() + "-")) {
+      decision = "Rejected: rule belongs to another environment";
+      return;
+    }
+    boolean starts = m.kind() == Announcements.Kind.START;
+    boolean roundStarts = m.kind() == Announcements.Kind.ROUND_START;
+    if (starts || roundStarts) {
+      if (engaged()) {
+        if (roundStarts) {
+          int n = m.roundNumber() == null ? roundNumber : m.roundNumber();
+          if (n > roundNumber) openConfiguredRound(n, now);
+          else if (n < roundNumber) {
+            addEvidence(m, now, false);
+            decision = "Rejected: stale round number";
+            return;
+          }
+          addEvidence(m, now, true);
+          decision = "Accepted round boundary within active match";
+          return;
+        }
+        if (m.opponent() == null || Objects.equals(m.opponent(), announcedOpponent)) {
+          decision = "Rejected: duplicate start while match remains active";
+          return;
+        }
+        // An explicit new named match is evidence of abandonment, never a generic timeout.
+        queuedStart = m;
+        queuedAt = now;
+        addEvidence(m, now, true);
+        decision = "Accepted next named match; waiting briefly for previous result";
+        return;
+      } else if (roundStarts && !Integer.valueOf(1).equals(m.roundNumber())) return;
+      clearMatchContext();
+      if (serverSessionId == null
+          || !Objects.equals(server, host)
+          || !Objects.equals(localPlayer, local)) serverSessionId = UUID.randomUUID().toString();
+      server = host;
+      localPlayer = local;
+      matchId = UUID.randomUUID().toString();
+      roundId = UUID.randomUUID().toString();
+      announcedOpponent = m.opponent();
+      roundStart = now;
+      begin("announced:" + Objects.toString(announcedOpponent, "?"), now);
+      configuredMatch = true;
+      missingEndNoted = false;
+      roundNumber = m.roundNumber() == null ? 1 : m.roundNumber();
+      openConfiguredRound(roundNumber, now);
+      addEvidence(m, now, true);
+      captureLimitation = "Awaiting server match result";
+      decision = "Accepted configured match start";
+      return;
+    }
+    if (!engaged() || !configuredMatch) return;
+    if (m.kind() == Announcements.Kind.END) {
+      matchEndMarker = now;
+      addEvidence(m, now, true);
+      decision = "Accepted explicit match end; awaiting result block";
+      return;
+    }
+    if (m.kind() != Announcements.Kind.RESULT) {
+      addEvidence(m, now, m.kind() == Announcements.Kind.BEGIN);
+      decision = "Observed inside match; does not end configured capture";
+      return;
+    }
+    String fingerprint = host + ":" + m.rule() + ":" + Announcements.normalize(m.original());
+    Long previous = recentConfiguredResults.get(fingerprint);
+    if (previous != null && now - previous < 2_000_000_000L) {
+      decision = "Rejected: duplicate result in recent announcement block";
+      return;
+    }
+    String winner = "local".equals(m.winner()) ? local : m.winner();
+    String loser = "local".equals(m.loser()) ? local : m.loser();
+    boolean pair = winner != null && loser != null;
+    boolean participants =
+        pair
+            ? Objects.equals(winner, local) && Objects.equals(loser, other())
+                || Objects.equals(loser, local) && Objects.equals(winner, other())
+            : Objects.equals(winner, local)
+                || Objects.equals(loser, local)
+                || (other() != null
+                    && (Objects.equals(winner, other()) || Objects.equals(loser, other())));
+    if (!participants) {
+      addEvidence(m, now, false);
+      decision = "Rejected: result does not identify active participants";
+      return;
+    }
+    boolean round = m.scope() == Scope.ROUND && matchEndMarker < 0;
+    if (round && m.score() != null && m.score()[0] + m.score()[1] != roundNumber) {
+      addEvidence(m, now, false);
+      if (notes.size() < 128) notes.add("Round score does not match active round number");
+      decision = "Rejected: round score does not match active round";
+      return;
+    }
+    boolean win = Objects.equals(winner, local) || Objects.equals(loser, other());
+    int index = addEvidence(m, now, true);
+    recentConfiguredResults.put(fingerprint, now);
+    if (recentConfiguredResults.size() > 128)
+      recentConfiguredResults.remove(recentConfiguredResults.keySet().iterator().next());
+    if (round) {
+      if (!roundClosed && !rounds.isEmpty() && rounds.getLast().number() == roundNumber) {
+        var r = rounds.getLast();
+        rounds.set(
+            rounds.size() - 1,
+            new MatchEvidence.Round(
+                r.number(),
+                r.startNanos(),
+                now,
+                win ? Outcome.WIN : Outcome.LOSS,
+                m.rule(),
+                Confidence.CONFIRMED));
+        roundClosed = true;
+        // Reset exchange correlation across rounds; retained hits keep their original IDs.
+        pending.clear();
+        stats.currentCombo = 0;
+        jumpWindow.clear();
+      }
+      decision = "Accepted round result; whole match remains active";
+      return;
+    }
+    decision = "Accepted configured match result";
+    finalizeWith(
+        now,
+        new Candidate(
+            win ? Classification.CONFIRMED_WIN : Classification.CONFIRMED_LOSS,
+            Source.SERVER_MATCH_RESULT,
+            Confidence.CONFIRMED,
+            Scope.MATCH,
+            now,
+            index,
+            null,
+            RANK_MATCH,
+            "Server match result / " + m.rule()));
+  }
+
+  private void openConfiguredRound(int number, long now) {
+    if (!rounds.isEmpty() && !roundClosed) {
+      var r = rounds.getLast();
+      rounds.set(
+          rounds.size() - 1,
+          new MatchEvidence.Round(
+              r.number(), r.startNanos(), now, null, null, Confidence.OBSERVED));
+    }
+    roundNumber = number;
+    roundClosed = false;
+    if (rounds.size() < 256)
+      rounds.add(new MatchEvidence.Round(number, now, null, null, null, Confidence.OBSERVED));
+    else captureLimitation = "Round metadata limit reached; later round outcomes omitted";
+    pending.clear();
+    lastIncomingTick = lastConfirmedTick = null;
+    stats.currentCombo = 0;
+  }
+
+  private List<MatchEvidence.Round> configuredRounds(long now) {
+    var copy = new ArrayList<>(rounds);
+    if (!copy.isEmpty() && copy.getLast().endNanos() == null) {
+      var r = copy.getLast();
+      copy.set(
+          copy.size() - 1,
+          new MatchEvidence.Round(
+              r.number(), r.startNanos(), now, r.outcome(), r.rule(), r.confidence()));
+    }
+    return List.copyOf(copy);
   }
 
   /** Observed decreases of local health plus absorption during the recording. */

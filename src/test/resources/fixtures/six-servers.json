@@ -1,0 +1,682 @@
+{
+  "description": "18 owner labels; redacted observed grammar; combat in replay is synthetic. Relative times from logs/packets; raw references remain private.",
+  "fixtures": [
+    {
+      "server": "mcpvp.club",
+      "match": 1,
+      "ownerResult": "LOSS",
+      "opponent": "PlayerB",
+      "duration": 34.935,
+      "messages": [
+        {
+          "t": 0,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 0.193,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 0.397,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 0.596,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 0.799,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 0.996,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 1.2,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 1.396,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 1.6,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 1.794,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 1.997,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 2.194,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 34.935,
+          "text": "PlayerA was smashed by PlayerB",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 34.935,
+          "text": "——————————————————————\\n⚔ Match Complete ⚔\\n\\n🗡 PlayerB won the round! (0 - 1)\\n\\n🛡 503 ᴀʀᴍᴏʀ ᴀᴠɢ. | ❤ 14/20 ʜᴘ\\n——————————————————————",
+          "origin": "SYSTEM"
+        }
+      ]
+    },
+    {
+      "server": "mcpvp.club",
+      "match": 2,
+      "ownerResult": "WIN",
+      "opponent": "PlayerB",
+      "duration": 103.49,
+      "messages": [
+        {
+          "t": 0,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 0.191,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 0.398,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 0.596,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 0.79,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 0.996,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 1.191,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 1.392,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 1.592,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 1.793,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 1.994,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 2.193,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 103.49,
+          "text": "PlayerB was shot by PlayerA",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 103.49,
+          "text": "——————————————————————\\n⚔ Match Complete ⚔\\n\\n🗡 PlayerA won the round! (1 - 0)\\n\\n❤ 11/20 ʜᴘ\\n——————————————————————",
+          "origin": "SYSTEM"
+        }
+      ]
+    },
+    {
+      "server": "mcpvp.club",
+      "match": 3,
+      "ownerResult": "WIN",
+      "opponent": "PlayerB",
+      "duration": 39.62,
+      "messages": [
+        {
+          "t": 0,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 0.199,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 0.396,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 0.597,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 0.795,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 1.001,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 1.197,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 1.395,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 1.597,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 1.796,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 1.996,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 2.196,
+          "text": "⚔ FIGHT! ⚔",
+          "origin": "TITLE"
+        },
+        {
+          "t": 39.62,
+          "text": "PlayerB was smashed by PlayerA",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 39.62,
+          "text": "——————————————————————\\n⚔ Match Complete ⚔\\n\\n🗡 PlayerA won the round! (1 - 0)\\n\\n🛡 399 ᴀʀᴍᴏʀ ᴀᴠɢ. | ❤ 23/20 ʜᴘ\\n——————————————————————",
+          "origin": "SYSTEM"
+        }
+      ]
+    },
+    {
+      "server": "east.catpvp.net",
+      "match": 1,
+      "ownerResult": "WIN",
+      "opponent": "PlayerB",
+      "duration": 70.0,
+      "messages": [
+        {
+          "t": 0.0,
+          "text": "Opponent: PlayerB ℹ",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 26.0,
+          "text": "PlayerA was killed by PlayerB",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 26.0,
+          "text": "PlayerB won the round.",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 49.0,
+          "text": "PlayerB was killed by PlayerA",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 49.0,
+          "text": "PlayerA won the round.",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 70.0,
+          "text": "PlayerB was killed by PlayerA",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 70.0,
+          "text": "PlayerA won the game.",
+          "origin": "SYSTEM"
+        }
+      ]
+    },
+    {
+      "server": "east.catpvp.net",
+      "match": 2,
+      "ownerResult": "WIN",
+      "opponent": "PlayerB",
+      "duration": 345.0,
+      "messages": [
+        {
+          "t": 0.0,
+          "text": "Opponent: PlayerB ℹ",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 345.0,
+          "text": "PlayerB was killed by PlayerA",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 345.0,
+          "text": "PlayerA won the game.",
+          "origin": "SYSTEM"
+        }
+      ]
+    },
+    {
+      "server": "east.catpvp.net",
+      "match": 3,
+      "ownerResult": "WIN",
+      "opponent": "PlayerB",
+      "duration": 127.0,
+      "messages": [
+        {
+          "t": 0.0,
+          "text": "Opponent: PlayerB ℹ",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 127.0,
+          "text": "PlayerB was killed by PlayerA",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 127.0,
+          "text": "PlayerA won the game.",
+          "origin": "SYSTEM"
+        }
+      ]
+    },
+    {
+      "server": "minemen.club",
+      "match": 1,
+      "ownerResult": "WIN",
+      "opponent": "PlayerB",
+      "duration": 31.0,
+      "messages": [
+        {
+          "t": 0.0,
+          "text": "\\nCasual Match\\n ● Map: Village\\n ● Opponent: PlayerB\\n ● Ping: 40 ms\\n",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 5.0,
+          "text": "Match started!",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 31.0,
+          "text": "PlayerB was killed by PlayerA!",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 31.0,
+          "text": "\\nMatch Results (Click to view)\\n 🏆 Winner: PlayerA  ▏  ☠ Loser: PlayerB\\n",
+          "origin": "SYSTEM"
+        }
+      ]
+    },
+    {
+      "server": "minemen.club",
+      "match": 2,
+      "ownerResult": "WIN",
+      "opponent": "PlayerB",
+      "duration": 61.0,
+      "messages": [
+        {
+          "t": 0.0,
+          "text": "\\nCasual Match\\n ● Map: Cowboy\\n ● Opponent: PlayerB\\n ● Ping: 26 ms\\n",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 5.0,
+          "text": "Match started!",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 61.0,
+          "text": "PlayerB was killed by PlayerA!",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 61.0,
+          "text": "\\nMatch Results (Click to view)\\n 🏆 Winner: PlayerA  ▏  ☠ Loser: PlayerB\\n",
+          "origin": "SYSTEM"
+        }
+      ]
+    },
+    {
+      "server": "minemen.club",
+      "match": 3,
+      "ownerResult": "WIN",
+      "opponent": "PlayerB",
+      "duration": 99.0,
+      "messages": [
+        {
+          "t": 0.0,
+          "text": "\\nCasual Match\\n ● Map: Cowboy\\n ● Opponent: PlayerB\\n ● Ping: 67 ms\\n",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 5.0,
+          "text": "Match started!",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 99.0,
+          "text": "PlayerB was killed by PlayerA!",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 99.0,
+          "text": "\\nMatch Results (Click to view)\\n 🏆 Winner: PlayerA  ▏  ☠ Loser: PlayerB\\n",
+          "origin": "SYSTEM"
+        }
+      ]
+    },
+    {
+      "server": "pvphq.com",
+      "match": 1,
+      "ownerResult": "WIN",
+      "opponent": "PlayerB",
+      "duration": 28.0,
+      "messages": [
+        {
+          "t": 0.0,
+          "text": "► Opponent: PlayerB",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 28.0,
+          "text": "🏆 MATCH REPORT 🏆",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 28.0,
+          "text": "► Winner: PlayerA (0.9 ❤) [Click]",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 28.0,
+          "text": "► Loser: PlayerB [Click]",
+          "origin": "SYSTEM"
+        }
+      ]
+    },
+    {
+      "server": "pvphq.com",
+      "match": 2,
+      "ownerResult": "WIN",
+      "opponent": "PlayerB",
+      "duration": 75.0,
+      "messages": [
+        {
+          "t": 0.0,
+          "text": "► Opponent: PlayerB",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 75.0,
+          "text": "🏆 MATCH REPORT 🏆",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 75.0,
+          "text": "► Winner: PlayerA (12.9 ❤) [Click]",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 75.0,
+          "text": "► Loser: PlayerB [Click]",
+          "origin": "SYSTEM"
+        }
+      ]
+    },
+    {
+      "server": "pvphq.com",
+      "match": 3,
+      "ownerResult": "WIN",
+      "opponent": "PlayerB",
+      "duration": 41.0,
+      "messages": [
+        {
+          "t": 0.0,
+          "text": "► Opponent: PlayerB",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 41.0,
+          "text": "🏆 MATCH REPORT 🏆",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 41.0,
+          "text": "► Winner: PlayerA (6.8 ❤) [Click]",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 41.0,
+          "text": "► Loser: PlayerB [Click]",
+          "origin": "SYSTEM"
+        }
+      ]
+    },
+    {
+      "server": "fishffa.gg",
+      "match": 1,
+      "ownerResult": "WIN",
+      "opponent": "PlayerB",
+      "duration": 44.0,
+      "messages": [
+        {
+          "t": 0.0,
+          "text": " ☠ Opponent: PlayerB",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 44.0,
+          "text": " ⭐ Winner: PlayerA",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 44.0,
+          "text": " ☠ Loser: PlayerB",
+          "origin": "SYSTEM"
+        }
+      ]
+    },
+    {
+      "server": "fishffa.gg",
+      "match": 2,
+      "ownerResult": "LOSS",
+      "opponent": "PlayerB",
+      "duration": 80.911,
+      "messages": [
+        {
+          "t": 0.0,
+          "text": " ☠ Opponent: PlayerB",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 80.911,
+          "text": "You lost the duel!",
+          "origin": "SUBTITLE"
+        }
+      ]
+    },
+    {
+      "server": "fishffa.gg",
+      "match": 3,
+      "ownerResult": "WIN",
+      "opponent": "PlayerB",
+      "duration": 53.0,
+      "messages": [
+        {
+          "t": 0.0,
+          "text": " ☠ Opponent: PlayerB",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 28.0,
+          "text": " ⭐ Winner: PlayerA (3.78❤)",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 53.0,
+          "text": " ⭐ Winner: PlayerA",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 53.0,
+          "text": " ☠ Loser: PlayerB",
+          "origin": "SYSTEM"
+        }
+      ]
+    },
+    {
+      "server": "pvplegacy.net",
+      "match": 1,
+      "ownerResult": "WIN",
+      "opponent": "PlayerB",
+      "duration": 51.0,
+      "messages": [
+        {
+          "t": 0.0,
+          "text": "Round 1 has started.",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 51.0,
+          "text": "PlayerB was slain by PlayerA",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 51.0,
+          "text": "\\nPlayerA has won the game!\\n",
+          "origin": "SYSTEM"
+        }
+      ]
+    },
+    {
+      "server": "pvplegacy.net",
+      "match": 2,
+      "ownerResult": "WIN",
+      "opponent": "PlayerB",
+      "duration": 200.0,
+      "messages": [
+        {
+          "t": 0.0,
+          "text": "Round 1 has started.",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 46.0,
+          "text": "PlayerB was slain by PlayerA",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 46.0,
+          "text": "\\nPlayerA has won the round.\\nThey need to win 1 more round to win.\\n",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 50.0,
+          "text": "Round 2 has started.",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 166.0,
+          "text": "PlayerA was slain by PlayerB",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 166.0,
+          "text": "\\nPlayerB has won the round.\\nThey need to win 1 more round to win.\\n",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 170.0,
+          "text": "Round 3 has started.",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 200.0,
+          "text": "PlayerB was slain by PlayerA",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 200.0,
+          "text": "\\nPlayerA has won the game!\\n",
+          "origin": "SYSTEM"
+        }
+      ]
+    },
+    {
+      "server": "pvplegacy.net",
+      "match": 3,
+      "ownerResult": "WIN",
+      "opponent": "PlayerB",
+      "duration": 30.0,
+      "messages": [
+        {
+          "t": 0.0,
+          "text": "Round 1 has started.",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 30.0,
+          "text": "PlayerB was slain by PlayerA",
+          "origin": "SYSTEM"
+        },
+        {
+          "t": 30.0,
+          "text": "\\nPlayerA has won the game!\\n",
+          "origin": "SYSTEM"
+        }
+      ]
+    }
+  ]
+}

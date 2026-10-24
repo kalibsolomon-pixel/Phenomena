@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 /** Opt-in candidate evidence only. Never captures player/disguised chat or uploads data. */
@@ -24,7 +25,41 @@ public final class Diagnostics {
       String loser,
       String opponent,
       String confidence,
-      String decision) {}
+      String decision,
+      String capturePolicy,
+      String adapterId,
+      Integer adapterVersion) {
+    public Entry(
+        long timestamp,
+        long nanos,
+        String server,
+        String channel,
+        String text,
+        String kind,
+        String rule,
+        String winner,
+        String loser,
+        String opponent,
+        String confidence,
+        String decision) {
+      this(
+          timestamp,
+          nanos,
+          server,
+          channel,
+          text,
+          kind,
+          rule,
+          winner,
+          loser,
+          opponent,
+          confidence,
+          decision,
+          null,
+          null,
+          null);
+    }
+  }
 
   public record Report(
       int schema,
@@ -35,7 +70,7 @@ public final class Diagnostics {
 
   private static final Pattern CANDIDATE =
       Pattern.compile(
-          "(?i)\\b(match|duel|round|winner|loser|won|lost|killed|draw|forfeit|opponent|victory|defeat)\\b");
+          "(?i)\\b(match|duel|round|game|fight|winner|loser|won|lost|killed|draw|forfeit|opponent|victory|defeat)\\b");
   private static final Pattern PRIVATE =
       Pattern.compile(
           "(?i)(?:^<|^\\[.*?]\\s*[A-Za-z0-9_]{1,16}\\s*[:»>]|^(?!(?:Winner|Loser|Opponent|Round|Match|Duel|Results):)[A-Za-z0-9_]{1,16}\\s*[:»>]|\\b(?:whisper|whispers|whispered|private"
@@ -47,6 +82,14 @@ public final class Diagnostics {
   private String capture = UUID.randomUUID().toString();
   private boolean enabled;
   private long nextSave;
+  private String observedHost, lastLimitation;
+  private Supplier<CapturePolicy> activePolicy;
+  private Supplier<String> limitation = () -> "";
+
+  public void policy(Supplier<CapturePolicy> policy, Supplier<String> limitation) {
+    this.activePolicy = policy;
+    this.limitation = limitation;
+  }
 
   public Diagnostics(FightStore store, Path data, Consumer<String> notice) {
     this.store = store;
@@ -78,7 +121,8 @@ public final class Diagnostics {
         || origin == Announcements.Origin.UNCERTAIN) return;
     String normalized = Announcements.normalize(text);
     if (PRIVATE.matcher(normalized).find()
-        || (message == null && !CANDIDATE.matcher(normalized).find())) return;
+        || ((message == null || message.kind() == Announcements.Kind.NOTE)
+            && !CANDIDATE.matcher(normalized).find())) return;
     add(
         new Entry(
             System.currentTimeMillis(),
@@ -118,7 +162,7 @@ public final class Diagnostics {
             null,
             e.kind() == CombatEvent.Kind.ATTACK ? e.target() : e.actor(),
             e.confidence().name(),
-            "Observed; does not alone confirm a match result"));
+            "Observed; does not alone confirm a match result. " + limitation.get()));
   }
 
   public void outcome(FightRecord f) {
@@ -142,6 +186,32 @@ public final class Diagnostics {
   }
 
   private void add(Entry e) {
+    observedHost = e.server();
+    var current =
+        activePolicy == null ? CapturePolicy.resolve(e.server(), true, false) : activePolicy.get();
+    var policy =
+        CapturePolicy.resolve(
+            e.server(),
+            current.mode() != CapturePolicy.Mode.DISABLED,
+            current.mode() == CapturePolicy.Mode.MANUAL);
+    var adapter = policy.environment();
+    e =
+        new Entry(
+            e.timestamp(),
+            e.nanos(),
+            e.server(),
+            e.channel(),
+            e.text(),
+            e.kind(),
+            e.rule(),
+            e.winner(),
+            e.loser(),
+            e.opponent(),
+            e.confidence(),
+            e.decision(),
+            policy.mode().name(),
+            adapter == null ? null : adapter.id(),
+            adapter == null ? null : adapter.version());
     if (entries.size() >= 2048) {
       flush();
       entries.clear();
@@ -151,6 +221,26 @@ public final class Diagnostics {
   }
 
   public void tick(long now) {
+    if (enabled && observedHost != null) {
+      String status = limitation.get();
+      if (!Objects.equals(lastLimitation, status)) {
+        lastLimitation = status;
+        add(
+            new Entry(
+                System.currentTimeMillis(),
+                now,
+                observedHost,
+                "CAPTURE_POLICY",
+                null,
+                "POLICY_STATUS",
+                null,
+                null,
+                null,
+                null,
+                "OBSERVED",
+                status));
+      }
+    }
     if (enabled && now >= nextSave) {
       nextSave = now + 5_000_000_000L;
       flush();
@@ -191,7 +281,8 @@ public final class Diagnostics {
     summary.put(
         "correlationConfidence",
         rows.stream().filter(e -> "LIFECYCLE".equals(e.channel())).map(Entry::confidence).toList());
-    return new Report(1, Announcements.adapters(), rows, privacy, summary);
+    summary.put("capturePolicies", rows.stream().map(Entry::capturePolicy).distinct().toList());
+    return new Report(2, Announcements.adapters(), rows, privacy, summary);
   }
 
   public void flush() {
@@ -258,7 +349,10 @@ public final class Diagnostics {
                       names ? redact(e.loser(), aliases) : e.loser(),
                       names ? redact(e.opponent(), aliases) : e.opponent(),
                       e.confidence(),
-                      names ? redact(e.decision(), aliases) : e.decision()));
+                      names ? redact(e.decision(), aliases) : e.decision(),
+                      e.capturePolicy(),
+                      e.adapterId(),
+                      e.adapterVersion()));
             // Unknown names in raw server text are conservatively removed; fixture author can
             // restore reviewed tokens.
             if (names)
@@ -278,7 +372,10 @@ public final class Diagnostics {
                                   e.loser(),
                                   e.opponent(),
                                   e.confidence(),
-                                  redactUnknown(e.decision())))
+                                  redactUnknown(e.decision()),
+                                  e.capturePolicy(),
+                                  e.adapterId(),
+                                  e.adapterVersion()))
                       .toList();
             Path out = folder.resolve("fixtures-" + System.currentTimeMillis() + ".json");
             AtomicJson.write(

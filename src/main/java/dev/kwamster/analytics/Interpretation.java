@@ -35,6 +35,7 @@ public final class Interpretation {
                 case RETALIATION -> "before an attributed return hit.";
                 case TRADE -> "before a same-tick trade.";
                 case DISENGAGE -> "before both players disengaged.";
+                case ROUND_BOUNDARY -> "before the round ended.";
                 case RECORDING_END -> "and the recording ended without a return hit.";
               });
     else if (!a.hits.isEmpty()) out.add("No two of your confirmed hits landed consecutively.");

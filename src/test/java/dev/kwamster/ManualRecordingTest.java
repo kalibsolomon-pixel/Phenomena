@@ -173,6 +173,7 @@ class ManualRecordingTest {
 
   @Test
   void automaticInProgressPromotesWithoutLosingOrDuplicatingHits() {
+    chat(1, Sim.MM_START);
     hit(1, "B");
     assertTrue(controller.start("minemen.club", "PlayerA", "world", Sim.ns(2), 60));
     hit(3, "B");
@@ -193,6 +194,10 @@ class ManualRecordingTest {
     end(3);
     hit(4, "C");
     controller.tick(Sim.ns(100), 2020);
+    assertEquals(1, saved.size(), "configured combat remains suppressed after manual end");
+    chat(101, Sim.MM_START.replace("PlayerB", "PlayerC"));
+    hit(104, "C");
+    chat(105, Sim.MM_WIN.replace("PlayerB", "PlayerC"));
     assertEquals(2, saved.size());
     assertFalse(saved.getLast().manual());
     assertEquals("C", saved.getLast().opponent());
@@ -341,6 +346,7 @@ class ManualRecordingTest {
 
   @Test
   void resultFromDifferentServerCannotResolveCurrentFight() {
+    chat(0, Sim.MM_START);
     hit(1, "B");
     engine.announcement(
         "pvphq.com",
@@ -355,7 +361,7 @@ class ManualRecordingTest {
 
   @Test
   void historicalSchemaThreeRetainsIncomingAnalytics() throws Exception {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.hit(1).incoming(2);
     var f = s.finish(4);
     var json = AtomicJson.GSON.toJson(f).replace("\"schemaVersion\": 4", "\"schemaVersion\": 3");
@@ -367,6 +373,7 @@ class ManualRecordingTest {
   @Test
   void automaticContextChangeCannotCarryOldServerIntoNewCombat() {
     controller.context("minemen.club", "PlayerA", "world", Sim.ns(0), 20);
+    chat(.1, Sim.MM_START);
     hit(1, "B");
     controller.context("other.invalid", "PlayerA", "world", Sim.ns(2), 60);
     assertEquals(FightRecord.Outcome.INTERRUPTED, saved.getFirst().outcome());

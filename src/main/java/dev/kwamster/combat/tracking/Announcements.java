@@ -138,10 +138,15 @@ public final class Announcements {
   private static final Pattern SIMPLE_DRAW =
       Pattern.compile("^(?:Draw|Tie|It's a draw|The match ended in a draw)[!.]?$");
   private static final List<Rules> RULES = new ArrayList<>();
+  private static final Map<String, ServerCompatibility.Adapter> ENVIRONMENTS = new HashMap<>();
 
   static {
     register(new Minemen());
     register(new Pvphq());
+    register(new Observed(ServerCompatibility.MCPVP));
+    register(new Observed(ServerCompatibility.CATPVP));
+    register(new Observed(ServerCompatibility.FISHFFA));
+    register(new Observed(ServerCompatibility.LEGACY));
   }
 
   private Announcements() {}
@@ -152,6 +157,12 @@ public final class Announcements {
    */
   public static void register(Rules rules) {
     RULES.add(rules);
+    for (String host : rules.metadata().hosts())
+      ENVIRONMENTS.put(normalizeHost(host), rules.metadata());
+  }
+
+  public static ServerCompatibility.Adapter environment(String host) {
+    return ENVIRONMENTS.get(normalizeHost(host));
   }
 
   public static List<ServerCompatibility.Adapter> adapters() {
@@ -160,8 +171,16 @@ public final class Announcements {
 
   public static Optional<Message> interpret(String host, String original, Origin origin) {
     if (original == null || original.length() > 4096) return Optional.empty();
+    String normalized = normalize(original);
+    // Only explicitly observed host/surface pairs may promote a title to a lifecycle signal.
+    if (origin == Origin.TITLE || origin == Origin.SUBTITLE)
+      for (var rules : RULES)
+        if (rules.supports(host) && rules instanceof Observed) {
+          var found = rules.parse(original, normalized, origin);
+          if (found.isPresent()) return found;
+        }
     if (origin == Origin.TITLE || origin == Origin.SUBTITLE) {
-      String text = normalize(original);
+      String text = normalized;
       return text.isEmpty() || text.length() > 160
           ? Optional.empty()
           : Optional.of(
@@ -169,7 +188,7 @@ public final class Announcements {
     }
     if (origin == Origin.PLAYER_CHAT || origin == Origin.DISGUISED_CHAT || origin == Origin.OVERLAY)
       return Optional.empty();
-    String text = normalize(original);
+    String text = normalized;
     for (var rules : RULES)
       if (rules.supports(host)) {
         var found = rules.parse(original, text, origin);
@@ -232,11 +251,21 @@ public final class Announcements {
   }
 
   static boolean hostIs(String host, String... domains) {
-    if (host == null) return false;
-    String h =
-        host.strip().toLowerCase(Locale.ROOT).replaceFirst(":\\d+$", "").replaceFirst("\\.$", "");
-    for (String d : domains) if (h.equals(d) || h.endsWith("." + d)) return true;
+    String h = normalizeHost(host);
+    for (String d : domains) if (h.equals(d)) return true;
     return false;
+  }
+
+  public static String normalizeHost(String host) {
+    if (host == null) return "";
+    String h = host.strip().toLowerCase(Locale.ROOT);
+    int colon = h.lastIndexOf(':');
+    if (colon >= 0 && colon < h.length() - 1) {
+      boolean port = true;
+      for (int i = colon + 1; i < h.length(); i++) port &= h.charAt(i) >= '0' && h.charAt(i) <= '9';
+      if (port) h = h.substring(0, colon);
+    }
+    return h.endsWith(".") ? h.substring(0, h.length() - 1) : h;
   }
 
   private static Message message(
@@ -304,7 +333,7 @@ public final class Announcements {
     }
 
     public boolean supports(String host) {
-      return hostIs(host, "minemen.net", "minemen.club");
+      return metadata().hosts().contains(normalizeHost(host));
     }
 
     public Optional<Message> parse(String original, String text, Origin origin) {
@@ -356,7 +385,7 @@ public final class Announcements {
     }
 
     public boolean supports(String host) {
-      return hostIs(host, "pvphq.com");
+      return metadata().hosts().contains(normalizeHost(host));
     }
 
     public Optional<Message> parse(String original, String text, Origin origin) {
@@ -382,6 +411,202 @@ public final class Announcements {
       if (HQ_BANNER.matcher(text).matches())
         return Optional.of(
             message(Kind.BEGIN, null, null, null, "pvphq-banner", original, origin, true));
+      return Optional.empty();
+    }
+  }
+
+  /** Grammars from the six-session corpus; no guessed countdown or chat-substring rules. */
+  private record Observed(ServerCompatibility.Adapter metadata) implements Rules {
+    private static final Pattern CAT_START = Pattern.compile("^Opponent: " + NAME + " ℹ$");
+    private static final Pattern CAT_RESULT =
+        Pattern.compile("^" + NAME + " won the (round|game)\\.$");
+    private static final Pattern FISH_START = Pattern.compile("^☠ Opponent: " + NAME + "$");
+    private static final Pattern FISH_WIN =
+        Pattern.compile("^⭐ Winner: " + NAME + "(?: \\(\\d+(?:\\.\\d+)?❤\\))?$");
+    private static final Pattern FISH_LOSE = Pattern.compile("^☠ Loser: " + NAME + "$");
+    private static final Pattern LEGACY_ROUND =
+        Pattern.compile("^Round (\\d{1,3}) has started\\.$");
+    private static final Pattern LEGACY_WIN = Pattern.compile("^" + NAME + " has won the game!$");
+    private static final Pattern LEGACY_ROUND_WIN =
+        Pattern.compile(
+            "^" + NAME + " has won the round\\. They need to win \\d+ more round to win\\.$");
+    private static final Pattern MCP_RESULT =
+        Pattern.compile(
+            "^—+ ⚔ Match Complete ⚔ 🗡 "
+                + NAME
+                + " won the round! \\((?:0 - 1|1 - 0)\\) (?:🛡 \\d+ ᴀʀᴍᴏʀ ᴀᴠɢ\\. \\| )?❤ \\d+/20 ʜᴘ"
+                + " —+$");
+
+    public boolean supports(String host) {
+      return metadata.hosts().contains(normalizeHost(host));
+    }
+
+    private Message signal(
+        Kind kind,
+        String winner,
+        String loser,
+        String opponent,
+        String rule,
+        String original,
+        Origin origin,
+        Scope scope,
+        Integer round) {
+      return new Message(
+          kind,
+          winner,
+          loser,
+          opponent,
+          metadata.id() + "-" + rule,
+          original,
+          origin,
+          true,
+          scope,
+          false,
+          round,
+          null);
+    }
+
+    public Optional<Message> parse(String original, String text, Origin origin) {
+      Matcher m;
+      String id = metadata.id();
+      if (id.equals("mcpvp")) {
+        if (origin == Origin.TITLE && text.equals("⚔ FIGHT! ⚔"))
+          return Optional.of(
+              signal(
+                  Kind.START, null, null, null, "fight-title", original, origin, Scope.MATCH, 1));
+        if (origin == Origin.SYSTEM && (m = MCP_RESULT.matcher(text)).matches())
+          return Optional.of(
+              signal(
+                  Kind.RESULT,
+                  m.group(1),
+                  null,
+                  null,
+                  "complete",
+                  original,
+                  origin,
+                  Scope.MATCH,
+                  null));
+      }
+      if (id.equals("fishffa")
+          && origin == Origin.SUBTITLE
+          && (text.equals("You lost the duel!") || text.equals("You have lost the duel!")))
+        return Optional.of(
+            signal(
+                Kind.RESULT,
+                null,
+                "local",
+                null,
+                "defeat-subtitle",
+                original,
+                origin,
+                Scope.MATCH,
+                null));
+      if (origin != Origin.SYSTEM) return Optional.empty();
+      if (id.equals("catpvp")) {
+        if ((m = CAT_START.matcher(text)).matches())
+          return Optional.of(
+              signal(
+                  Kind.START,
+                  null,
+                  null,
+                  m.group(1),
+                  "opponent",
+                  original,
+                  origin,
+                  Scope.MATCH,
+                  1));
+        if ((m = CAT_RESULT.matcher(text)).matches())
+          return Optional.of(
+              signal(
+                  Kind.RESULT,
+                  m.group(1),
+                  null,
+                  null,
+                  "winner-" + m.group(2),
+                  original,
+                  origin,
+                  m.group(2).equals("game") ? Scope.MATCH : Scope.ROUND,
+                  null));
+      }
+      if (id.equals("fishffa")) {
+        if ((m = FISH_START.matcher(text)).matches())
+          return Optional.of(
+              signal(
+                  Kind.START,
+                  null,
+                  null,
+                  m.group(1),
+                  "opponent",
+                  original,
+                  origin,
+                  Scope.MATCH,
+                  1));
+        if ((m = FISH_WIN.matcher(text)).matches())
+          return Optional.of(
+              signal(
+                  Kind.RESULT,
+                  m.group(1),
+                  null,
+                  null,
+                  "winner",
+                  original,
+                  origin,
+                  text.endsWith("❤)") ? Scope.ROUND : Scope.MATCH,
+                  null));
+        if ((m = FISH_LOSE.matcher(text)).matches())
+          return Optional.of(
+              signal(
+                  Kind.RESULT,
+                  null,
+                  m.group(1),
+                  null,
+                  "loser",
+                  original,
+                  origin,
+                  Scope.MATCH,
+                  null));
+      }
+      if (id.equals("pvplegacy")) {
+        if ((m = LEGACY_ROUND.matcher(text)).matches())
+          return Optional.of(
+              signal(
+                  Kind.ROUND_START,
+                  null,
+                  null,
+                  null,
+                  "round-start",
+                  original,
+                  origin,
+                  Scope.ROUND,
+                  Integer.parseInt(m.group(1))));
+        if ((m = LEGACY_WIN.matcher(text)).matches())
+          return Optional.of(
+              signal(
+                  Kind.RESULT,
+                  m.group(1),
+                  null,
+                  null,
+                  "game-winner",
+                  original,
+                  origin,
+                  Scope.MATCH,
+                  null));
+        if ((m = LEGACY_ROUND_WIN.matcher(text)).matches())
+          return Optional.of(
+              signal(
+                  Kind.RESULT,
+                  m.group(1),
+                  null,
+                  null,
+                  "round-winner",
+                  original,
+                  origin,
+                  Scope.ROUND,
+                  null));
+        if (text.equals("[GameManager] Game has ended."))
+          return Optional.of(
+              signal(Kind.END, null, null, null, "game-end", original, origin, Scope.MATCH, null));
+      }
       return Optional.empty();
     }
   }

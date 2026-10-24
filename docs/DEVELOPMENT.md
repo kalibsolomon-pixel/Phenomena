@@ -73,3 +73,10 @@ Defects found during the work and fixed:
 Removed file: `gui/screens/AnalyticsPage.java`, replaced by the Offense, Defense and Fight Flow pages. Shared logic moved to `AnalysisSupport`.
 
 The client test needed to hold `keyUse`/`keyJump` mappings directly, because Fabric's test input did not reach them while the window was ungrabbed. All test clients stayed muted, and every run used a new `build/run/v013-*` directory.
+
+
+## 0.1.5 — six-server capture environments
+
+Started at `ddb906ecc2a8c4d5fa1219dd9ad6a89ebea2d536`, clean tree on the existing branch. Inventoried 1,355 authoritative Aurora source files before read-only processing; 137 logging artifacts and two diagnostic captures locate all 18 matches. Added six exact-host capture environments, independent match/round evidence and combo boundaries, manual/disabled/configured/generic resolver, diagnostic policy/version/status and compact dashboard status. No generic fallback or inactivity end exists on configured environments.
+
+Baseline 253 unit cases passed with one skip; final 293 cases have 292 passes, one skip and no failures. Both redacted announcement and private original-combat replays agree with all 18 owner outcomes. Historical export: 243/243. Muted final client and four-mod runs pass. Browser interaction is explicitly unverified after file-protocol rejection; static report contracts and syntax pass. All earlier logs, builds and screenshots are preserved. [0.1.5 notes](0.1.5.md) contain exact denominators, limitations, performance and correlation references. Changes are committed locally only.

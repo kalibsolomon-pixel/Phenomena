@@ -43,8 +43,8 @@ final class OverviewPage implements KwamsterScreen.Page {
     if (a.fights == 0) {
       c.heading("No fights recorded yet");
       c.text(
-          "Start a fight with any living entity. KWAMSTER tracks combat in the background while"
-              + " this window is closed; statistics appear here once a fight ends.");
+          "Configured servers use their match announcements. Other servers use combat capture."
+              + " You can also start a manual recording here or with /kwm start.");
       c.note(
           "Press "
               + KwamsterScreen.keyName()
@@ -239,7 +239,7 @@ final class OverviewPage implements KwamsterScreen.Page {
   private void recording(Content c) {
     c.heading("Recording");
     c.block(
-        46,
+        90,
         (g, x, y, w, h, mx, my) -> {
           var r = KwamsterClient.recording;
           var font = net.minecraft.client.Minecraft.getInstance().font;
@@ -251,6 +251,26 @@ final class OverviewPage implements KwamsterScreen.Page {
                 + Objects.toString(r.server(), "No world")
                 + " / Opponent: "
                 + Objects.toString(r.opponent(), "Unknown"),
+            "Automatic capture: "
+                + (KwamsterClient.config.tracking ? "Enabled" : "Disabled")
+                + " / Policy: "
+                + KwamsterClient.engine.capturePolicy().mode().toString().replace('_', ' '),
+            "Environment: "
+                + (KwamsterClient.engine.capturePolicy().environment() == null
+                    ? "Generic combat"
+                    : KwamsterClient.engine.capturePolicy().environment().name()
+                        + " / adapter v"
+                        + KwamsterClient.engine.capturePolicy().environment().version()),
+            "Match: "
+                + (KwamsterClient.engine.engaged() ? KwamsterClient.engine.state() : "Idle")
+                + " / Round: "
+                + Objects.toString(KwamsterClient.engine.currentRound(), "Unknown")
+                + " / Manual: "
+                + (r.manual() ? "Active" : "Off"),
+            "Diagnostics: "
+                + (KwamsterClient.diagnostics.enabled() ? "Enabled" : "Off")
+                + " / "
+                + KwamsterClient.engine.captureLimitation(),
             "Export: "
                 + (r.lastSaved() == null
                     ? "No recording saved this run"

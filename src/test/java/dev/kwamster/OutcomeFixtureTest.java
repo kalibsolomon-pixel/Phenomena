@@ -109,7 +109,7 @@ class OutcomeFixtureTest {
         JsonParser.parseReader(new InputStreamReader(stream, StandardCharsets.UTF_8))
             .getAsJsonObject();
     Map<String, int[]> confusion = new TreeMap<>();
-    int confirmed = 0, decided = 0, total = 0, skipped = 0;
+    int confirmed = 0, decided = 0, total = 0, skipped = 0, roundOnly = 0;
     Map<String, Score> scores = new LinkedHashMap<>();
     int[] winC = new int[3], lossC = new int[3];
     for (var element : root.getAsJsonArray("fixtures")) {
@@ -119,7 +119,6 @@ class OutcomeFixtureTest {
         skipped++;
         continue;
       }
-      total++;
       List<double[]> times = new ArrayList<>();
       List<String> texts = new ArrayList<>();
       for (var m : f.getAsJsonArray("messages")) {
@@ -127,6 +126,16 @@ class OutcomeFixtureTest {
         texts.add(m.getAsJsonObject().get("text").getAsString());
       }
       var record = replay(f.get("server").getAsString(), times, texts);
+      // These legacy labels fall back to the last round/kill vote. They cannot authorize a
+      // configured match end in 0.1.5. Keep the original corpus and assert explicit abstention.
+      if (f.get("server").getAsString().equals("pvphq.com")
+          && !label.equals("NONE")
+          && texts.stream().noneMatch(t -> t.contains("MATCH REPORT"))) {
+        assertNull(record, "round-only evidence must not produce a completed match");
+        roundOnly++;
+        continue;
+      }
+      total++;
       String predicted =
           record == null
               ? "NONE"
@@ -154,9 +163,11 @@ class OutcomeFixtureTest {
     report.append(
         String.format(
             Locale.ROOT,
-            "fixtures=%d (ambiguous skipped=%d) decided=%d confirmed=%d%n",
+            "eligible fixtures=%d (ambiguous skipped=%d; round-only policy abstentions=%d)"
+                + " decided=%d confirmed=%d%n",
             total,
             skipped,
+            roundOnly,
             decided,
             confirmed));
     for (var e : scores.entrySet())

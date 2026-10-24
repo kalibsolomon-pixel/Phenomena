@@ -177,3 +177,20 @@ Synthetic manual report generation uses `generateManualExampleReport`; the paren
 The browser protocol gate rejected the local `file:` URL. No workaround or security bypass was attempted. Generated JavaScript passes `node --check`; unit/static checks cover escaping, CSP, offline data, filtering payloads and absence of network calls. Browser execution, tabs/filter interaction, responsive layout, network observation and console-error acceptance remain unverified for 0.1.4. The Minecraft manual-recording screenshot was inspected. Do not inherit 0.1.3's browser acceptance as proof for the changed viewer.
 
 All runs use fresh labeled directories; no pre-existing recordings, logs, screenshots, ignored artifacts or local developer files were deleted. No clean, push, publication, upload or installation into Aurora occurred. See [0.1.4](0.1.4.md), [server evidence procedure](SERVER_COMPATIBILITY.md), and [performance](PERFORMANCE.md).
+
+
+## 0.1.5 six-server capture validation
+
+Current build and complete evidence are in [0.1.5](0.1.5.md), including all 18 owner correlations, denominators, the preserved CatPvP round-count conflict and browser limitations. Final unit suite: 293 total, 292 passed, one existing Windows symlink skip, zero failures/errors. All 18 announcement fixtures and all 18 private replays of 21,748 original combat events pass. Each fixture produces one recording and one offline report. The unchanged legacy corpus validates 977 decisive eligible cases plus 200 negatives, explicitly abstains on 21 round-only cases, and excludes two historically ambiguous labels.
+
+Fresh muted functional acceptance (`v015-review-functional`) and the full four-mod sequence (`v015-review-compat`) pass, including locally supplied configured-environment scenarios and nine isolated recording/report pairs. Ordinary integrated-server melee and real manual/disconnect/GUI paths are also exercised. No new external-server acceptance is claimed. Historical validation exported all 243 originals (52 schema 1, 170 schema 2, 21 schema 4), with zero failures; schema 3 is covered by unit tests. Interactive browser access is blocked by protocol policy; static syntax/data/offline checks pass for 253 reports. No browser workaround was attempted.
+
+Reproduce from the repository root (PowerShell, Java 21):
+
+```powershell
+./scripts/dev.ps1 build
+./scripts/dev.ps1 benchmarkCapture
+./scripts/dev.ps1 runClientGameTest -PvalidationRun=NEW_UNIQUE_DIRECTORY
+```
+
+Private evidence preparation (read-only source; first preserve source inventory/hashes): run `scripts/investigate_six_servers.py INSTANCE`, then `scripts/extract_six_server_fixtures.py`, then `./scripts/dev.ps1 replayCapturedEvidence`. The extractor is explicitly for the October 24 corpus with reviewed log boundaries; it does not infer future-session ground truth. Raw outputs stay ignored. `scripts/check_offline_reports.py FOLDER...` checks syntax and embedded contracts, not browser interaction.

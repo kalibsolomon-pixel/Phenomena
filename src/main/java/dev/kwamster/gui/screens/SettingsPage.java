@@ -107,14 +107,14 @@ final class SettingsPage implements KwamsterScreen.Page {
     var cfg = c();
     c.heading("Tracking");
     c.setting(
-        "Combat tracking",
-        "Observes fights whether or not this window is open. Turning it off ends the current fight"
-            + " as interrupted.",
+        "Automatic capture",
+        "Uses configured server announcements or generic combat on other servers. Manual recording"
+            + " remains available.",
         toggle(
             "Combat tracking",
             () -> cfg.tracking,
             v -> {
-              if (!v)
+              if (!v && !KwamsterClient.recording.manual())
                 KwamsterClient.engine.finish(
                     ClientCapture.now(), FightRecord.Outcome.INTERRUPTED, "Tracking paused");
               cfg.tracking = v;
@@ -176,7 +176,7 @@ final class SettingsPage implements KwamsterScreen.Page {
     c.heading("Fight detection", "frozen into each new fight");
     c.setting(
         "Inactivity timeout",
-        "A fight ends as Unknown after this long without combat.",
+        "Applies only to generic combat capture on unconfigured servers.",
         slider(
             "Inactivity timeout",
             cfg.inactivitySeconds,
@@ -218,17 +218,7 @@ final class SettingsPage implements KwamsterScreen.Page {
             1,
             v -> "±" + (int) v + " ticks",
             v -> cfg.jumpWindowTicks = (int) v));
-    c.setting(
-        "Server round inactivity",
-        "Longer fallback when a server has announced the current round.",
-        slider(
-            "Server inactivity",
-            cfg.serverInactivitySeconds,
-            15,
-            300,
-            5,
-            v -> (int) v + " s",
-            v -> cfg.serverInactivitySeconds = v));
+    c.note("Configured matches and manual recordings never end because of inactivity.");
     c.heading("Reach and timing thresholds", "frozen into each new fight");
     c.setting(
         "Target reach",

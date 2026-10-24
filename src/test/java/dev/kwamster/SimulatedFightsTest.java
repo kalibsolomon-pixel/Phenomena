@@ -102,7 +102,7 @@ class SimulatedFightsTest {
 
   @Test
   void s03AlternatingExchanges() throws Exception {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     for (int i = 0; i < 6; i++) s.hit(1 + i).incoming(1.5 + i);
     var f = s.finish(8);
     assertEquals(1, f.statistics().longestCombo);
@@ -114,7 +114,7 @@ class SimulatedFightsTest {
 
   @Test
   void s04FourHitComboThenRetaliation() throws Exception {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.hit(1).hit(1.6).hit(2.2).hit(2.8).incoming(3.2).incoming(3.8);
     var f = s.finish(5);
     var a = FightAnalytics.of(f);
@@ -125,7 +125,7 @@ class SimulatedFightsTest {
 
   @Test
   void s05ShieldBlockThenConfirmedHit() throws Exception {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.attack(1, B, 3, true, true).shield(1.03, "BLOCK", "opponent");
     s.hit(1.7);
     var f = s.finish(3);
@@ -136,7 +136,7 @@ class SimulatedFightsTest {
 
   @Test
   void s06AxeShieldDisable() throws Exception {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.attack(1, B, 3, true, true).shield(1.02, "DISABLE", "opponent");
     s.hit(1.9).hit(2.5);
     var f = s.finish(3);
@@ -148,7 +148,7 @@ class SimulatedFightsTest {
 
   @Test
   void s07SameTickJumpReset() throws Exception {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.hit(.5).incoming(1).jump(1.01);
     var f = s.finish(2);
     assertEquals(1, f.statistics().jumpCandidates);
@@ -158,7 +158,7 @@ class SimulatedFightsTest {
 
   @Test
   void s08EarlyAndLateJumpResets() throws Exception {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.hit(.5);
     s.jump(.9).incoming(1.0); // early by 2 ticks
     s.incoming(2.0).jump(2.15); // late by 3 ticks
@@ -171,7 +171,7 @@ class SimulatedFightsTest {
 
   @Test
   void s09NearThreeBlockHit() throws Exception {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.hit(1, 3.04).hit(1.6, 2.4);
     var f = s.finish(3);
     assertEquals(1, f.statistics().perfectReachHits);
@@ -232,7 +232,7 @@ class SimulatedFightsTest {
 
   @Test
   void s14IncompleteIncomingAttribution() throws Exception {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     for (int i = 0; i < 8; i++) {
       s.hit(1 + i * .5);
       if (i % 2 == 0) s.unattributed(1.2 + i * .5);
@@ -247,13 +247,13 @@ class SimulatedFightsTest {
 
   @Test
   void s15MultiOpponentCombat() throws Exception {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.hit(1).incoming(1.5, C, Attribution.OTHER_ENTITY, true).hit(2);
     var f = s.finish(3);
     assertEquals(1, f.statistics().thirdPartyIncoming);
     assertEquals(2, f.statistics().longestCombo, "a third party's hit is not retaliation");
     consistent(f);
-    var t = new Sim();
+    var t = new Sim("unconfigured.test");
     t.hit(1).attack(2, C, 3, false, false);
     assertEquals(Classification.INTERRUPTED, t.out.getFirst().resolution().classification());
   }
@@ -273,7 +273,7 @@ class SimulatedFightsTest {
 
   @Test
   void interpretationTextIsEscapedInsideTheReport() throws Exception {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.host = "unknown.example";
     s.hit(1);
     var f = s.finish(2);

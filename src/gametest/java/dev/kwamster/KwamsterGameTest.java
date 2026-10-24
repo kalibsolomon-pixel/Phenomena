@@ -806,6 +806,7 @@ public final class KwamsterGameTest implements FabricClientGameTest {
                 "one-name result remains inferred");
           });
       await(ctx);
+      CaptureEnvironmentClientTest.exercise(ctx);
       ManualClientTest.exercise(ctx, world);
     }
     ManualClientTest.afterDisconnect(ctx);

@@ -10,12 +10,12 @@ Settings save asynchronously when the dashboard closes and on graceful shutdown.
 
 | Section | Control | Default / limits | Effect |
 | --- | --- | --- | --- |
-| General | Combat tracking | On | Observes combat independently of the dashboard. Turning it off ends the current fight as interrupted. |
+| General | Automatic capture | On | Configured announcements or generic combat on other servers; disabling preserves an active automatic match as Interrupted. Manual remains available. |
 | General | Record finished fights | On | Queues finalized fight snapshots to local storage. |
 | General | Fight summary in chat | Off | One local chat line per finished fight; never sent to the server. |
-| General / Storage | Fights kept | 100 / 1-1,000 | Applied on the next recording write; oldest valid recordings are removed first. |
-| General / Storage | Storage budget | 64 MiB / 1-1,024 | Applies to valid managed fight files; exports and preserved corrupt/future files are separate. |
-| General | Inactivity timeout | 8 s / 2-30 in the GUI (2-120 in the file) | Ends engagement as Unknown; ENDING begins at 75% of the interval. |
+| General / Storage | Fights kept | 100 / 1-1,000 | Bounds in-memory history; the automatic pipeline preserves existing files. |
+| General / Storage | Storage budget | 64 MiB / 1-1,024 | Legacy manual-save budget; automatic recordings remain preserved for recovery. |
+| General | Inactivity timeout | 8 s / 2-30 in the GUI (2-120 in the file) | Applies only to generic combat capture on unconfigured servers; configured matches/manual sessions ignore it. |
 | General | Damage correlation window | 250 ms / 50-500 | Match source-attributed damage to recent attacks. Higher values can increase temporal ambiguity. |
 | General | Combo timeout | 3 s / 0.5-10 | Consecutive correlated attacks beyond this gap begin a new combo. |
 | General | Jump candidate window | 150 ms / 50-300 | Conservative candidate window after incoming opponent damage. |
@@ -105,3 +105,8 @@ Recording schema is now **3**. Readers accept 1–3; older files derive a read-o
 Config schema remains 2; `diagnosticCapture` defaults to `false`. Settings > Recording & storage and `/kwm diagnostics on|off` control it. Manual `/kwm start` and `/kwm end` explicitly override disabled automatic tracking/saving for that session. They do not change those preference fields. Overview exposes the same Start/End controller and folder actions. Diagnostic export redacts both names and servers by default (`/kwm diagnostics export`), with separate `export-names` and `export-servers` options. See [server evidence workflow](SERVER_COMPATIBILITY.md).
 
 Recording schema 4 adds optional manual metadata and exchange scopes; schemas 1–3 still load. Report format 5 supports participant/exchange selection. Manual folders use `Manual Session <local timestamp>`. `pending-sessions` contains atomic recoverable snapshots and `server-compatibility.json` holds adapter versions/evidence. Recovery never automatically resumes recording. See [recovery policy and resource limits](0.1.4.md).
+
+
+## 0.1.5 configured capture
+
+[Capture policy](CAPTURE_POLICY.md) defines manual/disabled/configured/generic priority. Overview shows host, automatic preference, policy, environment, adapter version, match state, round (when known), manual state, diagnostics and export status. The old server-inactivity slider is removed; its stored configuration value is retained for compatibility and never ends a configured match. Diagnostics schema 2 adds active policy, adapter ID/version and clearer rejection reasons. Anonymous reports retain independent round outcomes while removing raw announcement names. Recording schema 4 accepts additive optional round metadata; no source recording or historical outcome is rewritten.

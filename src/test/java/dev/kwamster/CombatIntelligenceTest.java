@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 class CombatIntelligenceTest {
   @Test
   void unattributedAndThirdPartyDamageNeverBreakCombos() {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.hit(1).hit(1.5);
     s.unattributed(1.7); // fall damage between hits
     s.incoming(1.8, C, Attribution.OTHER_ENTITY, true); // third party
@@ -34,7 +34,7 @@ class CombatIntelligenceTest {
 
   @Test
   void fourHitComboEndedByRetaliationThenOpponentCombo() {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.hit(1).hit(1.6).hit(2.2).hit(2.8);
     s.incoming(3.3).incoming(3.9).incoming(4.5);
     s.hit(5.2);
@@ -55,7 +55,7 @@ class CombatIntelligenceTest {
 
   @Test
   void sameTickTradeExtendsNeitherCombo() {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.hit(1).hit(1.5);
     s.attack(2.0).hurt(2.01, B);
     s.incoming(2.02); // same client tick as the local hit
@@ -70,7 +70,7 @@ class CombatIntelligenceTest {
 
   @Test
   void disengagementSegmentsExchangesWithoutRetaliation() {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.hit(1).hit(1.5);
     s.hit(6).hit(6.5).hit(7); // gap > 3 s combo timeout
     var a = FightAnalytics.of(s.finish(8));
@@ -82,7 +82,7 @@ class CombatIntelligenceTest {
 
   @Test
   void duplicateIncomingObservationsCountOnce() {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.hit(1);
     s.incoming(2).incoming(2.01); // same tick
     var f = s.finish(3);
@@ -92,7 +92,7 @@ class CombatIntelligenceTest {
 
   @Test
   void dominanceFollowsConfirmedExchangesAndDecays() {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.hit(1).hit(1.5).hit(2).hit(2.5);
     s.incoming(3).incoming(3.5).incoming(4);
     var a = FightAnalytics.of(s.finish(20));
@@ -108,7 +108,7 @@ class CombatIntelligenceTest {
 
   @Test
   void largestSwingMatchesBruteForce() {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     double t = 1;
     var rnd = new Random(7);
     for (int i = 0; i < 60; i++) {
@@ -138,7 +138,7 @@ class CombatIntelligenceTest {
 
   @Test
   void dominanceIsNotConfidentWhenIncomingIsUnattributed() {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     for (int i = 0; i < 6; i++) {
       s.hit(1 + i * .6);
       s.unattributed(1.3 + i * .6);
@@ -155,7 +155,7 @@ class CombatIntelligenceTest {
 
   @Test
   void singleEventCannotProduceConfidentDominance() {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.hit(1);
     var a = FightAnalytics.of(s.finish(2));
     assertTrue(a.dominance.at(.05) <= .5 + 1e-9, "the +1 prior bounds a single hit at 0.5");
@@ -164,7 +164,7 @@ class CombatIntelligenceTest {
 
   @Test
   void confirmedShieldBlockLeavesAccuracyDenominator() {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.hit(1);
     s.attack(2, B, 3, true, true).shield(2.05, "BLOCK", "opponent");
     s.attack(3, B, 3, true, true); // no sound, no damage: estimated
@@ -194,7 +194,7 @@ class CombatIntelligenceTest {
 
   @Test
   void axeDisableThenFollowUpHit() {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.attack(1, B, 3, true, true)
         .shield(1.03, "DISABLE", "opponent")
         .shield(1.04, "BLOCK", "opponent");
@@ -209,7 +209,7 @@ class CombatIntelligenceTest {
 
   @Test
   void localDefensiveShieldEventsAreSeparate() {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.hit(1);
     s.shield(1.5, "BLOCK", "local").shield(2, "DISABLE", "local");
     var f = s.finish(3);
@@ -220,7 +220,7 @@ class CombatIntelligenceTest {
 
   @Test
   void hitIntoRaisedShieldFromBehindCountsAsBypass() {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.attack(1, B, 3, true, false).hurt(1.01, B);
     var a = FightAnalytics.of(s.finish(2));
     assertEquals(1, a.shields.bypassed());
@@ -229,7 +229,7 @@ class CombatIntelligenceTest {
 
   @Test
   void serverCritAnimationCorrelatesWithHit() {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.hit(1).crit(1.02, "opponent");
     s.hit(2);
     var f = s.finish(3);
@@ -241,7 +241,7 @@ class CombatIntelligenceTest {
 
   @Test
   void jumpResetClassificationPerIncomingHit() {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.hit(.5);
     s.incoming(1).jump(1.01); // same tick
     s.incoming(2).jump(2.12); // +2 ticks
@@ -267,7 +267,7 @@ class CombatIntelligenceTest {
 
   @Test
   void damageAndKnockbackObservedWithinTicks() {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.hit(.5).health(.6, 20);
     s.incoming(1).velocity(1.01, .3, .4).health(1.06, 16.5);
     var a = FightAnalytics.of(s.finish(2));
@@ -279,7 +279,7 @@ class CombatIntelligenceTest {
 
   @Test
   void healthDropWithoutDamageEventMarksIncomplete() {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.hit(.5).health(.6, 20).health(1.5, 17);
     var a = FightAnalytics.of(s.finish(2));
     assertEquals(1, a.unexplainedHealthDrops);
@@ -287,7 +287,7 @@ class CombatIntelligenceTest {
 
   @Test
   void experimentalJumpEffectNeedsThreeSamplesPerGroup() {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.hit(.2);
     for (int i = 0; i < 4; i++) {
       double t = 1 + i * 2;
@@ -304,7 +304,7 @@ class CombatIntelligenceTest {
 
   @Test
   void reachWindowAndPerWeaponSummary() {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.hit(1, 2.95).hit(1.6, 3.06).hit(2.2, 3.07).hit(2.8, 2.5);
     var a = FightAnalytics.of(s.finish(4));
     var r = a.reach;
@@ -330,7 +330,7 @@ class CombatIntelligenceTest {
     u.attack("sword", 0, 12.5, 1);
     var r = u.attack("sword", 13, 12.5, 1);
     assertEquals(AttackTiming.Grade.PERFECT, r.grade());
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.emit(
         1,
         dev.kwamster.combat.events.CombatEvent.Kind.ATTACK,
@@ -352,7 +352,7 @@ class CombatIntelligenceTest {
 
   @Test
   void aimSamplesKeepRawCoordinatesAndFace() {
-    var s = new Sim();
+    var s = new Sim("unconfigured.test");
     s.hit(1);
     var a = FightAnalytics.of(s.finish(2));
     var sample = a.aim.samples().getFirst();

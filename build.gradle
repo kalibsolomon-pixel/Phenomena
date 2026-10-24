@@ -77,3 +77,21 @@ tasks.register('benchmarkRecording', JavaExec) {
     mainClass = 'dev.kwamster.RecordingBenchmark'
     javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
 }
+
+tasks.register('benchmarkCapture', JavaExec) {
+    group = 'verification'
+    description = 'Measure configured capture, rule matching, diagnostics and a long multi-round match'
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'dev.kwamster.CaptureBenchmark'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+}
+
+tasks.register('replayCapturedEvidence', JavaExec) {
+    group = 'verification'
+    description = 'Replay ignored private six-server evidence prepared by the extraction script'
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'dev.kwamster.ReplayCapturedEvidence'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+}

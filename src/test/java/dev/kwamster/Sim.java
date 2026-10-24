@@ -23,6 +23,11 @@ final class Sim {
   private long seq;
 
   Sim() {
+    this("minemen.club");
+  }
+
+  Sim(String host) {
+    this.host = host;
     engine =
         new CombatEngine(
             config,
