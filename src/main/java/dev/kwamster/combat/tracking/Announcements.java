@@ -16,6 +16,7 @@ public final class Announcements {
     DISGUISED_CHAT,
     OVERLAY,
     TITLE,
+    SUBTITLE,
     UNCERTAIN
   }
 
@@ -69,6 +70,10 @@ public final class Announcements {
   }
 
   public interface Rules {
+    default ServerCompatibility.Adapter metadata() {
+      return ServerCompatibility.unknown();
+    }
+
     boolean supports(String host);
 
     Optional<Message> parse(String original, String normalized, Origin origin);
@@ -149,9 +154,13 @@ public final class Announcements {
     RULES.add(rules);
   }
 
+  public static List<ServerCompatibility.Adapter> adapters() {
+    return RULES.stream().map(Rules::metadata).toList();
+  }
+
   public static Optional<Message> interpret(String host, String original, Origin origin) {
     if (original == null || original.length() > 4096) return Optional.empty();
-    if (origin == Origin.TITLE) {
+    if (origin == Origin.TITLE || origin == Origin.SUBTITLE) {
       String text = normalize(original);
       return text.isEmpty() || text.length() > 160
           ? Optional.empty()
@@ -224,7 +233,8 @@ public final class Announcements {
 
   static boolean hostIs(String host, String... domains) {
     if (host == null) return false;
-    String h = host.toLowerCase(Locale.ROOT).replaceFirst(":\\d+$", "");
+    String h =
+        host.strip().toLowerCase(Locale.ROOT).replaceFirst(":\\d+$", "").replaceFirst("\\.$", "");
     for (String d : domains) if (h.equals(d) || h.endsWith("." + d)) return true;
     return false;
   }
@@ -289,6 +299,10 @@ public final class Announcements {
   }
 
   private record Minemen() implements Rules {
+    public ServerCompatibility.Adapter metadata() {
+      return ServerCompatibility.MINEMEN;
+    }
+
     public boolean supports(String host) {
       return hostIs(host, "minemen.net", "minemen.club");
     }
@@ -337,6 +351,10 @@ public final class Announcements {
   }
 
   private record Pvphq() implements Rules {
+    public ServerCompatibility.Adapter metadata() {
+      return ServerCompatibility.PVPHQ;
+    }
+
     public boolean supports(String host) {
       return hostIs(host, "pvphq.com");
     }

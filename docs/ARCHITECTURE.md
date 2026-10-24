@@ -120,3 +120,10 @@ Six primary tabs with one level of sections:
 ### Report
 
 Payload format 4 adds `resolution`, `interpretations`, `combos` (marks, streaks, exchanges), `dominance` (values, one-letter states, summary, model constants), `shields`, `incomingDetail`, `timingSamples`, `attemptOutcomes`, `reach`, `aim`, `jumpEffect` and `boundaries`. The viewer tabs are Overview, Offense, Defense, Fight Flow and Timeline. Shared copies redact resolution notes the same way as announcement text.
+
+
+## 0.1.4 recording controller and adapter inventory
+
+`recording.RecordingController` owns parent recording state and delegates exchange measurements to the existing `CombatEngine`. `ClientCapture` routes context/events/announcements through the controller. Engine completion becomes either an ordinary automatic recording or a nested manual exchange. Commands and Overview use the same controller. A manual session includes raw observations, participants, nested exchanges/results, announcement boundaries, explicit Start metadata and a termination reason. Session-wide combos/dominance are unavailable; scope selectors use independent exchange payloads.
+
+`SessionRecovery` queues atomic checkpoints on `FightStore`'s bounded worker. Final checkpoint precedes `AutoReports.finalized`; startup recovers by UUID before normal receipt recovery. Server adapter metadata has ID/version, capabilities and evidence provenance; `Announcements.Rules` remains independent of combat measurement. `Diagnostics` is opt-in, captures relevant packet surfaces/lifecycle events and exports local redacted bundles. Full transitions and limits: [0.1.4](0.1.4.md). Evidence workflow: [server compatibility](SERVER_COMPATIBILITY.md).

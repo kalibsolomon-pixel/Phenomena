@@ -28,7 +28,7 @@ public final class KwamsterGameTest implements FabricClientGameTest {
   }
 
   /** Clicks a visible dashboard widget by its label through the real mouse path. */
-  private static void click(ClientGameTestContext ctx, String label) {
+  static void click(ClientGameTestContext ctx, String label) {
     double[] at =
         ctx.computeOnClient(
             mc -> {
@@ -806,7 +806,9 @@ public final class KwamsterGameTest implements FabricClientGameTest {
                 "one-name result remains inferred");
           });
       await(ctx);
+      ManualClientTest.exercise(ctx, world);
     }
+    ManualClientTest.afterDisconnect(ctx);
     SystemOpener.setLauncher(null);
   }
 }

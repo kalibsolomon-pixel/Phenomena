@@ -6,6 +6,7 @@ import dev.kwamster.config.*;
 import dev.kwamster.feedback.FeedbackController;
 import dev.kwamster.gui.screens.KwamsterScreen;
 import dev.kwamster.hud.CombatHud;
+import dev.kwamster.recording.*;
 import dev.kwamster.recording.storage.*;
 import java.nio.file.*;
 import java.util.*;
@@ -28,6 +29,9 @@ public final class KwamsterClient implements ClientModInitializer {
   public static KeyMapping openKey;
   public static FightStore store;
   public static AutoReports autoReports;
+  public static RecordingController recording;
+  public static SessionRecovery recovery;
+  public static Diagnostics diagnostics;
   public static Path dataDir;
   public static String status = "Local by default / K opens KWAMSTER";
   public static final List<FightRecord> history = new ArrayList<>();
@@ -63,12 +67,33 @@ public final class KwamsterClient implements ClientModInitializer {
             dataDir,
             error -> {
               LOG.info("{}", error);
-              Minecraft.getInstance().execute(() -> status = error);
+              Minecraft.getInstance()
+                  .execute(
+                      () -> {
+                        status = error;
+                        if (error.contains("ready")
+                            || error.contains("failed")
+                            || error.contains("exhausted")) notice(error);
+                      });
             });
+    recovery = new SessionRecovery(store, dataDir, KwamsterClient::notice);
+    diagnostics = new Diagnostics(store, dataDir, KwamsterClient::notice);
+    diagnostics.enabled(config.diagnosticCapture);
+    store.submit(
+        () -> {
+          try {
+            AtomicJson.write(
+                dataDir.resolve("server-compatibility.json"), Announcements.adapters());
+          } catch (java.io.IOException ex) {
+            notice("Compatibility inventory could not be saved: " + ex.getMessage());
+          }
+        });
     installEngine();
+    RecordingCommands.register();
     var recoveryOptions = reportOptions();
     store.load(
-        fights -> {
+        loaded -> {
+          var fights = recovery.recover(loaded);
           autoReports.recover(fights, recoveryOptions);
           Minecraft.getInstance()
               .execute(
@@ -93,6 +118,7 @@ public final class KwamsterClient implements ClientModInitializer {
         client -> {
           ClientCapture.tick();
           autoReports.tick(ClientCapture.now());
+          diagnostics.tick(ClientCapture.now());
           // The persistent HUD is dormant: tracking never depends on it.
           if (config.hudOverlay) CombatHud.tick();
           while (openKey.consumeClick())
@@ -106,7 +132,8 @@ public final class KwamsterClient implements ClientModInitializer {
         });
     ClientLifecycleEvents.CLIENT_STOPPING.register(
         client -> {
-          engine.finish(ClientCapture.now(), FightRecord.Outcome.INTERRUPTED, "Client stopped");
+          recording.shutdown(ClientCapture.now(), ClientCapture.clientTick(), "Client stopped");
+          diagnostics.flush();
           autoReports.pump();
           saveConfig();
           store.close();
@@ -118,29 +145,49 @@ public final class KwamsterClient implements ClientModInitializer {
     engine =
         new CombatEngine(
             config,
-            fight -> {
-              history.addFirst(fight);
-              trimHistory();
-              historyChanged();
-              CombatHud.summaryAt = ClientCapture.now();
-              if (config.recording) autoReports.finalized(fight, reportOptions());
-              if (config.chatSummary)
+            fight -> recording.automaticFinished(fight),
+            FeedbackController::hit,
+            ClientCapture::label);
+    recording =
+        new RecordingController(
+            config,
+            engine,
+            KwamsterClient::completed,
+            recovery::checkpoint,
+            KwamsterClient::notice,
+            ClientCapture::label);
+    recording.exportStatus(autoReports::availability);
+  }
+
+  public static void notice(String message) {
+    LOG.info("{}", message);
+    Minecraft.getInstance()
+        .execute(
+            () -> {
+              status = message;
+              if (Minecraft.getInstance().player != null)
                 Minecraft.getInstance()
                     .gui
                     .getChat()
-                    .addMessage(
-                        Component.literal(
-                            String.format(
-                                Locale.ROOT,
-                                "[KWAMSTER] %s / %d hits / %d attacks / %.0f%% / %d uncertain",
-                                fight.outcome(),
-                                fight.statistics().hits,
-                                fight.statistics().attempts,
-                                fight.statistics().accuracy(),
-                                fight.statistics().uncertain)));
-            },
-            FeedbackController::hit,
-            ClientCapture::label);
+                    .addMessage(Component.literal("[KWAMSTER] " + message));
+            });
+  }
+
+  private static void completed(FightRecord fight) {
+    history.addFirst(fight);
+    trimHistory();
+    historyChanged();
+    CombatHud.summaryAt = ClientCapture.now();
+    diagnostics.outcome(fight);
+    if (fight.manual() || config.recording) autoReports.finalized(fight, reportOptions());
+    if (config.chatSummary && !fight.manual())
+      notice(
+          fight.resolution().classification().label
+              + " / "
+              + fight.statistics().hits
+              + " hits / "
+              + fight.statistics().attempts
+              + " attacks");
   }
 
   public static dev.kwamster.sharing.ReportExporter.Options reportOptions() {
@@ -159,8 +206,10 @@ public final class KwamsterClient implements ClientModInitializer {
   }
 
   public static void resetConfig() {
-    engine.finish(ClientCapture.now(), FightRecord.Outcome.INTERRUPTED, "Configuration reset");
+    if (recording != null)
+      recording.shutdown(ClientCapture.now(), ClientCapture.clientTick(), "Configuration reset");
     config = new Config();
+    if (diagnostics != null) diagnostics.enabled(false);
     installEngine();
     saveConfig();
   }

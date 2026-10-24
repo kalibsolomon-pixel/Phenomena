@@ -111,29 +111,55 @@ public final class ClientCapture {
     return mc.getCurrentServer() == null ? "singleplayer" : mc.getCurrentServer().ip;
   }
 
-  public static void systemMessage(String text, boolean overlay) {
-    var mc = Minecraft.getInstance();
-    if (mc.player == null || KwamsterClient.engine == null) return;
-    String host = host(mc);
-    Announcements.interpret(
-            host, text, overlay ? Announcements.Origin.OVERLAY : Announcements.Origin.SYSTEM)
-        .ifPresent(
-            m ->
-                KwamsterClient.engine.announcement(
-                    host, mc.player.getName().getString(), m, now()));
+  public static String currentHost() {
+    return host(Minecraft.getInstance());
   }
 
-  /** Title text: kept as non-authoritative local evidence while engaged. */
-  public static void title(String text) {
+  public static String currentWorld() {
     var mc = Minecraft.getInstance();
-    if (mc.player == null || KwamsterClient.engine == null || !KwamsterClient.engine.engaged())
-      return;
+    return mc.level == null ? null : mc.level.dimension().identifier().toString();
+  }
+
+  public static long clientTick() {
+    return clientTick;
+  }
+
+  public static java.util.List<String> knownNames() {
+    var names = new java.util.ArrayList<>(LABELS.values());
+    var mc = Minecraft.getInstance();
+    if (mc.player != null) names.add(mc.player.getName().getString());
+    if (mc.getConnection() != null)
+      mc.getConnection().getOnlinePlayers().forEach(p -> names.add(p.getProfile().name()));
+    return names;
+  }
+
+  public static void systemMessage(String text, boolean overlay) {
+    announcement(text, overlay ? Announcements.Origin.OVERLAY : Announcements.Origin.SYSTEM);
+  }
+
+  public static void title(String text) {
+    announcement(text, Announcements.Origin.TITLE);
+  }
+
+  public static void subtitle(String text) {
+    announcement(text, Announcements.Origin.SUBTITLE);
+  }
+
+  private static void announcement(String text, Announcements.Origin origin) {
+    var mc = Minecraft.getInstance();
+    if (mc.player == null || KwamsterClient.recording == null) return;
     String host = host(mc);
-    Announcements.interpret(host, text, Announcements.Origin.TITLE)
-        .ifPresent(
-            m ->
-                KwamsterClient.engine.announcement(
-                    host, mc.player.getName().getString(), m, now()));
+    long now = now();
+    var m = Announcements.interpret(host, text, origin).orElse(null);
+    if (m != null)
+      KwamsterClient.recording.announcement(host, mc.player.getName().getString(), m, now);
+    KwamsterClient.diagnostics.announcement(
+        host,
+        text,
+        origin,
+        m,
+        now,
+        m == null ? "No observed rule" : KwamsterClient.engine.evidenceDecision(now));
   }
 
   public static String label(String uuid) {
@@ -165,10 +191,13 @@ public final class ClientCapture {
       Attack a,
       String detail,
       Context context) {
-    if (KwamsterClient.engine != null)
-      KwamsterClient.engine.accept(
+    if (KwamsterClient.recording != null) {
+      var event =
           new CombatEvent(
-              ++sequence, now(), kind, actor, target, c, a, detail, clientTick, context));
+              ++sequence, now(), kind, actor, target, c, a, detail, clientTick, context);
+      KwamsterClient.diagnostics.event(currentHost(), event);
+      KwamsterClient.recording.accept(event);
+    }
   }
 
   public static void emptySwing() {
@@ -193,7 +222,7 @@ public final class ClientCapture {
     if (player != mc.player
         || !(target instanceof LivingEntity)
         || player.isSpectator()
-        || !KwamsterClient.config.tracking) return;
+        || (!KwamsterClient.config.tracking && !KwamsterClient.recording.manual())) return;
     remember(target);
     if (!KwamsterClient.engine.acceptsTarget(
         target.getUUID().toString(), label(target.getUUID().toString()))) return;
@@ -292,7 +321,9 @@ public final class ClientCapture {
   /** Called at TAIL, after vanilla's main-thread packet dispatch guard. Reads only. */
   public static void damage(ClientboundDamageEventPacket packet) {
     var mc = Minecraft.getInstance();
-    if (mc.player == null || mc.level == null || !KwamsterClient.config.tracking) return;
+    if (mc.player == null
+        || mc.level == null
+        || (!KwamsterClient.config.tracking && !KwamsterClient.recording.manual())) return;
     var target = mc.level.getEntity(packet.entityId());
     var cause = mc.level.getEntity(packet.sourceCauseId());
     if (target == null) return;
@@ -438,7 +469,7 @@ public final class ClientCapture {
       trackedTarget = null;
       lastLevel = null;
       lastPosition = null;
-      KwamsterClient.engine.tick(now());
+      KwamsterClient.recording.tick(now(), clientTick);
       return;
     }
     if (connected && lastLevel != mc.level) {
@@ -449,14 +480,15 @@ public final class ClientCapture {
       removedTarget = null;
       lastPosition = null;
     }
-    KwamsterClient.engine.context(host(mc), mc.player.getName().getString());
+    KwamsterClient.recording.context(
+        host(mc), mc.player.getName().getString(), currentWorld(), now(), clientTick);
     lastLevel = mc.level;
     if (!connected) {
       wasGround = mc.player.onGround();
       sprinting = mc.player.isSprinting();
       connected = true;
     }
-    if (KwamsterClient.config.tracking) {
+    if (KwamsterClient.config.tracking || KwamsterClient.recording.manual()) {
       var engine = KwamsterClient.engine;
       if (sprinting != mc.player.isSprinting()) {
         sprinting = mc.player.isSprinting();
@@ -536,6 +568,6 @@ public final class ClientCapture {
       }
       lastPosition = position;
     }
-    KwamsterClient.engine.tick(now());
+    KwamsterClient.recording.tick(now(), clientTick);
   }
 }

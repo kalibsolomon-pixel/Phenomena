@@ -149,4 +149,47 @@ public final class Statistics {
     return dev.kwamster.recording.storage.AtomicJson.GSON.fromJson(
         dev.kwamster.recording.storage.AtomicJson.GSON.toJson(this), Statistics.class);
   }
+
+  /** Session totals sum observations; streaks use the maximum of independent exchanges. */
+  public void add(Statistics s) {
+    attempts += s.attempts;
+    hits += s.hits;
+    emptyMisses += s.emptyMisses;
+    uncertain += s.uncertain;
+    contacts += s.contacts;
+    criticalConditions += s.criticalConditions;
+    sprintHits += s.sprintHits;
+    jumpCandidates += s.jumpCandidates;
+    incoming += s.incoming;
+    perfectReachHits += s.perfectReachHits;
+    unattributedIncoming += s.unattributedIncoming;
+    thirdPartyIncoming += s.thirdPartyIncoming;
+    attacksIntoShield += s.attacksIntoShield;
+    shieldBlocks += s.shieldBlocks;
+    estimatedShieldBlocks += s.estimatedShieldBlocks;
+    shieldDisables += s.shieldDisables;
+    localShieldBlocks += s.localShieldBlocks;
+    localShieldDisabled += s.localShieldDisabled;
+    serverCrits += s.serverCrits;
+    opponentCrits += s.opponentCrits;
+    comboCount += s.comboCount;
+    comboHits += s.comboHits;
+    damageTaken += s.damageTaken;
+    longestCombo = Math.max(longestCombo, s.longestCombo);
+    longestOpponentCombo = Math.max(longestOpponentCombo, s.longestOpponentCombo);
+    longestUnanswered = Math.max(longestUnanswered, s.longestUnanswered);
+    reachSum += s.reachSum;
+    reachCount += s.reachCount;
+    maxReach = Math.max(maxReach, s.maxReach);
+    cooldownSum += s.cooldownSum;
+    intervalSum += s.intervalSum;
+    intervalSquared += s.intervalSquared;
+    intervalCount += s.intervalCount;
+    centerAim += s.centerAim;
+    edgeAim += s.edgeAim;
+    highAim += s.highAim;
+    lowAim += s.lowAim;
+    for (int i = 0; i < reachDistribution.length; i++)
+      reachDistribution[i] += s.reachDistribution[i];
+  }
 }

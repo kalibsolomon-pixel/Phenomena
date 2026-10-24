@@ -58,6 +58,24 @@ final class FlowPage implements KwamsterScreen.Page {
     s.state.focus(s.state.focus, n);
     var f = a.timelines.get(n - 1 - s.state.focus);
     focusRow(c, f, n);
+    if (f.fight.manual()) {
+      c.note(
+          "Manual session: select a participant and exchange in the browser report for combos and"
+              + " dominance. Session-wide dominance is unavailable.");
+      for (var ex : f.fight.session().exchanges())
+        c.text(
+            opponent(ex.opponentLabel(), ex.opponent())
+                + " / "
+                + duration(ex.durationNanos())
+                + " / "
+                + ex.resolution().classification().label);
+      c.row(
+          new KButton(
+                  "View session in browser",
+                  () -> dev.kwamster.gui.FightActions.viewInBrowser(f.fight))
+              .content());
+      return;
+    }
     switch (s.state.flow) {
       case COMBOS -> combos(c, a, f);
       case DOMINANCE -> dominance(c, a, f);
@@ -280,8 +298,8 @@ final class FlowPage implements KwamsterScreen.Page {
       c.note(
           d.availability == Dominance.Availability.INCOMPLETE
               ? "Incoming-hit attribution was incomplete, so encounter dominance could not be"
-                    + " established confidently. Dotted grey columns mark where unattributed damage"
-                    + " was observed; they are not counted for either player."
+                  + " established confidently. Dotted grey columns mark where unattributed damage"
+                  + " was observed; they are not counted for either player."
               : "Too few confirmed exchanges were observed to estimate encounter dominance.",
           Theme.WARN);
     c.stats(

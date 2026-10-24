@@ -44,6 +44,11 @@ public abstract class PacketListenerMixin {
     ClientCapture.combatKill(p);
   }
 
+  @Inject(method = "setSubtitleText", at = @At("TAIL"))
+  private void kwamster$subtitle(ClientboundSetSubtitleTextPacket p, CallbackInfo ci) {
+    ClientCapture.subtitle(p.text().getString());
+  }
+
   @Inject(method = "setTitleText", at = @At("TAIL"))
   private void kwamster$title(ClientboundSetTitleTextPacket p, CallbackInfo ci) {
     ClientCapture.title(p.text().getString());

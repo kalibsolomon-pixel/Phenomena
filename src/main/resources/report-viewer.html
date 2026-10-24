@@ -97,6 +97,7 @@ footer{color:var(--dim);font-size:12px;padding-top:14px}
 <header class="top"><div class="wrap"><span class="brand">KWAMSTER</span><span class="sub">Fight report</span><span class="badges" id="badges"></span></div></header>
 <div class="wrap">
 <div class="ident"><h1 id="title">Fight</h1><p id="subtitle"></p></div>
+<div id="session-controls"></div>
 <nav class="tabs" role="tablist" aria-label="Report sections" id="tabs"></nav>
 <main class="panel">
 <section role="tabpanel" id="p-overview" aria-labelledby="t-overview"></section>
@@ -111,7 +112,12 @@ footer{color:var(--dim);font-size:12px;padding-top:14px}
 <script>
 'use strict';
 (function(){
-const P=JSON.parse(document.getElementById('data').textContent);
+const ROOT=JSON.parse(document.getElementById('data').textContent);
+let renderAbort;
+function render(P){
+if(renderAbort)renderAbort.abort();
+renderAbort=new AbortController();const signal=renderAbort.signal;
+for(const id of ['tabs','badges','p-overview','p-offense','p-defense','p-flow','p-timeline'])document.getElementById(id).replaceChildren();
 const F=P.fight, D=P.derived, S=D.summary, E=F.events||[];
 const base=F.matchEvidence?.timelineStartNanos??(E.length?E[0].nanoTime:0), dur=Math.max(S.duration||0,.001);
 const NS='http://www.w3.org/2000/svg';
@@ -156,9 +162,9 @@ for(const b of ['Offline',P.anonymized?'Anonymized':'Not anonymized',P.motionInc
 const TABS=[['overview','Overview'],['offense','Offense'],['defense','Defense'],['flow','Fight Flow'],['timeline','Timeline']];
 const built={};
 for(const[id,name]of TABS){const b=el('button',{role:'tab',id:'t-'+id,'aria-controls':'p-'+id,'aria-selected':'false',tabindex:'-1'},name);b.onclick=()=>show(id,true);$('tabs').append(b);}
-$('tabs').addEventListener('keydown',e=>{const i=TABS.findIndex(t=>$('t-'+t[0]).getAttribute('aria-selected')==='true');let j=i;if(e.key==='ArrowRight')j=(i+1)%TABS.length;else if(e.key==='ArrowLeft')j=(i+TABS.length-1)%TABS.length;else if(e.key==='Home')j=0;else if(e.key==='End')j=TABS.length-1;else return;e.preventDefault();show(TABS[j][0],true);$('t-'+TABS[j][0]).focus();});
+$('tabs').onkeydown=e=>{const i=TABS.findIndex(t=>$('t-'+t[0]).getAttribute('aria-selected')==='true');let j=i;if(e.key==='ArrowRight')j=(i+1)%TABS.length;else if(e.key==='ArrowLeft')j=(i+TABS.length-1)%TABS.length;else if(e.key==='Home')j=0;else if(e.key==='End')j=TABS.length-1;else return;e.preventDefault();show(TABS[j][0],true);$('t-'+TABS[j][0]).focus();};
 function show(id,push){if(!TABS.some(t=>t[0]===id))id='overview';for(const[t]of TABS){const on=t===id;$('t-'+t).setAttribute('aria-selected',on);$('t-'+t).tabIndex=on?0:-1;$('p-'+t).classList.toggle('on',on);}if(!built[id]){built[id]=true;BUILD[id]($('p-'+id));}if(push&&location.hash!=='#'+id){try{history.replaceState(null,'','#'+id);}catch(e){}}}
-window.addEventListener('hashchange',()=>show(location.hash.slice(1)));
+window.onhashchange=()=>show(location.hash.slice(1));
 
 // ---- generic charts ----
 function tip(box){const t=el('div',{class:'tip'});box.append(t);return t;}
@@ -350,6 +356,14 @@ function aimView(parent){
 // ---- tab builders ----
 const BUILD={
 overview(p){
+  if(F.session) {
+    h2(p,'Manual recording','session-level outcome is independent of exchange results');
+    note(p,'Server: '+(F.matchEvidence?.server||'Hidden for privacy')+' · '+F.session.termination);
+    facts(p,F.session.participants.map(x=>'Participant: '+(x.label||x.id)));
+    table(p,['Exchange','Opponent','Result','Duration'],F.session.exchanges.map((x,i)=>[String(i+1),x.opponentLabel||x.opponent,x.resolution.classification,s2(x.durationNanos/1e9)]));
+    h2(p,'Round and match announcement timeline');
+    table(p,['Time','Kind','Rule','Evidence'],F.session.announcements.map(x=>[s2((x.nanoTime-base)/1e9),x.kind,x.rule,x.text]));
+  }
   h2(p,'Result');
   const establishing=R.evidenceIndex!=null?(F.matchEvidence?.entries||[])[R.evidenceIndex]:null;
   cards(p,[[ 'Result',R.label,(R.source||'')+(R.derived?' · pre-0.1.3':''),null,'result'],['Evidence confidence',cap(R.confidence),'scope: '+cap(R.scope||'')],['Duration',num(dur,1)+' s',E.length+' events'],[label('accuracy','Hit accuracy'),pct(S.accuracy),S.hits+' / '+(S.accuracyDenominator??S.attempts)+' attempts','accuracy'],[label('reachWithin','Reach in target window'),D.reach&&D.reach.eligible?D.reach.within+' / '+D.reach.eligible:NONE,pct(D.reach?.withinPercent),'reachWithin'],[label('longestCombo','Longest combo'),String(S.longestCombo),(S.comboCount??0)+' combos','longestCombo'],[label('dominanceShare','Advantage share'),dom&&dom.availability==='AVAILABLE'?pct(dom.localShare):NONE,dom?dom.availabilityLabel:'unavailable','dominanceShare']]);
@@ -414,6 +428,8 @@ defense(p){
   if(!V3)unavailable(p,'health or knockback observations');
 },
 flow(p){
+  if(F.session){ h2(p,'Session exchanges');note(p,'Session-wide dominance and combo timelines are unavailable. Choose a participant and exchange above to inspect its own evidence, combos, dominance, shields, reach, aim, timing and jump resets.');
+    table(p,['Exchange','Participant','Result','Hits','Duration'],F.session.exchanges.map((x,i)=>[String(i+1),x.opponentLabel||x.opponent,x.resolution.classification,String(x.statistics.hits),s2(x.durationNanos/1e9)])); return; }
   sections(p,[['f-combo','Combos'],['f-dom','Dominance'],['f-ex','Exchanges']]);
   h2(p,'Combos','consecutive confirmed hits without a confirmed return hit','f-combo');
   cards(p,[[label('longestCombo','Longest combo'),String(S.longestCombo),'your best','longestCombo'],[label('comboCount','Combos'),String(S.comboCount??0),'two or more hits','comboCount'],[label('averageCombo','Average combo'),num(S.averageLocalCombo,2),'mean length','averageCombo'],[label('comboHits','Hits in combos'),String(S.comboHits??0),'of '+S.hits+' hits','comboHits'],[label('longestUnanswered','Longest unanswered streak'),String(S.longestUnanswered??S.longestCombo),'ignores gaps','longestUnanswered'],[label('longestOpponentCombo','Longest opponent combo'),S.opponentComboAvailability==='Unavailable'?NONE:String(S.longestOpponentCombo??0),cap(S.opponentComboAvailability||'observed'),'longestOpponentCombo']]);
@@ -486,13 +502,13 @@ timeline(p){
     now.replaceChildren(card('Hits so far',String(hs.length),at+' attempts'),card('Attributed incoming',String(inc),'opponent hits'),card('Current streak',String(run),'your unanswered hits'),card('Dominance',dv==null?NONE:num(dv,2),dom?{L:'you',O:'opponent',N:'neutral',C:'incomplete',I:'no evidence'}[(dom.states||'')[k2]]||'':'unavailable','dominance'));
     for(const m of marks)m.setAttribute('opacity',+m.dataset.t<=T?1:.35);}
   function setT(v){T=Math.max(0,Math.min(dur,v));render();}
-  function frame(ts){if(!playing)return;if(last)setT(T+(ts-last)/1000*Number(speed.value));last=ts;if(T>=dur){toggle(false);return;}requestAnimationFrame(frame);}
+  function frame(ts){if(!playing||signal.aborted)return;if(last)setT(T+(ts-last)/1000*Number(speed.value));last=ts;if(T>=dur){toggle(false);return;}requestAnimationFrame(frame);}
   function toggle(on){playing=on;play.textContent=on?'Pause':'Play';play.setAttribute('aria-label',on?'Pause':'Play');last=0;if(on){if(T>=dur)T=0;requestAnimationFrame(frame);}}
   play.onclick=()=>toggle(!playing);
   next.onclick=()=>{const n=times.find(x=>x>T+1e-6);setT(n!=null?n:dur);};
   prev.onclick=()=>{const c=[...times].reverse().find(x=>x<T-1e-6);setT(c!=null?c:0);};
   seek.oninput=()=>setT(Number(seek.value)/1000*dur);filter.onchange=render;
-  document.addEventListener('keydown',e=>{if(!$('p-timeline').classList.contains('on')||e.target.tagName==='SELECT'||e.target.tagName==='INPUT')return;if(e.key===' '){e.preventDefault();toggle(!playing);}else if(e.key==='.')next.click();else if(e.key===',')prev.click();});
+  document.addEventListener('keydown',e=>{if(!$('p-timeline').classList.contains('on')||e.target.tagName==='SELECT'||e.target.tagName==='INPUT')return;if(e.key===' '){e.preventDefault();toggle(!playing);}else if(e.key==='.')next.click();else if(e.key===',')prev.click();},{signal});
   render();
   note(p,'Playback advances through the recorded timestamps at the chosen speed. It annotates what KWAMSTER observed; it does not reconstruct positions or the Minecraft world. Space plays or pauses; comma and period step between events.');
 }};
@@ -503,6 +519,21 @@ function shieldTimeline(parent){const ev=shields.events||[];if(!ev.length)return
   for(const e of ev){const y=e.subject==='local'?36:14,x=tx(e.time);const n=e.type==='ESTIMATED_BLOCK'?sv('rect',{x:x-4,y:y-4,width:8,height:8,fill:'none',stroke:color[e.type],'stroke-width':2}):sv('rect',{x:x-4,y:y-4,width:8,height:8,fill:color[e.type]||'#9aa6ac'});hoverTip(n,t,box,cap(e.type)+' at '+num(e.time,2)+' s'+(e.weapon?' · '+item(e.weapon):''));svg.append(n);}
   timeAxis(svg,L,R,48,W,dur);legend(parent,[{name:'Block',color:'var(--good)'},{name:'Disable',color:'var(--warn)'},{name:'Estimated block',color:'#2f7f63',hollow:true}]);}
 show(location.hash.slice(1)||'overview');
+}
+if(ROOT.scopes){
+  const host=document.getElementById('session-controls');host.className='controls';
+  const participant=document.createElement('select');participant.setAttribute('aria-label','Participant filter');
+  const exchange=document.createElement('select');exchange.setAttribute('aria-label','Exchange filter');
+  function option(s,value,text){const o=document.createElement('option');o.value=value;o.textContent=text;s.append(o);}
+  option(participant,'','All participants');
+  for(const p of ROOT.fight.session.participants)option(participant,p.id,p.label||p.id);
+  host.append(document.createTextNode('Participant '),participant,document.createTextNode('Exchange '),exchange);
+  function refresh(){exchange.replaceChildren();if(!participant.value)option(exchange,'','Entire manual session');
+    ROOT.scopes.forEach((p,i)=>{if(!participant.value||p.fight.opponent===participant.value)option(exchange,String(i),'Exchange '+(i+1)+' vs '+(p.opponentLabel||p.fight.opponent||'Unknown'));});
+    if(!exchange.options.length){option(exchange,'','No attributed exchange; session overview');}
+    render(exchange.value===''?ROOT:ROOT.scopes[Number(exchange.value)]);}
+  participant.onchange=refresh;exchange.onchange=()=>render(exchange.value===''?ROOT:ROOT.scopes[Number(exchange.value)]);refresh();
+}else render(ROOT);
 })();
 </script>
 </body>

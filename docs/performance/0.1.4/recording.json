@@ -1,0 +1,29 @@
+{
+  "automatic": {
+    "limits": "Synthetic; checkpoint copies included; disk and HTML export excluded from event timing",
+    "eventsPerRun": 10000,
+    "nsPerEvent": [
+      1091.18,
+      820.21,
+      668.17
+    ]
+  },
+  "manual": {
+    "limits": "Synthetic; checkpoint copies included; disk and HTML export excluded from event timing",
+    "eventsPerRun": 10000,
+    "nsPerEvent": [
+      4582.33,
+      3459.12,
+      3055.56
+    ]
+  },
+  "manual-diagnostics": {
+    "limits": "Synthetic; checkpoint copies included; disk and HTML export excluded from event timing",
+    "eventsPerRun": 10000,
+    "nsPerEvent": [
+      2363.64,
+      1646.74,
+      1593.95
+    ]
+  }
+}

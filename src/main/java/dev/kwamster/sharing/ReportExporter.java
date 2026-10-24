@@ -22,7 +22,7 @@ import java.util.*;
  */
 public final class ReportExporter {
   public static final String PLACEHOLDER = "__KWAMSTER_PAYLOAD__";
-  public static final int FORMAT_VERSION = 4;
+  public static final int FORMAT_VERSION = 5;
   private static final Gson COMPACT = new GsonBuilder().disableHtmlEscaping().create();
 
   public record Options(boolean anonymize, boolean includeMotion, boolean reducedMotion) {
@@ -56,6 +56,29 @@ public final class ReportExporter {
 
   /** Applies privacy and size options without mutating the recording. */
   public static FightRecord prepare(FightRecord f, Options options) {
+    return prepare(f, options, aliases(f));
+  }
+
+  private static Map<String, String> aliases(FightRecord f) {
+    Map<String, String> map = new LinkedHashMap<>();
+    if (f.session() != null)
+      for (var p : f.session().participants()) {
+        String alias = "Participant " + (1 + map.values().stream().distinct().count());
+        if (p.id() != null) map.put(p.id(), alias);
+        if (p.label() != null) map.put(p.label(), alias);
+      }
+    if (f.opponent() != null) map.putIfAbsent(f.opponent(), "Opponent");
+    if (f.opponentLabel() != null) map.putIfAbsent(f.opponentLabel(), "Opponent");
+    return map;
+  }
+
+  private static String identity(String id, Map<String, String> names) {
+    return id == null
+        ? null
+        : "local".equals(id) ? "local" : names.getOrDefault(id, "Other entity");
+  }
+
+  private static FightRecord prepare(FightRecord f, Options options, Map<String, String> names) {
     String opponent = f.opponent();
     List<CombatEvent> events = new ArrayList<>();
     for (var e : f.events()) {
@@ -66,12 +89,13 @@ public final class ReportExporter {
                 e.sequence(),
                 e.nanoTime(),
                 e.kind(),
-                e.actor() == null ? null : "local".equals(e.actor()) ? "local" : "Opponent",
-                e.target() == null ? null : "local".equals(e.target()) ? "local" : "Opponent",
+                identity(e.actor(), names),
+                identity(e.target(), names),
                 e.confidence(),
                 e.attack(),
                 redact(e.detail(), f),
-                e.clientTick());
+                e.clientTick(),
+                e.context());
       events.add(e);
     }
     return new FightRecord(
@@ -80,14 +104,16 @@ public final class ReportExporter {
         f.startEpochMillis(),
         f.endEpochMillis(),
         f.durationNanos(),
-        options.anonymize() && opponent != null ? "Opponent" : opponent,
+        options.anonymize() ? identity(opponent, names) : opponent,
         f.outcome(),
         options.anonymize() ? redact(f.reason(), f) : f.reason(),
         f.statistics(),
         events,
         f.policy(),
         f.evaluations(),
-        options.anonymize() ? null : f.opponentLabel(),
+        options.anonymize()
+            ? (f.manual() ? null : identity(opponent != null ? opponent : f.opponentLabel(), names))
+            : f.opponentLabel(),
         options.anonymize()
             ? new MatchEvidence(
                 null,
@@ -109,7 +135,40 @@ public final class ReportExporter {
                 f.matchEvidence().matchId(),
                 f.matchEvidence().roundNumber())
             : f.matchEvidence(),
-        options.anonymize() ? redactResolution(f) : f.resolution());
+        options.anonymize() ? redactResolution(f) : f.resolution(),
+        f.session() == null
+            ? null
+            : new dev.kwamster.combat.fights.SessionInfo(
+                f.session().startTick(),
+                f.session().endTick(),
+                options.anonymize() ? null : f.session().world(),
+                options.anonymize()
+                    ? redact(f.session().termination(), f)
+                    : f.session().termination(),
+                f.session().participants().stream()
+                    .map(
+                        p ->
+                            options.anonymize()
+                                ? new dev.kwamster.combat.fights.SessionInfo.Participant(
+                                    identity(p.id(), names), identity(p.id(), names))
+                                : p)
+                    .toList(),
+                f.session().exchanges().stream().map(ex -> prepare(ex, options, names)).toList(),
+                f.session().announcements().stream()
+                    .map(
+                        e ->
+                            options.anonymize()
+                                ? new MatchEvidence.Entry(
+                                    e.nanoTime(),
+                                    e.kind(),
+                                    e.rule(),
+                                    e.origin(),
+                                    "Announcement text redacted",
+                                    e.accepted())
+                                : e)
+                    .toList(),
+                f.session().manualStartEpochMillis(),
+                f.session().manualStartTick()));
   }
 
   private static dev.kwamster.combat.fights.Resolution redactResolution(FightRecord f) {
@@ -135,6 +194,11 @@ public final class ReportExporter {
           f.matchEvidence().localPlayer(),
           f.matchEvidence().server()
         }) if (identity != null && !identity.isEmpty()) text = text.replace(identity, "[redacted]");
+    if (f.session() != null)
+      for (var p : f.session().participants()) {
+        if (p.id() != null && !p.id().isEmpty()) text = text.replace(p.id(), "[redacted]");
+        if (p.label() != null && !p.label().isEmpty()) text = text.replace(p.label(), "[redacted]");
+      }
     return text;
   }
 
@@ -357,7 +421,7 @@ public final class ReportExporter {
     summary.put("unattributedIncoming", a.unattributedIncoming);
     summary.put("thirdPartyIncoming", a.thirdPartyIncoming);
     summary.put("unexplainedHealthDrops", a.unexplainedHealthDrops);
-    boolean v3 = full.schemaVersion() >= FightRecord.SCHEMA;
+    boolean v3 = full.schemaVersion() >= 3;
     summary.put("serverCrits", v3 ? a.serverCrits : null);
     summary.put("damageTaken", v3 ? s.damageTaken : null);
     summary.put("comboCount", a.combos.combos(Combos.Side.LOCAL).size());
@@ -490,6 +554,24 @@ public final class ReportExporter {
     payload.put("metrics", MetricDefs.ALL);
     payload.put("fight", shared);
     payload.put("derived", derived);
+    if (full.manual()) {
+      List<Map<String, Object>> scopes = new ArrayList<>();
+      for (int i = 0; i < full.session().exchanges().size(); i++) {
+        var ex = full.session().exchanges().get(i);
+        var redacted = shared.session().exchanges().get(i);
+        scopes.add(payload(ex, redacted, options));
+      }
+      payload.put("scopes", scopes);
+      derived.put("boundaries", shared.session().announcements());
+      summary.put("comboCount", s.comboCount);
+      summary.put("comboHits", s.comboHits);
+      summary.put("longestOpponentCombo", s.longestOpponentCombo);
+      summary.put("longestUnanswered", s.longestUnanswered);
+      summary.put("attributedIncoming", s.incoming);
+      summary.put("unattributedIncoming", s.unattributedIncoming);
+      summary.put("thirdPartyIncoming", s.thirdPartyIncoming);
+      summary.put("opponentComboAvailability", "Unavailable");
+    }
     return payload;
   }
 }

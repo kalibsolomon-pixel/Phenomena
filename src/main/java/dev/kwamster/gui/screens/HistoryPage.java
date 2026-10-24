@@ -202,7 +202,7 @@ final class HistoryPage implements KwamsterScreen.Page {
     var r = f.resolution();
     c.heading(
         r.classification().label + " / " + duration(f.durationNanos()),
-        opponent(f.opponentLabel(), f.opponent()));
+        f.manual() ? "Manual session" : opponent(f.opponentLabel(), f.opponent()));
     c.text(
         "Established by: "
             + r.source().label
@@ -279,6 +279,18 @@ final class HistoryPage implements KwamsterScreen.Page {
       return;
     }
     var a = DataCache.analytics(full);
+    if (full.manual()) {
+      c.heading("Manual session");
+      c.text(
+          full.session().participants().size()
+              + " participants / "
+              + full.session().exchanges().size()
+              + " exchanges / "
+              + full.session().termination());
+      c.note(
+          "Open the browser report to filter by participant or exchange. Session-wide dominance is"
+              + " unavailable.");
+    }
     var cfg = KwamsterClient.config;
     c.heading("Reach per hit", "seconds into the fight");
     double[] hx = a.hits.stream().mapToDouble(FightAnalytics.Hit::time).toArray();

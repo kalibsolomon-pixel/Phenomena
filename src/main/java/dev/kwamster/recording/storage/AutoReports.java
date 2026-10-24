@@ -171,9 +171,19 @@ public final class AutoReports {
   }
 
   private static String fileDigest(Path p) throws IOException {
-    if (Files.isSymbolicLink(p) || Files.size(p) > 64L * 1024 * 1024)
+    if (Files.isSymbolicLink(p) || Files.size(p) > 2L * 1024 * 1024 * 1024)
       throw new IOException("Unsafe or oversized export");
-    return digest(Files.readString(p));
+    try {
+      var digest = MessageDigest.getInstance("SHA-256");
+      try (var in = Files.newInputStream(p)) {
+        byte[] buffer = new byte[65536];
+        int n;
+        while ((n = in.read(buffer)) != -1) digest.update(buffer, 0, n);
+      }
+      return HexFormat.of().formatHex(digest.digest());
+    } catch (NoSuchAlgorithmException ex) {
+      throw new IllegalStateException(ex);
+    }
   }
 
   private static String digest(String s) {

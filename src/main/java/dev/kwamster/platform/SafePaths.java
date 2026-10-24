@@ -47,6 +47,7 @@ public final class SafePaths {
         STAMP.format(
             java.time.Instant.ofEpochMilli(f.startEpochMillis())
                 .atZone(java.time.ZoneId.systemDefault()));
+    if (f.manual()) return "Manual Session " + when;
     String name = anonymize ? "" : sanitize(f.opponentLabel());
     return name.isEmpty() ? "Fight " + when : "Fight vs " + name + " " + when;
   }

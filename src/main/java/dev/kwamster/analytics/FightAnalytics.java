@@ -244,7 +244,7 @@ public final class FightAnalytics {
             : events.isEmpty() ? 0 : events.getFirst().nanoTime();
     duration = Math.max(f.durationNanos() / 1e9, 0);
     baseNanos = base;
-    contextAvailable = f.schemaVersion() >= FightRecord.SCHEMA;
+    contextAvailable = f.schemaVersion() >= 3;
     Map<Long, CombatEvent> bySequence = new HashMap<>();
     for (var e : events) bySequence.put(e.sequence(), e);
 
@@ -369,7 +369,12 @@ public final class FightAnalytics {
       intervalList.add(hits.get(i).time() - hits.get(i - 1).time());
     intervals = List.copyOf(intervalList);
 
-    combos = Combos.analyze(events, f.evaluations(), opponent, policy.comboSeconds());
+    combos =
+        Combos.analyze(
+            f.manual() ? List.of() : events,
+            f.manual() ? List.of() : f.evaluations(),
+            opponent,
+            policy.comboSeconds());
     comboLengths =
         combos.streaks().stream()
             .filter(s -> s.side() == Combos.Side.LOCAL)
@@ -547,7 +552,7 @@ public final class FightAnalytics {
       }
     }
     inputs.sort(Comparator.comparingDouble(Dominance.Input::time));
-    dominance = Dominance.of(duration, inputs, unattributedTimes, att);
+    dominance = Dominance.of(duration, f.manual() ? List.of() : inputs, unattributedTimes, att);
 
     List<Boundary> bs = new ArrayList<>();
     for (var entry : f.matchEvidence().entries())
@@ -955,6 +960,7 @@ public final class FightAnalytics {
 
   /** Opponent combo availability: attribution decides whether opponent streaks can be trusted. */
   public String opponentComboAvailability() {
+    if (fight.manual()) return "Unavailable";
     if (attributedIncoming == 0 && unattributedIncoming + unexplainedHealthDrops > 0)
       return "Unavailable";
     if (unattributedIncoming + unexplainedHealthDrops > 0) return "Estimated";

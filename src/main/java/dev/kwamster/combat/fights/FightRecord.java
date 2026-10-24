@@ -21,9 +21,50 @@ public record FightRecord(
     List<Evaluation> evaluations,
     String opponentLabel,
     MatchEvidence matchEvidence,
-    Resolution resolution) {
-  /** Schema 3: explicit result classification and evidence source. */
-  public static final int SCHEMA = 3;
+    Resolution resolution,
+    SessionInfo session) {
+  /** Schema 4 adds optional manual-session scopes; readers retain schemas 1�3. */
+  public static final int SCHEMA = 4;
+
+  /** Compatibility constructor for ordinary duels and historical callers. */
+  public FightRecord(
+      int schemaVersion,
+      String id,
+      long startEpochMillis,
+      long endEpochMillis,
+      long durationNanos,
+      String opponent,
+      Outcome outcome,
+      String reason,
+      Statistics statistics,
+      List<CombatEvent> events,
+      Policy policy,
+      List<Evaluation> evaluations,
+      String opponentLabel,
+      MatchEvidence matchEvidence,
+      Resolution resolution) {
+    this(
+        schemaVersion,
+        id,
+        startEpochMillis,
+        endEpochMillis,
+        durationNanos,
+        opponent,
+        outcome,
+        reason,
+        statistics,
+        events,
+        policy,
+        evaluations,
+        opponentLabel,
+        matchEvidence,
+        resolution,
+        null);
+  }
+
+  public boolean manual() {
+    return session != null;
+  }
 
   public FightRecord(
       int schemaVersion,
@@ -261,7 +302,19 @@ public record FightRecord(
         List.of(),
         opponentLabel,
         matchEvidence,
-        resolution);
+        resolution,
+        session == null
+            ? null
+            : new SessionInfo(
+                session.startTick(),
+                session.endTick(),
+                session.world(),
+                session.termination(),
+                session.participants(),
+                session.exchanges().stream().map(FightRecord::summaryOnly).toList(),
+                session.announcements(),
+                session.manualStartEpochMillis(),
+                session.manualStartTick()));
   }
 
   public FightRecord {

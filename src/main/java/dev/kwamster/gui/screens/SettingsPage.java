@@ -440,6 +440,13 @@ final class SettingsPage implements KwamsterScreen.Page {
     var cfg = c();
     c.heading("Recording");
     c.setting(
+        "Diagnostic capture",
+        "Opt-in local server announcement evidence; private chat excluded by default.",
+        toggle(
+            "Diagnostic capture",
+            () -> cfg.diagnosticCapture,
+            dev.kwamster.recording.RecordingCommands::diagnostics));
+    c.setting(
         "Record finished fights",
         "Automatic JSON and HTML after finalization. Local folders include the known opponent"
             + " name.",

@@ -1,6 +1,7 @@
 package dev.kwamster.config;
 
 public final class Config {
+  public boolean diagnosticCapture = false;
   public static final int SCHEMA = 2;
 
   public int schemaVersion = SCHEMA;

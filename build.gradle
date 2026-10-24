@@ -30,7 +30,7 @@ processGametestResources {
     }
 }
 loom.runs.clientGameTest {
-    vmArg '-Dkwamster.perfOutput=' + layout.buildDirectory.dir('performance').get().asFile.absolutePath
+    vmArg '-Dkwamster.perfOutput=' + layout.buildDirectory.dir(providers.gradleProperty('validationRun').map { 'performance/' + it }.orElse('performance').get()).get().asFile.absolutePath
     if (providers.gradleProperty('performance').orNull in ['baseline', 'mod']) vmArg '-Dfabric.modsFolder=' + layout.buildDirectory.dir('performance/mods').get().asFile.absolutePath
     // Packet-observation mixins require Fabric's test packet synchronizer to be disabled.
     vmArg '-Dfabric.client.gametest.disableNetworkSynchronizer=true'
@@ -60,5 +60,20 @@ tasks.register('generateExampleReport', JavaExec) {
     dependsOn testClasses
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'dev.kwamster.ReportExample'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+}
+
+tasks.register('generateManualExampleReport', JavaExec) {
+    group = 'verification'
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'dev.kwamster.ManualReportExample'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+}
+tasks.register('benchmarkRecording', JavaExec) {
+    group = 'verification'
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'dev.kwamster.RecordingBenchmark'
     javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
 }

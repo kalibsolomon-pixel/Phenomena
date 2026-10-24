@@ -1,0 +1,17 @@
+[
+  {
+    "mode": "Fabric baseline",
+    "throttleReason": "NONE",
+    "samples": 5727,
+    "totalFrames": 45818,
+    "sampleStride": 8,
+    "meanFrameMs": 0.2581670857342413,
+    "p95FrameMs": 0.419,
+    "p99FrameMs": 0.6259,
+    "wallSeconds": 11.9981614,
+    "processCpuMs": 33531.25,
+    "usedHeapBytes": 582839352,
+    "gcMillis": 42,
+    "gcCollections": 20
+  }
+]

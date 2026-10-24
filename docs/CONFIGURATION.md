@@ -98,3 +98,10 @@ Every Measurement value is frozen into each new fight's policy, so a later chang
 - The 1.5-block shield-sound radius.
 
 Recording schema is now **3**. Readers accept 1–3; older files derive a read-only result classification and are never rewritten. Shared report payload format is **4**. Dashboard keys 1–6 switch tabs.
+
+
+## 0.1.4 manual recording and diagnostics
+
+Config schema remains 2; `diagnosticCapture` defaults to `false`. Settings > Recording & storage and `/kwm diagnostics on|off` control it. Manual `/kwm start` and `/kwm end` explicitly override disabled automatic tracking/saving for that session. They do not change those preference fields. Overview exposes the same Start/End controller and folder actions. Diagnostic export redacts both names and servers by default (`/kwm diagnostics export`), with separate `export-names` and `export-servers` options. See [server evidence workflow](SERVER_COMPATIBILITY.md).
+
+Recording schema 4 adds optional manual metadata and exchange scopes; schemas 1–3 still load. Report format 5 supports participant/exchange selection. Manual folders use `Manual Session <local timestamp>`. `pending-sessions` contains atomic recoverable snapshots and `server-compatibility.json` holds adapter versions/evidence. Recovery never automatically resumes recording. See [recovery policy and resource limits](0.1.4.md).

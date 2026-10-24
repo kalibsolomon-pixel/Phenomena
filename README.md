@@ -15,7 +15,15 @@ $env:JAVA_HOME = (Get-ChildItem .tools -Directory -Filter 'jdk-21*' | Select-Obj
 ./gradlew.bat runClientGameTest
 ~~~
 
-On another machine install Java 21 and set JAVA_HOME, then use the checked-in Gradle wrapper. The wrapper verifies its distribution checksum. Build output: build/libs/kwamster-0.1.3.jar. Install this jar and Fabric API 0.141.6+1.21.11 into a Fabric 1.21.11 client. Sources and integration-test mods are not required for installation.
+On another machine install Java 21 and set JAVA_HOME, then use the checked-in Gradle wrapper. The wrapper verifies its distribution checksum. Build output: build/libs/kwamster-0.1.4.jar. Install this jar and Fabric API 0.141.6+1.21.11 into a Fabric 1.21.11 client. Sources and integration-test mods are not required for installation.
+
+## Manual recording (0.1.4)
+
+Type **`/kwm start`**, fight for as long as you want, then **`/kwm end`**. These commands run locally without server permissions. End automatically saves a recording and an anonymous offline HTML report, with status in chat. Repeating Start or End does not create duplicate recordings. Overview also has Start/End and folder buttons; K is unchanged.
+
+Manual sessions can contain several opponents, exchanges and rounds. Automatic announcements and inactivity do not stop the session. Starting during an automatic fight carries its observations into the manual session. Disconnect/world change/shutdown saves an Interrupted session; five-second atomic checkpoints recover after a crash without resuming on another server. The session's overall outcome stays Unknown unless interrupted; individual exchanges retain their own evidence/results. Browser reports filter by participant and exchange, with dominance kept separate for each exchange.
+
+Automatic Minemen/PVPHQ rules retain their real-log fixture coverage. Other servers are unknown until observed evidence supports an adapter. Use `/kwm diagnostics on` while playing, `/kwm diagnostics off` afterwards, then `/kwm diagnostics export` for a local redacted fixture bundle. Capture is off by default and nothing is uploaded. Read the [server inventory and evidence procedure](docs/SERVER_COMPATIBILITY.md) and [0.1.4 lifecycle, privacy, recovery and validation notes](docs/0.1.4.md).
 
 ## The dashboard
 
@@ -56,7 +64,7 @@ See [implementation and validation](docs/0.1.2.md). The [synthetic report](docs/
 
 ## Browser replay
 
-Every finalized fight, with recording enabled (default), automatically writes its JSON recording and a self-contained HTML report without opening the GUI. **View in Browser** reuses the same export folder and opens it. Exports live in `kwamster/exports/Fight <date> <time>/index.html` when anonymization is on (default), or `Fight vs <opponent> <date> <time>` when off. Local recordings always retain known opponent names independently of sharing privacy.
+Every finalized automatic fight, with recording enabled (default), automatically writes its JSON recording and a self-contained HTML report without opening the GUI. **View in Browser** reuses the same export folder and opens it. Exports live in `kwamster/exports/Fight <date> <time>/index.html` when anonymization is on (default), or `Fight vs <opponent> <date> <time>` when off. Local recordings always retain known opponent names independently of sharing privacy.
 
 The page works offline: no hosted site, external scripts or network requests. Tabs: Overview (result, evidence, interpretations), Offense (accuracy, reach histogram, aim faces, weapon timing), Defense (attribution, shields, tick-aligned jump timeline, damage and knockback), Fight Flow (clickable combo timeline, dominance graph, exchanges) and Timeline (play/pause, speed, scrubbing and annotations). Playback follows recorded event timestamps; it does not reconstruct the Minecraft world. Failed writes retry three times, then every 30 seconds while running, and missing or damaged exports recover on restart. Completed exports are checked by content digest and reused.
 
@@ -71,6 +79,9 @@ Accuracy is **confirmed hits / (attempts − confirmed shield blocks)**, includi
 | What | Location (relative to the Minecraft game directory) |
 | --- | --- |
 | Configuration | config/kwamster.json (schema 2; a schema-1 file is migrated and its original kept as kwamster.json.v1-backup) |
+| Manual checkpoints | kwamster/pending-sessions/&lt;uuid&gt;.json; recovered locally after interruption |
+| Diagnostics (opt-in) | kwamster/diagnostics/&lt;capture-id&gt;.json and fixtures-&lt;timestamp&gt;.json |
+| Server inventory | kwamster/server-compatibility.json |
 | Recordings | kwamster/fights/Fight [vs &lt;opponent&gt;] &lt;date&gt; &lt;time&gt;/&lt;uuid&gt;.json; legacy root UUID files also load |
 | Reports and exports | kwamster/exports/Fight [vs &lt;opponent&gt;] &lt;date&gt; &lt;time&gt;/index.html and report.json |
 

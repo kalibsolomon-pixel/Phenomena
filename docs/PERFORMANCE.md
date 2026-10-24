@@ -77,3 +77,24 @@ Per-event engine cost rose because every finalization now runs the shared combo 
 Analytics run only when history or scope changes and are cached per fight; they never run per frame. On the client thread, the worst case at the in-memory caps is one page build of a few tens of milliseconds after a fight ends. Exports run on the storage worker. Reports are larger because they embed dominance samples, combo structure and per-attempt data. A 10,000-event fight produces a report of about 4 MB.
 
 Ranges span three back-to-back runs after the optimizations. This machine shows about ±20 % variation between runs, and the 0.1.1/0.1.2 values come from earlier sessions. Treat the comparison as indicative.
+
+
+## 0.1.4 manual recording and diagnostic capture
+
+Fresh muted runs, isolated outputs: `build/performance/v014-perf-baseline/baseline.json` and `v014-perf-mod/mod.json`. Summary files, without the large raw frame arrays, are committed in [performance/0.1.4](performance/0.1.4). Same stride-eight high-frame-rate synthetic workload and hardware as 0.1.3. Optional compatibility mods are excluded from these measurements. Every mode reported throttle reason NONE.
+
+| Mode | Samples | Mean ms | P95 ms | P99 ms |
+| --- | ---: | ---: | ---: | ---: |
+| Fabric baseline, KWAMSTER disabled | 5727 | 0.2582 | 0.4190 | 0.6259 |
+| Inactive | 5809 | 0.2545 | 0.4429 | 0.6891 |
+| Tracking | 6069 | 0.2429 | 0.4142 | 0.6386 |
+| Dormant HUD forced on | 5646 | 0.2651 | 0.4540 | 0.7792 |
+| Automatic recording | 5740 | 0.2601 | 0.4503 | 0.7621 |
+| Manual recording | 5689 | 0.2641 | 0.4538 | 0.7308 |
+| Manual with diagnostic capture | 6134 | 0.2453 | 0.4298 | 0.7415 |
+
+No clear frame regression appears in this short synthetic scene. These are one run per mode, with run order/JIT/GC variation; the lower diagnostic mean is not evidence that diagnostics improve performance. They are not interactive FPS or long-multiplayer-session measurements.
+
+`benchmarkRecording` separately replayed 10,000 events per run (one discarded warmup, three reported runs). Observed ranges were 668–1091 ns/event automatic, 3056–4582 ns/event manual, and 1594–2364 ns/event manual plus diagnostics. Timed work includes event processing, exchange finalization, participant collection and five-second snapshot copies. Disk writes and HTML generation are outside that event timing; async diagnostic chunk queuing is included. Warmup and mode order prevent interpreting the ranges as causal overhead percentages. Raw values are in `performance/0.1.4/recording.json`.
+
+Diagnostics are off by default and return after a boolean check. Enabled captures rotate at 2,048 relevant entries. Serialization, fixture reduction, atomic writes, report analytics and exports use the storage worker. Snapshot copying and participant/summary aggregation run on the client thread every five seconds, and grow with session length; parent data remains memory-resident. This release does not claim bounded constant-time snapshots, unlimited sessions, or hours-long memory/performance acceptance. No render-frame file IO or diagnostic upload was introduced.

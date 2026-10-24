@@ -11,6 +11,7 @@ import java.util.function.Consumer;
  * All operations run on the single bounded writer. Existing reports are replaced only atomically.
  */
 public final class FightStore implements AutoCloseable {
+  public static final long MAX_RECORDING_BYTES = 512L * 1024 * 1024;
   private final Path directory;
   private final Consumer<String> errors;
   private final ThreadPoolExecutor writer;
@@ -85,7 +86,7 @@ public final class FightStore implements AutoCloseable {
       throw new IOException("Invalid fight identifier");
     }
     if (!Files.exists(p)) throw new IOException("Recording not found");
-    if (Files.isSymbolicLink(p) || Files.size(p) > 32 * 1024 * 1024)
+    if (Files.isSymbolicLink(p) || Files.size(p) > MAX_RECORDING_BYTES)
       throw new IOException("Unsafe report");
     var f = decode(Files.readString(p));
     if (!f.id().equals(id)) throw new IOException("Report ID mismatch");
@@ -153,7 +154,7 @@ public final class FightStore implements AutoCloseable {
         try {
           if (Files.isSymbolicLink(p)
               || Files.isSymbolicLink(p.getParent())
-              || Files.size(p) > 32 * 1024 * 1024) throw new IOException("Oversize or symlink");
+              || Files.size(p) > MAX_RECORDING_BYTES) throw new IOException("Oversize or symlink");
           var f = decode(Files.readString(p));
           if (!p.getFileName().toString().equals(f.id() + ".json"))
             throw new IOException("ID mismatch");
@@ -183,7 +184,7 @@ public final class FightStore implements AutoCloseable {
       UUID.fromString(f.id());
       if (f.statistics() == null
           || f.events() == null
-          || f.events().size() > 10000
+          || f.events().size() > (f.manual() ? 1_000_000 : 10000)
           || f.outcome() == null
           || f.durationNanos() < 0) throw new IOException("Invalid report");
       long seq = -1, time = -1;
@@ -210,7 +211,7 @@ public final class FightStore implements AutoCloseable {
       for (var p :
           files.filter(f -> f.getFileName().toString().endsWith(".json")).limit(2000).toList()) {
         try {
-          if (Files.isSymbolicLink(p) || Files.size(p) > 32 * 1024 * 1024) continue;
+          if (Files.isSymbolicLink(p) || Files.size(p) > MAX_RECORDING_BYTES) continue;
           var f = decode(Files.readString(p));
           if (p.getFileName().toString().equals(f.id() + ".json"))
             managed.add(new Stored(p, f.startEpochMillis(), Files.size(p)));

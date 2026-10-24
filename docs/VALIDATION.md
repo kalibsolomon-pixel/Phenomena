@@ -162,3 +162,18 @@ The same full sequence passed with Sodium 0.8.14+mc1.21.11, Lithium 0.21.4+mc1.2
 ### F. Performance
 
 See PERFORMANCE.md (0.1.3 section).
+
+
+## 0.1.4 manual sessions and server evidence
+
+Starting SHA `8864f172a1c2ca4bc6557bea1fa2496c28b483d0`, clean branch `codex/0.1.2-combat-corrections`. Baseline tests were rerun: 224 total, 223 passing, one existing Windows symlink skip. Final build: 253 total, 252 passing, one skip, zero failures/errors. This includes the full 0.1.3 real-log fixture suite and 29 additional unit cases for local command dispatch, manual lifecycle/promotion/priority, participants, delayed/nested results, context transitions, persistence/recovery/idempotence, naming/privacy, diagnostics and host boundaries.
+
+Muted Fabric 1.21.11 full functional acceptance passed in `v014-functional01`. It exercises the normal `/kwm start` and `/kwm end` client path, real melee and source confirmation, automatic recording/report creation even when automatic tracking/saving preferences are off, duplicate commands, shared Overview controls and actual disconnect preservation. A test-only server command-packet mixin verifies zero `kwm` commands received by the server. The existing K/navigation, measurement and automatic-export acceptance remains included. No external multiplayer acceptance is claimed.
+
+Four-mod smoke acceptance passed in isolated `v014-final-compat` and `v014-final-compat02`: Sodium 0.8.14+mc1.21.11, Lithium 0.21.4+mc1.21.11, FerriteCore 8.2.0 and ImmediatelyFast 1.14.3+1.21.11. Existing jar SHA-512 values were rechecked against the saved vendor metadata and all matched. An earlier exploratory compatibility run overlapped development recompilation and failed to load a transiently unavailable class; the non-overlapping rerun passed. Its evidence was preserved.
+
+Synthetic manual report generation uses `generateManualExampleReport`; the parent includes two participants, two independent exchanges and 18 confirmed hits. The embedded scopes have 13 and 5 hits respectively, both with their own available dominance curves; the parent has none. Anonymous copies retain distinct aliases and no original test names/host. A read-only export check also decoded/analyzed/exported the three checked-in schema-1/2/3 example recordings without failure into `build/validation/v014-history-exports`.
+
+The browser protocol gate rejected the local `file:` URL. No workaround or security bypass was attempted. Generated JavaScript passes `node --check`; unit/static checks cover escaping, CSP, offline data, filtering payloads and absence of network calls. Browser execution, tabs/filter interaction, responsive layout, network observation and console-error acceptance remain unverified for 0.1.4. The Minecraft manual-recording screenshot was inspected. Do not inherit 0.1.3's browser acceptance as proof for the changed viewer.
+
+All runs use fresh labeled directories; no pre-existing recordings, logs, screenshots, ignored artifacts or local developer files were deleted. No clean, push, publication, upload or installation into Aurora occurred. See [0.1.4](0.1.4.md), [server evidence procedure](SERVER_COMPATIBILITY.md), and [performance](PERFORMANCE.md).

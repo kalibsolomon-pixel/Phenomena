@@ -70,6 +70,56 @@ public final class CombatEngine {
   private long start, lastActivity, lastSequence = -1, lastTime = -1, startEpoch, lastHitNanos = -1;
   private State state = State.IDLE;
   private boolean opponentGone;
+  public boolean manualExchanges;
+
+  public long startNanos() {
+    return start;
+  }
+
+  public long startEpochMillis() {
+    return startEpoch;
+  }
+
+  public FightRecord checkpoint(long now) {
+    return new FightRecord(
+        FightRecord.SCHEMA,
+        UUID.randomUUID().toString(),
+        startEpoch,
+        System.currentTimeMillis(),
+        Math.max(0, now - start),
+        opponent,
+        Outcome.INTERRUPTED,
+        "Active exchange at checkpoint",
+        stats.copy(),
+        List.copyOf(events),
+        policy,
+        List.copyOf(evaluations),
+        opponentLabel,
+        new MatchEvidence(
+            server, localPlayer, roundId, Confidence.OBSERVED, List.copyOf(matchEntries), start));
+  }
+
+  public List<CombatEvent> observations() {
+    return List.copyOf(events);
+  }
+
+  public List<FightRecord.Evaluation> evaluations() {
+    return List.copyOf(evaluations);
+  }
+
+  public void clearMatchContext() {
+    roundStart = -1;
+    announcedOpponent = null;
+    matchId = null;
+    queuedStart = null;
+    matchEndMarker = -1;
+    lastRoundOpponent = null;
+    lastRoundResolved = true;
+    announcements.clear();
+    matchEntries.clear();
+    notes.clear();
+  }
+
   private final List<MatchEvidence.Entry> matchEntries = new ArrayList<>();
   private String server, localPlayer, matchId, roundId, announcedOpponent;
   private Integer roundNumber;
@@ -107,7 +157,13 @@ public final class CombatEngine {
 
   /** Announcement interpretation lives in adapters; the tracker only applies scoped evidence. */
   public void announcement(String host, String local, Announcements.Message message, long now) {
-    if (!config.tracking || now < lastTime) return;
+    if ((!config.tracking && !manualExchanges) || now < lastTime) return;
+    if (engaged() && !Objects.equals(server, host)) {
+      // A result from another connection must never resolve the previous server's fight.
+      if (message.kind() != Announcements.Kind.START) return;
+      finish(now, Outcome.INTERRUPTED, "Server changed");
+      clearMatchContext();
+    }
     boolean system = message.origin() == Announcements.Origin.SYSTEM;
     String fingerprint =
         host + ":" + message.rule() + ":" + Announcements.normalize(message.original());
@@ -421,6 +477,17 @@ public final class CombatEngine {
     }
   }
 
+  public String evidenceDecision(long now) {
+    for (int i = matchEntries.size() - 1; i >= 0; i--) {
+      var e = matchEntries.get(i);
+      if (e.nanoTime() == now)
+        return e.accepted()
+            ? "Accepted in scoped lifecycle"
+            : "Rejected: no matching fresh participant/context, or non-authoritative surface";
+    }
+    return "Not accepted: duplicate, idle, different server, or inactive tracking";
+  }
+
   private int addEvidence(Announcements.Message m, long now, boolean accepted) {
     if (matchEntries.size() >= 64) return -1;
     matchEntries.add(
@@ -572,7 +639,8 @@ public final class CombatEngine {
   }
 
   public boolean acceptsTarget(String id, String name) {
-    return !engaged()
+    return manualExchanges
+        || !engaged()
         || roundStart < 0
         || Objects.equals(id, opponent)
         || (opponent != null
@@ -586,7 +654,9 @@ public final class CombatEngine {
   // ---- combat events ------------------------------------------------------------------------
 
   public void accept(CombatEvent e) {
-    if (!config.tracking || e.sequence() <= lastSequence || e.nanoTime() < lastTime) return;
+    if ((!config.tracking && !manualExchanges)
+        || e.sequence() <= lastSequence
+        || e.nanoTime() < lastTime) return;
     lastSequence = e.sequence();
     lastTime = e.nanoTime();
     if (e.kind() == Kind.DISCONNECT) {
@@ -630,7 +700,11 @@ public final class CombatEngine {
       }
     }
     if (e.kind() == Kind.ATTACK && e.target() != null && !e.target().equals(opponent)) {
-      if (roundStart >= 0) return; // A server-scoped duel cannot silently change participants.
+      if (roundStart >= 0 && !manualExchanges) return;
+      if (manualExchanges) {
+        finish(e.nanoTime(), Outcome.INTERRUPTED, "Manual exchange target changed");
+        clearMatchContext();
+      }
       if (opponentGone)
         finalizeWith(
             e.nanoTime(),

@@ -67,7 +67,7 @@ class SimulatedFightsTest {
     assertEquals(
         f.resolution().classification().name(),
         d.getAsJsonObject("resolution").get("classification").getAsString());
-    assertEquals(4, p.get("version").getAsInt());
+    assertEquals(ReportExporter.FORMAT_VERSION, p.get("version").getAsInt());
   }
 
   @Test
