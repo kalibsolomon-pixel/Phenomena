@@ -72,14 +72,20 @@ public final class Content {
   }
 
   public void stats(List<Blocks.Stat> stats) {
-    int cols = Layout.columns(width, compact ? 96 : 104, Blocks.StatGrid.GAP, 5);
-    // Avoid a lone orphan card on the last row when another column count divides evenly.
-    for (int c = cols; c >= Math.max(2, cols - 1); c--)
-      if (stats.size() % c == 0) {
+    int max = Layout.columns(width, compact ? 96 : 104, Blocks.StatGrid.GAP, 5);
+    // Prefer the widest column count whose last row holds more than one card; fall back
+    // to fewer columns rather than leaving a lone orphan on its own row.
+    int cols = 1;
+    for (int c = max; c >= 2; c--) {
+      int rem = stats.size() % c;
+      if (rem == 0 || rem >= 2 || stats.size() <= c) {
         cols = c;
         break;
       }
-    block(Blocks.StatGrid.height(stats.size(), cols, compact), new Blocks.StatGrid(stats, cols, compact));
+    }
+    block(
+        Blocks.StatGrid.height(stats.size(), Math.max(1, cols), compact),
+        new Blocks.StatGrid(stats, Math.max(1, cols), compact));
   }
 
   public int chartHeight() {

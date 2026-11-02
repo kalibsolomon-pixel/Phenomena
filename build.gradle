@@ -26,7 +26,7 @@ processGametestResources {
     def mode = providers.gradleProperty('performance').orElse('functional')
     inputs.property 'testMode', mode
     filesMatching('fabric.mod.json') {
-        expand 'entrypoint': mode.get() == 'baseline' ? 'dev.phenomena.FabricBaselineTest' : mode.get() == 'mod' ? 'dev.phenomena.ModPerformanceTest' : 'dev.phenomena.PhenomenaGameTest'
+        expand 'entrypoint': mode.get() == 'baseline' ? 'dev.phenomena.FabricBaselineTest' : mode.get() == 'mod' ? 'dev.phenomena.ModPerformanceTest' : mode.get() == 'shots' ? 'dev.phenomena.UiScreenshotClientTest' : 'dev.phenomena.PhenomenaGameTest'
     }
 }
 loom.runs.clientGameTest {

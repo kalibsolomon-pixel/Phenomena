@@ -22,7 +22,7 @@ public final class Theme {
       BEVEL_DARK = 0x26000000,
       TEXT = 0xFFE8EDEB,
       MUTED = 0xFF9BA7AD,
-      DIM = 0xFF6D777D,
+      DIM = 0xFF7A848B,
       GRID = 0xFF252C33,
       WARN = 0xFFE4C46E,
       ERROR = 0xFFE49790,

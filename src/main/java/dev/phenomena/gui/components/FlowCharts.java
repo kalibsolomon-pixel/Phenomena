@@ -119,8 +119,9 @@ public final class FlowCharts {
       int label = Math.max(f.width("Opponent"), f.width("You")) + 8;
       int px = x + label, pw = Math.max(20, w - label - 4);
       int laneH = 22, top = y + 4, bottom = top + laneH + 6;
-      Pixel.fillLogical(g, px, top, px + pw, top + laneH, Theme.alpha(Theme.SURFACE_2, 0x90));
-      Pixel.fillLogical(g, px, bottom, px + pw, bottom + laneH, Theme.alpha(Theme.SURFACE_2, 0x90));
+      // Solid inset tracks so combo bands (drawn over them) stay clearly visible.
+      Pixel.rounded(g, px, top, pw, laneH, Theme.RADIUS_SMALL, Theme.INSET);
+      Pixel.rounded(g, px, bottom, pw, laneH, Theme.RADIUS_SMALL, Theme.INSET);
       g.drawString(f, "You", x, top + 7, LOCAL, false);
       g.drawString(f, "Opponent", x, bottom + 7, OPPONENT, false);
       for (double b : boundaries) {
@@ -133,8 +134,8 @@ public final class FlowCharts {
         int x0 = sx(s.start(), px, pw) - 2, x1 = Math.max(x0 + 5, sx(s.end(), px, pw) + 3);
         int ly = s.local() ? top : bottom;
         int color = s.local() ? LOCAL : OPPONENT;
-        Pixel.fillLogical(g, x0, ly + 3, x1, ly + laneH - 3, Theme.alpha(color, 0x55));
-        if (i == selected) Pixel.outline(g, x0 - 1, ly + 2, x1 - x0 + 2, laneH - 4, 2, 1, Theme.TEXT);
+        Pixel.rounded(g, x0, ly + 3, x1 - x0, laneH - 6, Theme.RADIUS_SMALL, Theme.alpha(color, 0x99));
+        if (i == selected) Pixel.outline(g, x0 - 1, ly + 2, x1 - x0 + 2, laneH - 4, Theme.RADIUS_SMALL, 1, Theme.TEXT);
         String n = "x" + s.length();
         int tx = Math.min(px + pw - f.width(n), Math.max(px, (x0 + x1 - f.width(n)) / 2));
         g.drawString(f, n, tx, s.local() ? ly - 1 : ly + laneH - 7, Theme.TEXT, false);

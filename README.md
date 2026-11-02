@@ -2,6 +2,8 @@
 
 Standalone, client-side PvP analytics for **Minecraft Java 1.21.11**, Fabric, Java 21. Press **K** in a world to open the Phenomena dashboard. The key is a normal Minecraft key mapping (Controls > Phenomena) and can also be rebound in the dashboard's Settings > Controls.
 
+**0.2.0**: the project formerly named KWAMSTER is now **Phenomena** (mod id `phenomena`, packages `dev.phenomena`, artifact `phenomena-0.2.0.jar`). Existing `kwamster/` data and `config/kwamster.json` migrate forward automatically and non-destructively on first launch — see the [migration and modernization report](docs/PHENOMENA_MIGRATION.md). The dashboard was rebuilt on a per-pixel renderer (analytic device-pixel antialiasing adapted from Aurora Client's coverage rasterizer) with the restrained Spxctra design language; the primary command is now **`/phenomena`** (`/kwm` remains a deprecated alias).
+
 Phenomena observes combat. It never changes reach, cooldowns, attacks, movement, knockback or network packets. No server installation is needed. Training against living entities is supported. Tracking and recording run in the background whether or not the dashboard is open.
 
 ## Build and run
@@ -15,11 +17,11 @@ $env:JAVA_HOME = (Get-ChildItem .tools -Directory -Filter 'jdk-21*' | Select-Obj
 ./gradlew.bat runClientGameTest
 ~~~
 
-On another machine install Java 21 and set JAVA_HOME, then use the checked-in Gradle wrapper. The wrapper verifies its distribution checksum. Development build output: build/libs/phenomena-0.1.6.jar. This assignment does not install it into Aurora. Sources and integration-test mods are not required to use the mod.
+On another machine install Java 21 and set JAVA_HOME, then use the checked-in Gradle wrapper. The wrapper verifies its distribution checksum. Development build output: build/libs/phenomena-0.2.0.jar. Sources and integration-test mods are not required to use the mod.
 
 ## Combat exchanges and accuracy (0.1.6)
 
-Fight recordings and combat measurement have separate lifecycles. A configured match keeps recording through arena loads, round resets and breaks. A combat exchange ends after **3 seconds** without an aimed attack, correlated outgoing hit or attributed incoming hit. Settings > Measurement changes this timeout independently of the generic fight-recording timeout. The Fight Flow exchange timeline shows active intervals and breaks within the full recording.
+Fight recordings and combat measurement have separate lifecycles. A configured match keeps recording through arena loads, round resets and breaks. A combat exchange ends after **3 seconds** without an aimed attack, correlated outgoing hit or attributed incoming hit. Settings > Combat exchanges changes this timeout independently of the generic-capture inactivity timeout in the same section. The Fight Flow exchange timeline shows active intervals and breaks within the full recording.
 
 Observed outgoing inputs within an inclusive **two-client-tick** window count as one attack, anchored to the first input: ticks 100/102 merge, tick 104 starts another attack. Raw observations remain available. Aimed opening misses count without requiring a previous hit; unrelated swings are excluded. Hits and shield blocks wait for bounded server-evidence correlation. Unresolved attempts and uncertain shields remain visible and stay in the conservative accuracy denominator. Accuracy is **confirmed hits / (unique eligible combat attempts − confirmed shield blocks)**. Historical recordings retain their original policy and outcomes.
 
@@ -33,11 +35,11 @@ Overview shows the policy, environment/version, match/round state, diagnostics a
 
 ## Manual recording
 
-Type **`/kwm start`**, fight for as long as you want, then **`/kwm end`**. These commands run locally without server permissions. End automatically saves a recording and an anonymous offline HTML report, with status in chat. Repeating Start or End does not create duplicate recordings. Overview also has Start/End and folder buttons; K is unchanged.
+Type **`/phenomena start`**, fight for as long as you want, then **`/phenomena end`**. These commands run locally without server permissions; `/kwm` still works as a deprecated alias. End automatically saves a recording and an anonymous offline HTML report, with status in chat. Repeating Start or End does not create duplicate recordings. Overview also has Start/End and folder buttons; K is unchanged.
 
 Manual sessions can contain several opponents, exchanges and rounds. Automatic announcements and inactivity do not stop the session. Starting during an automatic fight carries its observations into the manual session. Actual disconnect, server change or shutdown saves an Interrupted session; arena/dimension replacement keeps the parent active. Five-second atomic checkpoints recover after a crash without resuming on another server. The session's overall outcome stays Unknown unless interrupted; nested participant scopes retain their own evidence/results and combat intervals. Browser reports filter by participant and scope, with dominance kept separate for each participant scope.
 
-All six configured adapters have real-log and/or packet fixture coverage; individual formats and missing-signal limits remain explicit. Use `/kwm diagnostics on` while playing, `/kwm diagnostics off` afterwards, then `/kwm diagnostics export` for a local redacted fixture bundle. Capture is off by default and nothing is uploaded. Read the [server inventory and evidence procedure](docs/SERVER_COMPATIBILITY.md) and [0.1.4 lifecycle, privacy, recovery and validation notes](docs/0.1.4.md).
+All six configured adapters have real-log and/or packet fixture coverage; individual formats and missing-signal limits remain explicit. Use `/phenomena diagnostics on` while playing, `/phenomena diagnostics off` afterwards, then `/phenomena diagnostics export` for a local redacted fixture bundle. Capture is off by default and nothing is uploaded. Read the [server inventory and evidence procedure](docs/SERVER_COMPATIBILITY.md) and [0.1.4 lifecycle, privacy, recovery and validation notes](docs/0.1.4.md).
 
 ## The dashboard
 

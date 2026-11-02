@@ -181,14 +181,14 @@ public final class MetricDefs {
               "Confirmed hits that were part of a combo of two or more."),
           new Def(
               "longestOpponentCombo",
-              "Longest opponent combo",
+              "Longest opp. combo",
               "",
               "Inferred",
               "Same rule using attributed incoming hits. Estimated or unavailable when some"
                   + " incoming damage is unattributed."),
           new Def(
               "longestUnanswered",
-              "Longest unanswered streak",
+              "Longest streak",
               "",
               "Inferred",
               "Most consecutive confirmed hits before an attributed return hit, ignoring"

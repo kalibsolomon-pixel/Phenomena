@@ -91,12 +91,12 @@ final class OffensePage implements PhenomenaScreen.Page {
               new Stat(
                   "Unresolved attacks",
                   "" + (a.uncertain - a.uncertainShield),
-                  "included in denominator",
+                  "in denominator",
                   "Outcome evidence is insufficient. These attacks are never labelled as misses."),
               new Stat(
                   "Uncertain shields",
                   "" + a.uncertainShield,
-                  "included in uncertainty",
+                  "in uncertainty",
                   "Blocking/facing state alone cannot prove a block; retained in accuracy"
                       + " denominator.")));
     }
@@ -113,7 +113,7 @@ final class OffensePage implements PhenomenaScreen.Page {
         new StackBar(
             new String[] {"Hits", "Eligible misses", "Uncertain", "Shield blocks"},
             new int[] {a.hits, a.emptyMisses, a.uncertain, a.shieldBlocks},
-            new int[] {Theme.SERIES_1, Theme.SERIES_2, Theme.DIM, Theme.SERIES_3}));
+            new int[] {Theme.SERIES_1, Theme.SERIES_2, Theme.MUTED, Theme.SERIES_3}));
     c.note(
         "Accuracy = confirmed hits / (attempts minus confirmed shield blocks). A blocked attack met"
             + " the opponent's shield: it is neither a hit nor a miss. Estimated blocks and other"
