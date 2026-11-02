@@ -62,7 +62,7 @@ Aurora components audited for interaction semantics: focus rings offset outside 
 
 ## 7. Validation summary
 
-- Unit suite: **361 tests, 0 failures** (1 pre-existing Windows symlink-privilege skip) — includes the new migration regressions.
+- Unit suite: **351 tests, 0 failures** (1 pre-existing Windows symlink-privilege skip) — includes the nine new migration regressions.
 - Native client acceptance and per-resolution screenshots: see `docs/0.2.0.md`.
 - Performance and four-mod compatibility results: see `docs/0.2.0.md`.
 

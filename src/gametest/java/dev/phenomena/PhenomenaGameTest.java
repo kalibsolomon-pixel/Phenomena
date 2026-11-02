@@ -701,13 +701,14 @@ public final class PhenomenaGameTest implements FabricClientGameTest {
       shot(ctx, "phenomena-settings");
       ctx.runOnClient(
           mc -> {
+            // The setting is a real toggle switch since 0.2.0.
             var b =
                 mc.screen.children().stream()
                     .filter(
                         c ->
-                            c instanceof dev.phenomena.gui.components.KButton k
+                            c instanceof dev.phenomena.gui.components.KToggle k
                                 && k.id.equals("Fight summary in chat"))
-                    .map(c -> (dev.phenomena.gui.components.KButton) c)
+                    .map(c -> (dev.phenomena.gui.components.KToggle) c)
                     .findFirst()
                     .orElseThrow();
             b.onPress(new net.minecraft.client.input.KeyEvent(GLFW.GLFW_KEY_ENTER, 0, 0));
