@@ -1,0 +1,1435 @@
+{
+  "schemaVersion": 5,
+  "id": "02100002-0000-4000-8000-000000000021",
+  "startEpochMillis": 1793007200000,
+  "endEpochMillis": 1793007218700,
+  "durationNanos": 18700000000,
+  "opponent": "Opponent",
+  "outcome": "WIN",
+  "reason": "Server match result / minemen-result",
+  "statistics": {
+    "measurementVersion": 1,
+    "totalInputs": 12,
+    "uniqueAttacks": 12,
+    "deduplicatedAttacks": 0,
+    "excludedSwings": 0,
+    "eligibleMisses": 0,
+    "uncertainShield": 0,
+    "attackCanonicalIds": {
+      "1": 1,
+      "3": 3,
+      "5": 5,
+      "8": 8,
+      "12": 12,
+      "17": 17,
+      "19": 19,
+      "21": 21,
+      "23": 23,
+      "25": 25,
+      "26": 26,
+      "29": 29
+    },
+    "attackSamples": {
+      "1": 1,
+      "3": 3,
+      "5": 5,
+      "8": 8,
+      "12": 12,
+      "17": 17,
+      "19": 19,
+      "21": 21,
+      "23": 23,
+      "25": 25,
+      "26": 26,
+      "29": 29
+    },
+    "attackClassifications": {
+      "1": "HIT",
+      "3": "HIT",
+      "5": "HIT",
+      "8": "HIT",
+      "12": "HIT",
+      "17": "SHIELD_BLOCK",
+      "19": "HIT",
+      "21": "HIT",
+      "23": "HIT",
+      "25": "UNRESOLVED",
+      "26": "HIT",
+      "29": "HIT"
+    },
+    "attackTimings": {
+      "1": {
+        "grade": "OPENER",
+        "intervalTicks": 0.0,
+        "expectedTicks": 12.5
+      },
+      "3": {
+        "grade": "PERFECT",
+        "intervalTicks": 12.0,
+        "expectedTicks": 12.5
+      },
+      "5": {
+        "grade": "PERFECT",
+        "intervalTicks": 12.0,
+        "expectedTicks": 12.5
+      },
+      "8": {
+        "grade": "TOO_SLOW",
+        "intervalTicks": 22.0,
+        "expectedTicks": 12.5
+      },
+      "12": {
+        "grade": "OPENER",
+        "intervalTicks": 0.0,
+        "expectedTicks": 12.5
+      },
+      "17": {
+        "grade": "OPENER",
+        "intervalTicks": 32.0,
+        "expectedTicks": 12.5
+      },
+      "19": {
+        "grade": "OPENER",
+        "intervalTicks": 0.0,
+        "expectedTicks": 12.5
+      },
+      "21": {
+        "grade": "PERFECT",
+        "intervalTicks": 12.0,
+        "expectedTicks": 12.5
+      },
+      "23": {
+        "grade": "PERFECT",
+        "intervalTicks": 12.0,
+        "expectedTicks": 12.5
+      },
+      "25": {
+        "grade": "TOO_FAST",
+        "intervalTicks": 10.0,
+        "expectedTicks": 12.5
+      },
+      "26": {
+        "grade": "PERFECT",
+        "intervalTicks": 12.0,
+        "expectedTicks": 12.5
+      },
+      "29": {
+        "grade": "TOO_SLOW",
+        "intervalTicks": 22.0,
+        "expectedTicks": 12.5
+      }
+    },
+    "exchangeTimeoutSeconds": 3.0,
+    "combatExchanges": [
+      {
+        "startNanos": 2200000000,
+        "endNanos": 5200000000,
+        "endedBy": "ROUND_BOUNDARY"
+      },
+      {
+        "startNanos": 8600000000,
+        "endNanos": 12000000000,
+        "endedBy": "ROUND_BOUNDARY"
+      },
+      {
+        "startNanos": 15600000000,
+        "endNanos": 19600000000,
+        "endedBy": "ROUND_BOUNDARY"
+      }
+    ],
+    "attempts": 12,
+    "hits": 10,
+    "emptyMisses": 0,
+    "uncertain": 1,
+    "contacts": 12,
+    "criticalConditions": 0,
+    "sprintHits": 0,
+    "jumpCandidates": 1,
+    "currentCombo": 0,
+    "longestCombo": 4,
+    "incoming": 6,
+    "perfectReachHits": 6,
+    "unattributedIncoming": 0,
+    "thirdPartyIncoming": 0,
+    "attacksIntoShield": 1,
+    "shieldBlocks": 1,
+    "estimatedShieldBlocks": 0,
+    "shieldDisables": 0,
+    "localShieldBlocks": 0,
+    "localShieldDisabled": 0,
+    "serverCrits": 0,
+    "opponentCrits": 0,
+    "comboCount": 2,
+    "comboHits": 7,
+    "longestOpponentCombo": 2,
+    "longestUnanswered": 4,
+    "damageTaken": 0.0,
+    "centerAim": 10,
+    "edgeAim": 0,
+    "highAim": 0,
+    "lowAim": 0,
+    "reachDistribution": [
+      0,
+      0,
+      4,
+      6,
+      0,
+      0,
+      0,
+      0
+    ],
+    "recentReach": [
+      2.95,
+      3.02,
+      3.08,
+      2.88,
+      3.1,
+      2.97,
+      3.0,
+      3.04,
+      2.92,
+      3.06,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "recentReachIndex": 10,
+    "recentReachCount": 10,
+    "recentInterval": 1.1,
+    "momentumAt": 19010000000,
+    "reachSum": 30.02,
+    "maxReach": 3.1,
+    "cooldownSum": 10.0,
+    "intervalSum": 16.799999999999997,
+    "intervalSquared": 67.27999999999997,
+    "reachCount": 10,
+    "intervalCount": 9,
+    "lastHit": 19000000000,
+    "comboStart": 19000000000,
+    "momentum": 0.0
+  },
+  "events": [
+    {
+      "sequence": 1,
+      "nanoTime": 2200000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 2.95,
+        "aimX": 0.5,
+        "aimY": 0.7,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "minecraft:diamond_sword;slot\u003d0;attributes\u003d0",
+          "attackSpeed": 1.6,
+          "cooldownTicks": 12.5,
+          "timing": {
+            "grade": "OPENER",
+            "intervalTicks": 0.0,
+            "expectedTicks": 12.5
+          },
+          "eye": {
+            "x": 0.0,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": -0.4,
+            "minY": 0.0,
+            "minZ": 2.6,
+            "maxX": 0.4,
+            "maxY": 1.9,
+            "maxZ": 3.4
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.8526315789473685,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.8500000000000001,
+              "z": 0.0
+            },
+            "idealRadius": 0.14399999999999996,
+            "goodRadius": 0.31999999999999995,
+            "peripheralRadius": 0.5599999999999998,
+            "reachable": true
+          },
+          "aimQuality": "GOOD",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "test",
+      "clientTick": 44,
+      "context": {
+        "targetBlocking": false,
+        "targetFacing": false
+      }
+    },
+    {
+      "sequence": 2,
+      "nanoTime": 2210000000,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source",
+      "clientTick": 44
+    },
+    {
+      "sequence": 3,
+      "nanoTime": 2800000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 3.02,
+        "aimX": 0.5,
+        "aimY": 0.7,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "minecraft:diamond_sword;slot\u003d0;attributes\u003d0",
+          "attackSpeed": 1.6,
+          "cooldownTicks": 12.5,
+          "timing": {
+            "grade": "OPENER",
+            "intervalTicks": 0.0,
+            "expectedTicks": 12.5
+          },
+          "eye": {
+            "x": 0.0,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": -0.4,
+            "minY": 0.0,
+            "minZ": 2.6,
+            "maxX": 0.4,
+            "maxY": 1.9,
+            "maxZ": 3.4
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.8526315789473685,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.8500000000000001,
+              "z": 0.0
+            },
+            "idealRadius": 0.14399999999999996,
+            "goodRadius": 0.31999999999999995,
+            "peripheralRadius": 0.5599999999999998,
+            "reachable": true
+          },
+          "aimQuality": "GOOD",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "test",
+      "clientTick": 56,
+      "context": {
+        "targetBlocking": false,
+        "targetFacing": false
+      }
+    },
+    {
+      "sequence": 4,
+      "nanoTime": 2810000000,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source",
+      "clientTick": 56
+    },
+    {
+      "sequence": 5,
+      "nanoTime": 3400000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 3.08,
+        "aimX": 0.5,
+        "aimY": 0.7,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "minecraft:diamond_sword;slot\u003d0;attributes\u003d0",
+          "attackSpeed": 1.6,
+          "cooldownTicks": 12.5,
+          "timing": {
+            "grade": "OPENER",
+            "intervalTicks": 0.0,
+            "expectedTicks": 12.5
+          },
+          "eye": {
+            "x": 0.0,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": -0.4,
+            "minY": 0.0,
+            "minZ": 2.6,
+            "maxX": 0.4,
+            "maxY": 1.9,
+            "maxZ": 3.4
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.8526315789473685,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.8500000000000001,
+              "z": 0.0
+            },
+            "idealRadius": 0.14399999999999996,
+            "goodRadius": 0.31999999999999995,
+            "peripheralRadius": 0.5599999999999998,
+            "reachable": true
+          },
+          "aimQuality": "GOOD",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "test",
+      "clientTick": 68,
+      "context": {
+        "targetBlocking": false,
+        "targetFacing": false
+      }
+    },
+    {
+      "sequence": 6,
+      "nanoTime": 3410000000,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source",
+      "clientTick": 68
+    },
+    {
+      "sequence": 7,
+      "nanoTime": 3900000000,
+      "kind": "DAMAGE_IN",
+      "actor": "Opponent",
+      "target": "local",
+      "confidence": "CONFIRMED",
+      "detail": "server damage event",
+      "clientTick": 78,
+      "context": {
+        "attribution": "OPPONENT_DIRECT",
+        "damageType": "minecraft:player_attack",
+        "direct": true,
+        "ground": true,
+        "sprinting": false,
+        "movementValid": true
+      }
+    },
+    {
+      "sequence": 8,
+      "nanoTime": 4500000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 2.88,
+        "aimX": 0.5,
+        "aimY": 0.7,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "minecraft:diamond_sword;slot\u003d0;attributes\u003d0",
+          "attackSpeed": 1.6,
+          "cooldownTicks": 12.5,
+          "timing": {
+            "grade": "OPENER",
+            "intervalTicks": 0.0,
+            "expectedTicks": 12.5
+          },
+          "eye": {
+            "x": 0.0,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": -0.4,
+            "minY": 0.0,
+            "minZ": 2.6,
+            "maxX": 0.4,
+            "maxY": 1.9,
+            "maxZ": 3.4
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.8526315789473685,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.8500000000000001,
+              "z": 0.0
+            },
+            "idealRadius": 0.14399999999999996,
+            "goodRadius": 0.31999999999999995,
+            "peripheralRadius": 0.5599999999999998,
+            "reachable": true
+          },
+          "aimQuality": "GOOD",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "test",
+      "clientTick": 90,
+      "context": {
+        "targetBlocking": false,
+        "targetFacing": false
+      }
+    },
+    {
+      "sequence": 9,
+      "nanoTime": 4510000000,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source",
+      "clientTick": 90
+    },
+    {
+      "sequence": 10,
+      "nanoTime": 8600000000,
+      "kind": "DAMAGE_IN",
+      "actor": "Opponent",
+      "target": "local",
+      "confidence": "CONFIRMED",
+      "detail": "server damage event",
+      "clientTick": 172,
+      "context": {
+        "attribution": "OPPONENT_DIRECT",
+        "damageType": "minecraft:player_attack",
+        "direct": true,
+        "ground": true,
+        "sprinting": false,
+        "movementValid": true
+      }
+    },
+    {
+      "sequence": 11,
+      "nanoTime": 9200000000,
+      "kind": "DAMAGE_IN",
+      "actor": "Opponent",
+      "target": "local",
+      "confidence": "CONFIRMED",
+      "detail": "server damage event",
+      "clientTick": 184,
+      "context": {
+        "attribution": "OPPONENT_DIRECT",
+        "damageType": "minecraft:player_attack",
+        "direct": true,
+        "ground": true,
+        "sprinting": false,
+        "movementValid": true
+      }
+    },
+    {
+      "sequence": 12,
+      "nanoTime": 9500000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 3.1,
+        "aimX": 0.5,
+        "aimY": 0.7,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "minecraft:diamond_sword;slot\u003d0;attributes\u003d0",
+          "attackSpeed": 1.6,
+          "cooldownTicks": 12.5,
+          "timing": {
+            "grade": "OPENER",
+            "intervalTicks": 0.0,
+            "expectedTicks": 12.5
+          },
+          "eye": {
+            "x": 0.0,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": -0.4,
+            "minY": 0.0,
+            "minZ": 2.6,
+            "maxX": 0.4,
+            "maxY": 1.9,
+            "maxZ": 3.4
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.8526315789473685,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.8500000000000001,
+              "z": 0.0
+            },
+            "idealRadius": 0.14399999999999996,
+            "goodRadius": 0.31999999999999995,
+            "peripheralRadius": 0.5599999999999998,
+            "reachable": true
+          },
+          "aimQuality": "GOOD",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "test",
+      "clientTick": 190,
+      "context": {
+        "targetBlocking": false,
+        "targetFacing": false
+      }
+    },
+    {
+      "sequence": 13,
+      "nanoTime": 9510000000,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source",
+      "clientTick": 190
+    },
+    {
+      "sequence": 14,
+      "nanoTime": 10000000000,
+      "kind": "DAMAGE_IN",
+      "actor": "Opponent",
+      "target": "local",
+      "confidence": "CONFIRMED",
+      "detail": "server damage event",
+      "clientTick": 200,
+      "context": {
+        "attribution": "OPPONENT_DIRECT",
+        "damageType": "minecraft:player_attack",
+        "direct": true,
+        "ground": true,
+        "sprinting": false,
+        "movementValid": true
+      }
+    },
+    {
+      "sequence": 15,
+      "nanoTime": 10000000000,
+      "kind": "JUMP",
+      "actor": "local",
+      "confidence": "OBSERVED",
+      "detail": "jump",
+      "clientTick": 200,
+      "context": {
+        "ground": true,
+        "sprinting": false,
+        "movementValid": true
+      }
+    },
+    {
+      "sequence": 16,
+      "nanoTime": 10600000000,
+      "kind": "DAMAGE_IN",
+      "actor": "Opponent",
+      "target": "local",
+      "confidence": "CONFIRMED",
+      "detail": "server damage event",
+      "clientTick": 212,
+      "context": {
+        "attribution": "OPPONENT_DIRECT",
+        "damageType": "minecraft:player_attack",
+        "direct": true,
+        "ground": true,
+        "sprinting": false,
+        "movementValid": true
+      }
+    },
+    {
+      "sequence": 17,
+      "nanoTime": 11100000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 3.0,
+        "aimX": 0.5,
+        "aimY": 0.7,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "minecraft:diamond_sword;slot\u003d0;attributes\u003d0",
+          "attackSpeed": 1.6,
+          "cooldownTicks": 12.5,
+          "timing": {
+            "grade": "OPENER",
+            "intervalTicks": 0.0,
+            "expectedTicks": 12.5
+          },
+          "eye": {
+            "x": 0.0,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": -0.4,
+            "minY": 0.0,
+            "minZ": 2.6,
+            "maxX": 0.4,
+            "maxY": 1.9,
+            "maxZ": 3.4
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.8526315789473685,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.8500000000000001,
+              "z": 0.0
+            },
+            "idealRadius": 0.14399999999999996,
+            "goodRadius": 0.31999999999999995,
+            "peripheralRadius": 0.5599999999999998,
+            "reachable": true
+          },
+          "aimQuality": "GOOD",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "test",
+      "clientTick": 222,
+      "context": {
+        "targetBlocking": true,
+        "targetFacing": true
+      }
+    },
+    {
+      "sequence": 18,
+      "nanoTime": 11130000000,
+      "kind": "SHIELD",
+      "confidence": "OBSERVED",
+      "detail": "shield sound",
+      "clientTick": 222,
+      "context": {
+        "shield": "BLOCK",
+        "subject": "opponent",
+        "distance": 0.8
+      }
+    },
+    {
+      "sequence": 19,
+      "nanoTime": 15600000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 2.97,
+        "aimX": 0.5,
+        "aimY": 0.7,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "minecraft:diamond_sword;slot\u003d0;attributes\u003d0",
+          "attackSpeed": 1.6,
+          "cooldownTicks": 12.5,
+          "timing": {
+            "grade": "OPENER",
+            "intervalTicks": 0.0,
+            "expectedTicks": 12.5
+          },
+          "eye": {
+            "x": 0.0,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": -0.4,
+            "minY": 0.0,
+            "minZ": 2.6,
+            "maxX": 0.4,
+            "maxY": 1.9,
+            "maxZ": 3.4
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.8526315789473685,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.8500000000000001,
+              "z": 0.0
+            },
+            "idealRadius": 0.14399999999999996,
+            "goodRadius": 0.31999999999999995,
+            "peripheralRadius": 0.5599999999999998,
+            "reachable": true
+          },
+          "aimQuality": "GOOD",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "test",
+      "clientTick": 312,
+      "context": {
+        "targetBlocking": false,
+        "targetFacing": false
+      }
+    },
+    {
+      "sequence": 20,
+      "nanoTime": 15610000000,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source",
+      "clientTick": 312
+    },
+    {
+      "sequence": 21,
+      "nanoTime": 16200000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 3.0,
+        "aimX": 0.5,
+        "aimY": 0.7,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "minecraft:diamond_sword;slot\u003d0;attributes\u003d0",
+          "attackSpeed": 1.6,
+          "cooldownTicks": 12.5,
+          "timing": {
+            "grade": "OPENER",
+            "intervalTicks": 0.0,
+            "expectedTicks": 12.5
+          },
+          "eye": {
+            "x": 0.0,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": -0.4,
+            "minY": 0.0,
+            "minZ": 2.6,
+            "maxX": 0.4,
+            "maxY": 1.9,
+            "maxZ": 3.4
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.8526315789473685,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.8500000000000001,
+              "z": 0.0
+            },
+            "idealRadius": 0.14399999999999996,
+            "goodRadius": 0.31999999999999995,
+            "peripheralRadius": 0.5599999999999998,
+            "reachable": true
+          },
+          "aimQuality": "GOOD",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "test",
+      "clientTick": 324,
+      "context": {
+        "targetBlocking": false,
+        "targetFacing": false
+      }
+    },
+    {
+      "sequence": 22,
+      "nanoTime": 16210000000,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source",
+      "clientTick": 324
+    },
+    {
+      "sequence": 23,
+      "nanoTime": 16800000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 3.04,
+        "aimX": 0.5,
+        "aimY": 0.7,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "minecraft:diamond_sword;slot\u003d0;attributes\u003d0",
+          "attackSpeed": 1.6,
+          "cooldownTicks": 12.5,
+          "timing": {
+            "grade": "OPENER",
+            "intervalTicks": 0.0,
+            "expectedTicks": 12.5
+          },
+          "eye": {
+            "x": 0.0,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": -0.4,
+            "minY": 0.0,
+            "minZ": 2.6,
+            "maxX": 0.4,
+            "maxY": 1.9,
+            "maxZ": 3.4
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.8526315789473685,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.8500000000000001,
+              "z": 0.0
+            },
+            "idealRadius": 0.14399999999999996,
+            "goodRadius": 0.31999999999999995,
+            "peripheralRadius": 0.5599999999999998,
+            "reachable": true
+          },
+          "aimQuality": "GOOD",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "test",
+      "clientTick": 336,
+      "context": {
+        "targetBlocking": false,
+        "targetFacing": false
+      }
+    },
+    {
+      "sequence": 24,
+      "nanoTime": 16810000000,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source",
+      "clientTick": 336
+    },
+    {
+      "sequence": 25,
+      "nanoTime": 17300000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 3.0,
+        "aimX": 0.5,
+        "aimY": 0.7,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "minecraft:diamond_sword;slot\u003d0;attributes\u003d0",
+          "attackSpeed": 1.6,
+          "cooldownTicks": 12.5,
+          "timing": {
+            "grade": "OPENER",
+            "intervalTicks": 0.0,
+            "expectedTicks": 12.5
+          },
+          "eye": {
+            "x": 0.0,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": -0.4,
+            "minY": 0.0,
+            "minZ": 2.6,
+            "maxX": 0.4,
+            "maxY": 1.9,
+            "maxZ": 3.4
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.8526315789473685,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.8500000000000001,
+              "z": 0.0
+            },
+            "idealRadius": 0.14399999999999996,
+            "goodRadius": 0.31999999999999995,
+            "peripheralRadius": 0.5599999999999998,
+            "reachable": true
+          },
+          "aimQuality": "GOOD",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "test",
+      "clientTick": 346,
+      "context": {
+        "targetBlocking": false,
+        "targetFacing": false
+      }
+    },
+    {
+      "sequence": 26,
+      "nanoTime": 17900000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 2.92,
+        "aimX": 0.5,
+        "aimY": 0.7,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "minecraft:diamond_sword;slot\u003d0;attributes\u003d0",
+          "attackSpeed": 1.6,
+          "cooldownTicks": 12.5,
+          "timing": {
+            "grade": "OPENER",
+            "intervalTicks": 0.0,
+            "expectedTicks": 12.5
+          },
+          "eye": {
+            "x": 0.0,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": -0.4,
+            "minY": 0.0,
+            "minZ": 2.6,
+            "maxX": 0.4,
+            "maxY": 1.9,
+            "maxZ": 3.4
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.8526315789473685,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.8500000000000001,
+              "z": 0.0
+            },
+            "idealRadius": 0.14399999999999996,
+            "goodRadius": 0.31999999999999995,
+            "peripheralRadius": 0.5599999999999998,
+            "reachable": true
+          },
+          "aimQuality": "GOOD",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "test",
+      "clientTick": 358,
+      "context": {
+        "targetBlocking": false,
+        "targetFacing": false
+      }
+    },
+    {
+      "sequence": 27,
+      "nanoTime": 17910000000,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source",
+      "clientTick": 358
+    },
+    {
+      "sequence": 28,
+      "nanoTime": 18400000000,
+      "kind": "DAMAGE_IN",
+      "actor": "Opponent",
+      "target": "local",
+      "confidence": "CONFIRMED",
+      "detail": "server damage event",
+      "clientTick": 368,
+      "context": {
+        "attribution": "OPPONENT_DIRECT",
+        "damageType": "minecraft:player_attack",
+        "direct": true,
+        "ground": true,
+        "sprinting": false,
+        "movementValid": true
+      }
+    },
+    {
+      "sequence": 29,
+      "nanoTime": 19000000000,
+      "kind": "ATTACK",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "OBSERVED",
+      "attack": {
+        "cooldown": 1.0,
+        "reach": 3.06,
+        "aimX": 0.5,
+        "aimY": 0.7,
+        "aimZ": 0.0,
+        "sprinting": false,
+        "criticalConditions": false,
+        "rayContact": true,
+        "measurement": {
+          "weapon": "minecraft:diamond_sword;slot\u003d0;attributes\u003d0",
+          "attackSpeed": 1.6,
+          "cooldownTicks": 12.5,
+          "timing": {
+            "grade": "OPENER",
+            "intervalTicks": 0.0,
+            "expectedTicks": 12.5
+          },
+          "eye": {
+            "x": 0.0,
+            "y": 1.62,
+            "z": 0.0
+          },
+          "box": {
+            "minX": -0.4,
+            "minY": 0.0,
+            "minZ": 2.6,
+            "maxX": 0.4,
+            "maxY": 1.9,
+            "maxZ": 3.4
+          },
+          "idealRegion": {
+            "nearest": {
+              "x": 0.5,
+              "y": 0.8526315789473685,
+              "z": 0.0
+            },
+            "ideal": {
+              "x": 0.5,
+              "y": 0.8500000000000001,
+              "z": 0.0
+            },
+            "idealRadius": 0.14399999999999996,
+            "goodRadius": 0.31999999999999995,
+            "peripheralRadius": 0.5599999999999998,
+            "reachable": true
+          },
+          "aimQuality": "GOOD",
+          "mode": "MELEE_ATTEMPT"
+        }
+      },
+      "detail": "test",
+      "clientTick": 380,
+      "context": {
+        "targetBlocking": false,
+        "targetFacing": false
+      }
+    },
+    {
+      "sequence": 30,
+      "nanoTime": 19010000000,
+      "kind": "HURT",
+      "actor": "local",
+      "target": "Opponent",
+      "confidence": "CONFIRMED",
+      "detail": "local-melee-source",
+      "clientTick": 380
+    }
+  ],
+  "policy": {
+    "correlationMillis": 250.0,
+    "comboSeconds": 3.0,
+    "jumpWindowMillis": 150.0,
+    "perfectCooldown": 0.95,
+    "greatCooldown": 0.85,
+    "perfectReachTarget": 3.0,
+    "perfectReachTolerance": 0.06,
+    "timingToleranceTicks": 1.0,
+    "jumpWindowTicks": 4
+  },
+  "evaluations": [
+    {
+      "attackSequence": 1,
+      "evidenceSequence": 2,
+      "confidence": "INFERRED",
+      "combo": 1,
+      "momentum": 0.2,
+      "result": "HIT"
+    },
+    {
+      "attackSequence": 3,
+      "evidenceSequence": 4,
+      "confidence": "INFERRED",
+      "combo": 2,
+      "momentum": 0.3637461506155964,
+      "result": "HIT"
+    },
+    {
+      "attackSequence": 5,
+      "evidenceSequence": 6,
+      "confidence": "INFERRED",
+      "combo": 3,
+      "momentum": 0.49781015982272425,
+      "result": "HIT"
+    },
+    {
+      "attackSequence": 8,
+      "evidenceSequence": 9,
+      "confidence": "INFERRED",
+      "combo": 1,
+      "momentum": 0.3410011133433162,
+      "result": "HIT"
+    },
+    {
+      "attackSequence": 12,
+      "evidenceSequence": 13,
+      "confidence": "INFERRED",
+      "combo": 1,
+      "momentum": -0.21004481307584233,
+      "result": "HIT"
+    },
+    {
+      "attackSequence": 17,
+      "evidenceSequence": 18,
+      "confidence": "INFERRED",
+      "combo": 0,
+      "momentum": -0.6007383173471089,
+      "result": "SHIELD_BLOCK"
+    },
+    {
+      "attackSequence": 19,
+      "evidenceSequence": 20,
+      "confidence": "INFERRED",
+      "combo": 1,
+      "momentum": 0.2,
+      "result": "HIT"
+    },
+    {
+      "attackSequence": 21,
+      "evidenceSequence": 22,
+      "confidence": "INFERRED",
+      "combo": 2,
+      "momentum": 0.3637461506155964,
+      "result": "HIT"
+    },
+    {
+      "attackSequence": 23,
+      "evidenceSequence": 24,
+      "confidence": "INFERRED",
+      "combo": 3,
+      "momentum": 0.49781015982272425,
+      "result": "HIT"
+    },
+    {
+      "attackSequence": 26,
+      "evidenceSequence": 27,
+      "confidence": "INFERRED",
+      "combo": 4,
+      "momentum": 0.5450026618488714,
+      "result": "HIT"
+    },
+    {
+      "attackSequence": 29,
+      "evidenceSequence": 30,
+      "confidence": "INFERRED",
+      "combo": 1,
+      "momentum": 0.3737074342109478,
+      "result": "HIT"
+    }
+  ],
+  "opponentLabel": "Opponent",
+  "matchEvidence": {
+    "roundId": "07b89451-cd31-4562-aafd-de0592300e60",
+    "confidence": "CONFIRMED",
+    "entries": [
+      {
+        "nanoTime": 1000000000,
+        "kind": "START",
+        "rule": "minemen-start",
+        "origin": "SYSTEM",
+        "text": "Announcement text redacted",
+        "accepted": true
+      },
+      {
+        "nanoTime": 5200000000,
+        "kind": "RESULT",
+        "rule": "minemen-round-result",
+        "origin": "SYSTEM",
+        "text": "Announcement text redacted",
+        "accepted": true
+      },
+      {
+        "nanoTime": 8000000000,
+        "kind": "ROUND_START",
+        "rule": "minemen-round",
+        "origin": "SYSTEM",
+        "text": "Announcement text redacted",
+        "accepted": true
+      },
+      {
+        "nanoTime": 12000000000,
+        "kind": "RESULT",
+        "rule": "minemen-round-result",
+        "origin": "SYSTEM",
+        "text": "Announcement text redacted",
+        "accepted": true
+      },
+      {
+        "nanoTime": 15000000000,
+        "kind": "ROUND_START",
+        "rule": "minemen-round",
+        "origin": "SYSTEM",
+        "text": "Announcement text redacted",
+        "accepted": true
+      },
+      {
+        "nanoTime": 19600000000,
+        "kind": "RESULT",
+        "rule": "minemen-round-result",
+        "origin": "SYSTEM",
+        "text": "Announcement text redacted",
+        "accepted": true
+      },
+      {
+        "nanoTime": 19700000000,
+        "kind": "RESULT",
+        "rule": "minemen-result",
+        "origin": "SYSTEM",
+        "text": "Announcement text redacted",
+        "accepted": true
+      }
+    ],
+    "timelineStartNanos": 1000000000,
+    "matchId": "27754dae-f836-4ff1-80e3-359877523f63",
+    "roundNumber": 3,
+    "rounds": [
+      {
+        "number": 1,
+        "startNanos": 1000000000,
+        "endNanos": 5200000000,
+        "outcome": "WIN",
+        "rule": "minemen-round-result",
+        "confidence": "CONFIRMED"
+      },
+      {
+        "number": 2,
+        "startNanos": 8000000000,
+        "endNanos": 12000000000,
+        "outcome": "LOSS",
+        "rule": "minemen-round-result",
+        "confidence": "CONFIRMED"
+      },
+      {
+        "number": 3,
+        "startNanos": 15000000000,
+        "endNanos": 19600000000,
+        "outcome": "WIN",
+        "rule": "minemen-round-result",
+        "confidence": "CONFIRMED"
+      }
+    ],
+    "serverSessionId": "1cbad635-7a0f-4c74-957f-2a17bedb5729"
+  },
+  "resolution": {
+    "classification": "CONFIRMED_WIN",
+    "source": "SERVER_MATCH_RESULT",
+    "confidence": "CONFIRMED",
+    "scope": "MATCH",
+    "establishedNanos": 19700000000,
+    "evidenceIndex": 6,
+    "notes": [],
+    "derived": false
+  }
+}

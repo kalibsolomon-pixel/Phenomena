@@ -1,0 +1,840 @@
+{
+ "browser": "Edg/156.0.4314.58",
+ "method": "scripts/review_reports.mjs: file:// in headless Chromium via DevTools; viewports 1440x900, 820x1180, 390x844; tabs overview..timeline; audits at load and after exercising every control. Single runs on one desktop; indicative only.",
+ "templateBytes": {
+  "0.2.0": 73290,
+  "0.2.1": 98033
+ },
+ "before_0_2_0_viewer": [
+  {
+   "report": "01-completed",
+   "bytes": 184613,
+   "views": 15,
+   "maxLoadMs": 26,
+   "maxTabSwitchMs": 3.8,
+   "maxDomElements": 1736,
+   "pageOverflowViews": 1,
+   "svgTextBelow10_5px": 170,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 30,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 279
+  },
+  {
+   "report": "02-multi-round",
+   "bytes": 139625,
+   "views": 15,
+   "maxLoadMs": 24,
+   "maxTabSwitchMs": 2.4,
+   "maxDomElements": 1673,
+   "pageOverflowViews": 1,
+   "svgTextBelow10_5px": 196,
+   "svgLabelOverlaps": 6,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 30,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 261
+  },
+  {
+   "report": "03-exchanges",
+   "bytes": 141533,
+   "views": 15,
+   "maxLoadMs": 20,
+   "maxTabSwitchMs": 2.3,
+   "maxDomElements": 1661,
+   "pageOverflowViews": 1,
+   "svgTextBelow10_5px": 172,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 30,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 261
+  },
+  {
+   "report": "04-manual",
+   "bytes": 412815,
+   "views": 15,
+   "maxLoadMs": 24,
+   "maxTabSwitchMs": 2.3,
+   "maxDomElements": 1762,
+   "pageOverflowViews": 1,
+   "svgTextBelow10_5px": 87,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 24,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 186
+  },
+  {
+   "report": "05-interrupted",
+   "bytes": 108521,
+   "views": 15,
+   "maxLoadMs": 18,
+   "maxTabSwitchMs": 2.1,
+   "maxDomElements": 1642,
+   "pageOverflowViews": 1,
+   "svgTextBelow10_5px": 111,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 30,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 222
+  },
+  {
+   "report": "06-historical-schema1",
+   "bytes": 99988,
+   "views": 15,
+   "maxLoadMs": 12,
+   "maxTabSwitchMs": 2.5,
+   "maxDomElements": 439,
+   "pageOverflowViews": 1,
+   "svgTextBelow10_5px": 88,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 30,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 153
+  },
+  {
+   "report": "07-incomplete",
+   "bytes": 91590,
+   "views": 15,
+   "maxLoadMs": 13,
+   "maxTabSwitchMs": 2.1,
+   "maxDomElements": 338,
+   "pageOverflowViews": 1,
+   "svgTextBelow10_5px": 92,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 30,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 165
+  },
+  {
+   "report": "08-long-match",
+   "bytes": 1172208,
+   "views": 15,
+   "maxLoadMs": 50,
+   "maxTabSwitchMs": 4.5,
+   "maxDomElements": 4431,
+   "pageOverflowViews": 1,
+   "svgTextBelow10_5px": 604,
+   "svgLabelOverlaps": 1158,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 30,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 447
+  }
+ ],
+ "after_0_2_1_viewer": [
+  {
+   "report": "01-completed",
+   "bytes": 210071,
+   "views": 15,
+   "maxLoadMs": 49,
+   "maxTabSwitchMs": 10.4,
+   "maxDomElements": 1859,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 441
+  },
+  {
+   "report": "02-multi-round",
+   "bytes": 165083,
+   "views": 15,
+   "maxLoadMs": 25,
+   "maxTabSwitchMs": 6.5,
+   "maxDomElements": 1797,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 441
+  },
+  {
+   "report": "03-exchanges",
+   "bytes": 166991,
+   "views": 15,
+   "maxLoadMs": 25,
+   "maxTabSwitchMs": 6.6,
+   "maxDomElements": 1792,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 435
+  },
+  {
+   "report": "04-manual",
+   "bytes": 438273,
+   "views": 15,
+   "maxLoadMs": 31,
+   "maxTabSwitchMs": 6.3,
+   "maxDomElements": 1883,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 306
+  },
+  {
+   "report": "05-interrupted",
+   "bytes": 133979,
+   "views": 15,
+   "maxLoadMs": 23,
+   "maxTabSwitchMs": 8,
+   "maxDomElements": 1768,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 381
+  },
+  {
+   "report": "06-historical-schema1",
+   "bytes": 125446,
+   "views": 15,
+   "maxLoadMs": 20,
+   "maxTabSwitchMs": 4.3,
+   "maxDomElements": 525,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 282
+  },
+  {
+   "report": "07-incomplete",
+   "bytes": 117048,
+   "views": 15,
+   "maxLoadMs": 16,
+   "maxTabSwitchMs": 4.3,
+   "maxDomElements": 442,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 306
+  },
+  {
+   "report": "08-long-match",
+   "bytes": 1197666,
+   "views": 15,
+   "maxLoadMs": 48,
+   "maxTabSwitchMs": 13.2,
+   "maxDomElements": 4473,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 837
+  },
+  {
+   "report": "x01-schema2",
+   "bytes": 124637,
+   "views": 15,
+   "maxLoadMs": 24,
+   "maxTabSwitchMs": 6.1,
+   "maxDomElements": 1711,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 303
+  },
+  {
+   "report": "x02-schema3",
+   "bytes": 156296,
+   "views": 15,
+   "maxLoadMs": 21,
+   "maxTabSwitchMs": 5.3,
+   "maxDomElements": 1786,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 345
+  },
+  {
+   "report": "x03-schema5",
+   "bytes": 162798,
+   "views": 15,
+   "maxLoadMs": 22,
+   "maxTabSwitchMs": 5.2,
+   "maxDomElements": 1776,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 354
+  },
+  {
+   "report": "x04-schema5",
+   "bytes": 157917,
+   "views": 15,
+   "maxLoadMs": 22,
+   "maxTabSwitchMs": 5.1,
+   "maxDomElements": 1766,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 354
+  }
+ ],
+ "after_0_2_1_release_set": [
+  {
+   "report": "01-completed",
+   "bytes": 209356,
+   "views": 15,
+   "maxLoadMs": 30,
+   "maxTabSwitchMs": 8.8,
+   "maxDomElements": 1859,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 441
+  },
+  {
+   "report": "02-multi-round",
+   "bytes": 164368,
+   "views": 15,
+   "maxLoadMs": 24,
+   "maxTabSwitchMs": 5.7,
+   "maxDomElements": 1797,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 441
+  },
+  {
+   "report": "03-exchanges",
+   "bytes": 166276,
+   "views": 15,
+   "maxLoadMs": 22,
+   "maxTabSwitchMs": 5.6,
+   "maxDomElements": 1792,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 435
+  },
+  {
+   "report": "04-manual",
+   "bytes": 437558,
+   "views": 15,
+   "maxLoadMs": 27,
+   "maxTabSwitchMs": 5.7,
+   "maxDomElements": 1883,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 306
+  },
+  {
+   "report": "05-interrupted",
+   "bytes": 133264,
+   "views": 15,
+   "maxLoadMs": 20,
+   "maxTabSwitchMs": 4.9,
+   "maxDomElements": 1768,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 381
+  },
+  {
+   "report": "06-historical-schema1",
+   "bytes": 124731,
+   "views": 15,
+   "maxLoadMs": 15,
+   "maxTabSwitchMs": 4.3,
+   "maxDomElements": 526,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 282
+  },
+  {
+   "report": "07-incomplete",
+   "bytes": 116333,
+   "views": 15,
+   "maxLoadMs": 18,
+   "maxTabSwitchMs": 4.1,
+   "maxDomElements": 442,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 306
+  },
+  {
+   "report": "08-long-match",
+   "bytes": 1196951,
+   "views": 15,
+   "maxLoadMs": 63,
+   "maxTabSwitchMs": 13.1,
+   "maxDomElements": 4474,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 837
+  }
+ ],
+ "after_0_2_1_real_recordings_local_only": [
+  {
+   "report": "real-schema1-10000-events",
+   "bytes": 2431107,
+   "views": 15,
+   "maxLoadMs": 75,
+   "maxTabSwitchMs": 26.3,
+   "maxDomElements": 6344,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 828
+  },
+  {
+   "report": "real-schema2-10000-events",
+   "bytes": 4402341,
+   "views": 15,
+   "maxLoadMs": 76,
+   "maxTabSwitchMs": 17.7,
+   "maxDomElements": 7030,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 960
+  },
+  {
+   "report": "real-schema4-5466-events",
+   "bytes": 2184974,
+   "views": 15,
+   "maxLoadMs": 56,
+   "maxTabSwitchMs": 12.2,
+   "maxDomElements": 5190,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 645
+  },
+  {
+   "report": "real-schema4-multi-round-619-events",
+   "bytes": 374848,
+   "views": 15,
+   "maxLoadMs": 21,
+   "maxTabSwitchMs": 6.5,
+   "maxDomElements": 1812,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 426
+  }
+ ],
+ "after_0_2_1_client_written_exports": [
+  {
+   "report": "Fight 2026-11-02 11-34-04",
+   "bytes": 157728,
+   "views": 10,
+   "maxLoadMs": 29,
+   "maxTabSwitchMs": 10.2,
+   "maxDomElements": 1772,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 236
+  },
+  {
+   "report": "Fight 2026-11-02 11-34-12",
+   "bytes": 157836,
+   "views": 10,
+   "maxLoadMs": 25,
+   "maxTabSwitchMs": 5.8,
+   "maxDomElements": 1758,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 236
+  },
+  {
+   "report": "Fight 2026-11-02 11-34-20",
+   "bytes": 157199,
+   "views": 10,
+   "maxLoadMs": 21,
+   "maxTabSwitchMs": 4.9,
+   "maxDomElements": 1766,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 236
+  },
+  {
+   "report": "Fight 2026-11-02 11-34-28",
+   "bytes": 156702,
+   "views": 10,
+   "maxLoadMs": 22,
+   "maxTabSwitchMs": 4.6,
+   "maxDomElements": 1760,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 236
+  },
+  {
+   "report": "Fight 2026-11-02 11-34-37",
+   "bytes": 156937,
+   "views": 10,
+   "maxLoadMs": 24,
+   "maxTabSwitchMs": 5.2,
+   "maxDomElements": 1815,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 246
+  },
+  {
+   "report": "Fight 2026-11-02 11-34-41",
+   "bytes": 141441,
+   "views": 10,
+   "maxLoadMs": 20,
+   "maxTabSwitchMs": 4.9,
+   "maxDomElements": 1741,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 258
+  },
+  {
+   "report": "Fight 2026-11-02 11-35-13",
+   "bytes": 124338,
+   "views": 10,
+   "maxLoadMs": 19,
+   "maxTabSwitchMs": 5.1,
+   "maxDomElements": 1739,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 226
+  },
+  {
+   "report": "Manual Session 2026-11-02 11-35-14",
+   "bytes": 154380,
+   "views": 10,
+   "maxLoadMs": 22,
+   "maxTabSwitchMs": 6,
+   "maxDomElements": 1747,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 180
+  },
+  {
+   "report": "Manual Session 2026-11-02 11-35-16",
+   "bytes": 116560,
+   "views": 10,
+   "maxLoadMs": 15,
+   "maxTabSwitchMs": 4.1,
+   "maxDomElements": 418,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 156
+  },
+  {
+   "report": "Manual Session 2026-11-02 11-35-21",
+   "bytes": 115603,
+   "views": 10,
+   "maxLoadMs": 15,
+   "maxTabSwitchMs": 3.8,
+   "maxDomElements": 414,
+   "pageOverflowViews": 0,
+   "svgTextBelow10_5px": 0,
+   "svgLabelOverlaps": 0,
+   "svgLabelsOutside": 0,
+   "htmlTextBelow11_5pxElements": 0,
+   "errors": 0,
+   "externalRequests": 0,
+   "interactions": 154
+  }
+ ],
+ "playbackSeekBenchmark_identicalPayloads": {
+  "real-schema1-10000-events": {
+   "old": {
+    "bytes": 2406288,
+    "seeks200Ms": 929.6,
+    "timelineLoadMs": 70
+   },
+   "new": {
+    "bytes": 2431107,
+    "seeks200Ms": 932.5,
+    "timelineLoadMs": 85
+   }
+  },
+  "real-schema4-5466-events": {
+   "old": {
+    "bytes": 2160155,
+    "seeks200Ms": 1006.3,
+    "timelineLoadMs": 38
+   },
+   "new": {
+    "bytes": 2184974,
+    "seeks200Ms": 884.8,
+    "timelineLoadMs": 41
+   }
+  },
+  "real-schema2-10000-events": {
+   "old": {
+    "bytes": 4377522,
+    "seeks200Ms": 1065.4,
+    "timelineLoadMs": 60
+   },
+   "new": {
+    "bytes": 4402341,
+    "seeks200Ms": 968.3,
+    "timelineLoadMs": 71
+   }
+  },
+  "synthetic-08-long-match": {
+   "old": {
+    "bytes": 1172770,
+    "seeks200Ms": 721.1,
+    "timelineLoadMs": 24
+   },
+   "new": {
+    "bytes": 1197589,
+    "seeks200Ms": 591.6,
+    "timelineLoadMs": 40
+   }
+  }
+ },
+ "resizeRebuild": {
+  "01-completed": {
+   "before": {
+    "value": "minecraft:diamond_axe",
+    "svgWidth": 1152
+   },
+   "after": {
+    "value": "minecraft:diamond_axe",
+    "svgViewBoxWidth": 358,
+    "overflow": 0
+   },
+   "preserved": true,
+   "errors": []
+  },
+  "02-multi-round": {
+   "before": {
+    "value": "minecraft:diamond_sword",
+    "svgWidth": 1152
+   },
+   "after": {
+    "value": "minecraft:diamond_sword",
+    "svgViewBoxWidth": 358,
+    "overflow": 0
+   },
+   "preserved": true,
+   "errors": []
+  },
+  "03-exchanges": {
+   "before": {
+    "value": "minecraft:diamond_sword",
+    "svgWidth": 1152
+   },
+   "after": {
+    "value": "minecraft:diamond_sword",
+    "svgViewBoxWidth": 358,
+    "overflow": 0
+   },
+   "preserved": true,
+   "errors": []
+  },
+  "04-manual": {
+   "before": {
+    "value": "minecraft:diamond_axe",
+    "svgWidth": 1152
+   },
+   "after": {
+    "value": "minecraft:diamond_axe",
+    "svgViewBoxWidth": 358,
+    "overflow": 0
+   },
+   "preserved": true,
+   "errors": []
+  },
+  "05-interrupted": {
+   "before": {
+    "value": "minecraft:diamond_sword",
+    "svgWidth": 1152
+   },
+   "after": {
+    "value": "minecraft:diamond_sword",
+    "svgViewBoxWidth": 358,
+    "overflow": 0
+   },
+   "preserved": true,
+   "errors": []
+  },
+  "06-historical-schema1": {
+   "before": null,
+   "after": {
+    "value": "all",
+    "svgViewBoxWidth": 358,
+    "overflow": 0
+   },
+   "preserved": true,
+   "errors": []
+  },
+  "07-incomplete": {
+   "before": null,
+   "after": {
+    "value": "all",
+    "svgViewBoxWidth": 358,
+    "overflow": 0
+   },
+   "preserved": true,
+   "errors": []
+  },
+  "08-long-match": {
+   "before": {
+    "value": "minecraft:diamond_sword",
+    "svgWidth": 1152
+   },
+   "after": {
+    "value": "minecraft:diamond_sword",
+    "svgViewBoxWidth": 358,
+    "overflow": 0
+   },
+   "preserved": true,
+   "errors": []
+  }
+ }
+}

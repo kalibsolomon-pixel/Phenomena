@@ -2,6 +2,8 @@
 
 Standalone, client-side PvP analytics for **Minecraft Java 1.21.11**, Fabric, Java 21. Press **K** in a world to open the Phenomena dashboard. The key is a normal Minecraft key mapping (Controls > Phenomena) and can also be rebound in the dashboard's Settings > Controls.
 
+**0.2.1**: the shareable HTML fight report was redesigned in the same Spxctra language as the dashboard — result-first header, sticky tabs, confidence-labelled cards with inline definitions, collapsible methodology, charts drawn at real pixel width for phones and tablets, and round/exchange navigation on the timeline. Reports stay single offline files; the payload and format version are unchanged, so existing exports are not regenerated. See the [0.2.1 report](docs/0.2.1.md) and [example reports](docs/example-reports-0.2.1/01-completed/index.html).
+
 **0.2.0**: the project formerly named KWAMSTER is now **Phenomena** (mod id `phenomena`, packages `dev.phenomena`, artifact `phenomena-0.2.0.jar`). Existing `kwamster/` data and `config/kwamster.json` migrate forward automatically and non-destructively on first launch — see the [migration and modernization report](docs/PHENOMENA_MIGRATION.md). The dashboard was rebuilt on a per-pixel renderer (analytic device-pixel antialiasing adapted from Aurora Client's coverage rasterizer) with the restrained Spxctra design language; the primary command is now **`/phenomena`** (`/kwm` remains a deprecated alias).
 
 Phenomena observes combat. It never changes reach, cooldowns, attacks, movement, knockback or network packets. No server installation is needed. Training against living entities is supported. Tracking and recording run in the background whether or not the dashboard is open.
@@ -17,7 +19,7 @@ $env:JAVA_HOME = (Get-ChildItem .tools -Directory -Filter 'jdk-21*' | Select-Obj
 ./gradlew.bat runClientGameTest
 ~~~
 
-On another machine install Java 21 and set JAVA_HOME, then use the checked-in Gradle wrapper. The wrapper verifies its distribution checksum. Development build output: build/libs/phenomena-0.2.0.jar. Sources and integration-test mods are not required to use the mod.
+On another machine install Java 21 and set JAVA_HOME, then use the checked-in Gradle wrapper. The wrapper verifies its distribution checksum. Development build output: build/libs/phenomena-0.2.1.jar. Sources and integration-test mods are not required to use the mod.
 
 ## Combat exchanges and accuracy (0.1.6)
 
