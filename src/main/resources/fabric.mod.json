@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "id": "kwamster",
+  "id": "phenomena",
   "version": "${version}",
-  "name": "KWAMSTER",
+  "name": "Phenomena",
   "description": "Local, confidence-aware modern PvP analytics.",
   "environment": "client",
   "entrypoints": {
     "client": [
-      "dev.kwamster.KwamsterClient"
+      "dev.phenomena.PhenomenaClient"
     ]
   },
   "depends": {
@@ -17,6 +17,6 @@
     "fabric-api": "*"
   },
   "mixins": [
-    "kwamster.mixins.json"
+    "phenomena.mixins.json"
   ]
 }

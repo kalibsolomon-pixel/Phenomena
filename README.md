@@ -1,8 +1,8 @@
-# KWAMSTER
+# Phenomena
 
-Standalone, client-side PvP analytics for **Minecraft Java 1.21.11**, Fabric, Java 21. Press **K** in a world to open the KWAMSTER dashboard. The key is a normal Minecraft key mapping (Controls > KWAMSTER) and can also be rebound in the dashboard's Settings > Controls.
+Standalone, client-side PvP analytics for **Minecraft Java 1.21.11**, Fabric, Java 21. Press **K** in a world to open the Phenomena dashboard. The key is a normal Minecraft key mapping (Controls > Phenomena) and can also be rebound in the dashboard's Settings > Controls.
 
-KWAMSTER observes combat. It never changes reach, cooldowns, attacks, movement, knockback or network packets. No server installation is needed. Training against living entities is supported. Tracking and recording run in the background whether or not the dashboard is open.
+Phenomena observes combat. It never changes reach, cooldowns, attacks, movement, knockback or network packets. No server installation is needed. Training against living entities is supported. Tracking and recording run in the background whether or not the dashboard is open.
 
 ## Build and run
 
@@ -15,7 +15,7 @@ $env:JAVA_HOME = (Get-ChildItem .tools -Directory -Filter 'jdk-21*' | Select-Obj
 ./gradlew.bat runClientGameTest
 ~~~
 
-On another machine install Java 21 and set JAVA_HOME, then use the checked-in Gradle wrapper. The wrapper verifies its distribution checksum. Development build output: build/libs/kwamster-0.1.6.jar. This assignment does not install it into Aurora. Sources and integration-test mods are not required to use the mod.
+On another machine install Java 21 and set JAVA_HOME, then use the checked-in Gradle wrapper. The wrapper verifies its distribution checksum. Development build output: build/libs/phenomena-0.1.6.jar. This assignment does not install it into Aurora. Sources and integration-test mods are not required to use the mod.
 
 ## Combat exchanges and accuracy (0.1.6)
 
@@ -74,7 +74,7 @@ See [implementation and validation](docs/0.1.2.md). The [synthetic report](docs/
 
 ## Browser replay
 
-Every finalized automatic fight, with recording enabled (default), automatically writes its JSON recording and a self-contained HTML report without opening the GUI. **View in Browser** reuses the same export folder and opens it. Exports live in `kwamster/exports/Fight <date> <time>/index.html` when anonymization is on (default), or `Fight vs <opponent> <date> <time>` when off. Local recordings always retain known opponent names independently of sharing privacy.
+Every finalized automatic fight, with recording enabled (default), automatically writes its JSON recording and a self-contained HTML report without opening the GUI. **View in Browser** reuses the same export folder and opens it. Exports live in `phenomena/exports/Fight <date> <time>/index.html` when anonymization is on (default), or `Fight vs <opponent> <date> <time>` when off. Local recordings always retain known opponent names independently of sharing privacy.
 
 The page works offline: no hosted site, external scripts or network requests. Tabs: Overview (result, evidence, interpretations), Offense (accuracy, reach histogram, aim faces, weapon timing), Defense (attribution, shields, tick-aligned jump timeline, damage and knockback), Fight Flow (clickable combo timeline, dominance graph, exchanges) and Timeline (play/pause, speed, scrubbing and annotations). Playback follows recorded event timestamps; it does not reconstruct the Minecraft world. Failed writes retry three times, then every 30 seconds while running, and missing or damaged exports recover on restart. Completed exports are checked by content digest and reused.
 
@@ -88,14 +88,14 @@ Accuracy is **confirmed hits / (attempts − confirmed shield blocks)**, includi
 
 | What | Location (relative to the Minecraft game directory) |
 | --- | --- |
-| Configuration | config/kwamster.json (schema 2; a schema-1 file is migrated and its original kept as kwamster.json.v1-backup) |
-| Manual checkpoints | kwamster/pending-sessions/&lt;uuid&gt;.json; recovered locally after interruption |
-| Diagnostics (opt-in) | kwamster/diagnostics/&lt;capture-id&gt;.json and fixtures-&lt;timestamp&gt;.json |
-| Server inventory | kwamster/server-compatibility.json |
-| Recordings | kwamster/fights/Fight [vs &lt;opponent&gt;] &lt;date&gt; &lt;time&gt;/&lt;uuid&gt;.json; legacy root UUID files also load |
-| Reports and exports | kwamster/exports/Fight [vs &lt;opponent&gt;] &lt;date&gt; &lt;time&gt;/index.html and report.json |
+| Configuration | config/phenomena.json (schema 2; a schema-1 file is migrated and its original kept as phenomena.json.v1-backup) |
+| Manual checkpoints | phenomena/pending-sessions/&lt;uuid&gt;.json; recovered locally after interruption |
+| Diagnostics (opt-in) | phenomena/diagnostics/&lt;capture-id&gt;.json and fixtures-&lt;timestamp&gt;.json |
+| Server inventory | phenomena/server-compatibility.json |
+| Recordings | phenomena/fights/Fight [vs &lt;opponent&gt;] &lt;date&gt; &lt;time&gt;/&lt;uuid&gt;.json; legacy root UUID files also load |
+| Reports and exports | phenomena/exports/Fight [vs &lt;opponent&gt;] &lt;date&gt; &lt;time&gt;/index.html and report.json |
 
-Automatic saves preserve existing files and do not prune recordings. Retention limits in-memory history; the legacy manual-save budget does not delete automatic recordings. Nothing is uploaded. Reports are anonymized by default (opponent ID and name replaced by "Opponent"); this can be turned off in Settings > Recording & storage. Folder and browser actions only open these KWAMSTER-managed locations, resolved from the game directory and validated fight IDs.
+Automatic saves preserve existing files and do not prune recordings. Retention limits in-memory history; the legacy manual-save budget does not delete automatic recordings. Nothing is uploaded. Reports are anonymized by default (opponent ID and name replaced by "Opponent"); this can be turned off in Settings > Recording & storage. Folder and browser actions only open these Phenomena-managed locations, resolved from the game directory and validated fight IDs.
 
 ## Persistent HUD
 

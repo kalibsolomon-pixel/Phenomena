@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "dev.phenomena.testmixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "FrameProbeMixin",
+    "ChatProbeMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "mixins": [
+    "CommandProbeMixin"
+  ]
+}

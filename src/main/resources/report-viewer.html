@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
 <meta name="referrer" content="no-referrer">
-<title>KWAMSTER Fight Report</title>
+<title>Phenomena Fight Report</title>
 <style>
 :root{
   color-scheme:dark;
@@ -94,7 +94,7 @@ footer{color:var(--dim);font-size:12px;padding-top:14px}
 </style>
 </head>
 <body>
-<header class="top"><div class="wrap"><span class="brand">KWAMSTER</span><span class="sub">Fight report</span><span class="badges" id="badges"></span></div></header>
+<header class="top"><div class="wrap"><span class="brand">Phenomena</span><span class="sub">Fight report</span><span class="badges" id="badges"></span></div></header>
 <div class="wrap">
 <div class="ident"><h1 id="title">Fight</h1><p id="subtitle"></p></div>
 <div id="session-controls"></div>
@@ -106,9 +106,9 @@ footer{color:var(--dim);font-size:12px;padding-top:14px}
 <section role="tabpanel" id="p-flow" aria-labelledby="t-flow"></section>
 <section role="tabpanel" id="p-timeline" aria-labelledby="t-timeline"></section>
 </main>
-<footer>Generated locally by KWAMSTER. This file makes no network requests and nothing was uploaded. Share the folder yourself if you choose.</footer>
+<footer>Generated locally by Phenomena. This file makes no network requests and nothing was uploaded. Share the folder yourself if you choose.</footer>
 </div>
-<script id="data" type="application/json">__KWAMSTER_PAYLOAD__</script>
+<script id="data" type="application/json">__PHENOMENA_PAYLOAD__</script>
 <script>
 'use strict';
 (function(){
@@ -531,7 +531,7 @@ timeline(p){
   seek.oninput=()=>setT(Number(seek.value)/1000*dur);filter.onchange=render;
   document.addEventListener('keydown',e=>{if(!$('p-timeline').classList.contains('on')||e.target.tagName==='SELECT'||e.target.tagName==='INPUT')return;if(e.key===' '){e.preventDefault();toggle(!playing);}else if(e.key==='.')next.click();else if(e.key===',')prev.click();},{signal});
   render();
-  note(p,'Playback advances through the recorded timestamps at the chosen speed. It annotates what KWAMSTER observed; it does not reconstruct positions or the Minecraft world. Space plays or pauses; comma and period step between events.');
+  note(p,'Playback advances through the recorded timestamps at the chosen speed. It annotates what Phenomena observed; it does not reconstruct positions or the Minecraft world. Space plays or pauses; comma and period step between events.');
 }};
 function h3Text(parent,text){parent.append(el('h3',null,text));}
 function shieldTimeline(parent){const ev=shields.events||[];if(!ev.length)return;const W=900,H=72,L=86,R=12;const{box,svg,t}=chartBox(parent,W,H,'Shield events over time');const tx=v=>L+(W-L-R)*v/dur;

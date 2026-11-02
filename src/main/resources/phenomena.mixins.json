@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "dev.phenomena.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "MinecraftMixin",
+    "GameModeMixin",
+    "PacketListenerMixin",
+    "LivingEntityMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -3,8 +3,8 @@ plugins {
     id 'maven-publish'
 }
 version = project.mod_version
-group = 'dev.kwamster'
-base { archivesName = 'kwamster' }
+group = 'dev.phenomena'
+base { archivesName = 'phenomena' }
 repositories { mavenCentral() }
 dependencies {
     minecraft 'com.mojang:minecraft:1.21.11'
@@ -20,23 +20,23 @@ tasks.withType(JavaCompile).configureEach { options.release = 21 }
 processResources { inputs.property 'version', project.version; filesMatching('fabric.mod.json') { expand 'version': project.version } }
 test { useJUnitPlatform() }
 
-fabricApi { configureTests { createSourceSet = true; modId = 'kwamster-test'; enableGameTests = false; enableClientGameTests = true; clearRunDirectory = false } }
+fabricApi { configureTests { createSourceSet = true; modId = 'phenomena-test'; enableGameTests = false; enableClientGameTests = true; clearRunDirectory = false } }
 
 processGametestResources {
     def mode = providers.gradleProperty('performance').orElse('functional')
     inputs.property 'testMode', mode
     filesMatching('fabric.mod.json') {
-        expand 'entrypoint': mode.get() == 'baseline' ? 'dev.kwamster.FabricBaselineTest' : mode.get() == 'mod' ? 'dev.kwamster.ModPerformanceTest' : 'dev.kwamster.KwamsterGameTest'
+        expand 'entrypoint': mode.get() == 'baseline' ? 'dev.phenomena.FabricBaselineTest' : mode.get() == 'mod' ? 'dev.phenomena.ModPerformanceTest' : 'dev.phenomena.PhenomenaGameTest'
     }
 }
 loom.runs.clientGameTest {
-    vmArg '-Dkwamster.perfOutput=' + layout.buildDirectory.dir(providers.gradleProperty('validationRun').map { 'performance/' + it }.orElse('performance').get()).get().asFile.absolutePath
+    vmArg '-Dphenomena.perfOutput=' + layout.buildDirectory.dir(providers.gradleProperty('validationRun').map { 'performance/' + it }.orElse('performance').get()).get().asFile.absolutePath
     if (providers.gradleProperty('performance').orNull in ['baseline', 'mod']) vmArg '-Dfabric.modsFolder=' + layout.buildDirectory.dir('performance/mods').get().asFile.absolutePath
     // Packet-observation mixins require Fabric's test packet synchronizer to be disabled.
     vmArg '-Dfabric.client.gametest.disableNetworkSynchronizer=true'
-    if (providers.gradleProperty('performance').orNull == 'baseline') vmArg '-Dfabric.debug.disableModIds=kwamster'
+    if (providers.gradleProperty('performance').orNull == 'baseline') vmArg '-Dfabric.debug.disableModIds=phenomena'
     // -PrealOpen=true lets the client test launch the real file manager and browser once.
-    if (providers.gradleProperty('realOpen').orNull == 'true') vmArg '-Dkwamster.realOpen=true'
+    if (providers.gradleProperty('realOpen').orNull == 'true') vmArg '-Dphenomena.realOpen=true'
 }
 
 tasks.register('benchmarkAnalytics', JavaExec) {
@@ -44,7 +44,7 @@ tasks.register('benchmarkAnalytics', JavaExec) {
     description = 'Measure synthetic event processing, allocation and atomic recording overhead'
     dependsOn testClasses
     classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'dev.kwamster.AnalyticsBenchmark'
+    mainClass = 'dev.phenomena.AnalyticsBenchmark'
     javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
 }
 
@@ -59,7 +59,7 @@ tasks.register('generateExampleReport', JavaExec) {
     group = 'verification'
     dependsOn testClasses
     classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'dev.kwamster.ReportExample'
+    mainClass = 'dev.phenomena.ReportExample'
     javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
 }
 
@@ -67,14 +67,14 @@ tasks.register('generateManualExampleReport', JavaExec) {
     group = 'verification'
     dependsOn testClasses
     classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'dev.kwamster.ManualReportExample'
+    mainClass = 'dev.phenomena.ManualReportExample'
     javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
 }
 tasks.register('benchmarkRecording', JavaExec) {
     group = 'verification'
     dependsOn testClasses
     classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'dev.kwamster.RecordingBenchmark'
+    mainClass = 'dev.phenomena.RecordingBenchmark'
     javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
 }
 
@@ -83,7 +83,7 @@ tasks.register('benchmarkCapture', JavaExec) {
     description = 'Measure configured capture, rule matching, diagnostics and a long multi-round match'
     dependsOn testClasses
     classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'dev.kwamster.CaptureBenchmark'
+    mainClass = 'dev.phenomena.CaptureBenchmark'
     javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
 }
 
@@ -92,7 +92,7 @@ tasks.register('replayCapturedEvidence', JavaExec) {
     description = 'Replay ignored private six-server evidence prepared by the extraction script'
     dependsOn testClasses
     classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'dev.kwamster.ReplayCapturedEvidence'
+    mainClass = 'dev.phenomena.ReplayCapturedEvidence'
     javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
 }
 
@@ -100,7 +100,7 @@ tasks.register('benchmarkCombatExchanges', JavaExec) {
     group = 'verification'
     dependsOn testClasses
     classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'dev.kwamster.ExchangeBenchmark'
+    mainClass = 'dev.phenomena.ExchangeBenchmark'
     javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
 }
 
@@ -108,6 +108,6 @@ tasks.register('generateExchangeExampleReport', JavaExec) {
     group = 'verification'
     dependsOn testClasses
     classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'dev.kwamster.ExchangeReportExample'
+    mainClass = 'dev.phenomena.ExchangeReportExample'
     javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
 }
