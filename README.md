@@ -2,6 +2,12 @@
 
 Standalone, client-side PvP analytics for **Minecraft Java 1.21.11**, Fabric, Java 21. Press **K** in a world to open the Phenomena dashboard. The key is a normal Minecraft key mapping (Controls > Phenomena) and can also be rebound in the dashboard's Settings > Controls.
 
+## Install
+
+Download **phenomena-0.2.1.jar** from the [official release](https://github.com/kalibsolomon-pixel/Phenomena/releases/tag/v0.2.1). Use Minecraft **1.21.11**, **Java 21**, Fabric Loader **0.19.5 or later**, and Fabric API **0.141.6+1.21.11**. Put the Phenomena and Fabric API jars in your Fabric profile's `mods` folder. Aurora Client is not required.
+
+Upgrading from KWAMSTER: remove the old mod jar first; do not install both versions together. See the [release notes and upgrade instructions](docs/RELEASE_NOTES_0.2.1.md) for legacy data handling and known limitations.
+
 **0.2.1**: the shareable HTML fight report was redesigned in the same Spxctra language as the dashboard — result-first header, sticky tabs, confidence-labelled cards with inline definitions, collapsible methodology, charts drawn at real pixel width for phones and tablets, and round/exchange navigation on the timeline. Reports stay single offline files; the payload and format version are unchanged, so existing exports are not regenerated. See the [0.2.1 report](docs/0.2.1.md) and [example reports](docs/example-reports-0.2.1/01-completed/index.html).
 
 **0.2.0**: the project formerly named KWAMSTER is now **Phenomena** (mod id `phenomena`, packages `dev.phenomena`, artifact `phenomena-0.2.0.jar`). Existing `kwamster/` data and `config/kwamster.json` migrate forward automatically and non-destructively on first launch — see the [migration and modernization report](docs/PHENOMENA_MIGRATION.md). The dashboard was rebuilt on a per-pixel renderer (analytic device-pixel antialiasing adapted from Aurora Client's coverage rasterizer) with the restrained Spxctra design language; the primary command is now **`/phenomena`** (`/kwm` remains a deprecated alias).

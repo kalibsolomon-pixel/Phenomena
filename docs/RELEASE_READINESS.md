@@ -1,6 +1,26 @@
 # Release readiness
 
-## 0.1.6 local review status
+## 0.2.1 public release validation — 2026-11-02
+
+The owner approved publication as **Phenomena 0.2.1** to [kalibsolomon-pixel/Phenomena](https://github.com/kalibsolomon-pixel/Phenomena). The checkout initially had no remote or tags; no existing repository for this project was found in the authenticated owner's account. The similarly named public KWAMSTER project under another owner has different history and is not the release destination.
+
+Release source builds on development commit `69699b63f39bc8111d31b6189aa802bc97d2e455`. Release preparation changes installation and release documentation only. The native GUI, recording implementation, analytics, dependencies and report schemas remain unchanged from the accepted implementation.
+
+Verified production artifact: **`phenomena-0.2.1.jar`**, **610,742 bytes**, SHA-256 **`7164c15a00eee27b456aae8a40640d1cfd3044611ec6639db8f9b5c015e605ba`**. A fresh build in an isolated Git worktree reproduced the development jar byte-for-byte. Its Fabric identity, version, client entry point, four mixins, resource namespace and embedded report template were inspected. No tests, test instrumentation, private files or Aurora dependency are bundled. Opt-in local diagnostics remain an intended product feature.
+
+- Unit suite: **362 cases: 361 passed, one pre-existing Windows symlink skip, zero failures/errors**.
+- Muted Fabric 1.21.11 functional client: passed recording, native GUI, exports, configured capture environments, manual interruption, notification lifecycle and clean shutdown.
+- Packaged-jar production client: the same full acceptance sequence passed in [Loom's production launcher](https://docs.fabricmc.net/develop/loom/production-run-tasks), using the release jar and a separate remapped test mod; clean shutdown and master volume zero confirmed. Test helpers are excluded from the distributed jar.
+- Four-mod compatibility client: the same sequence passed with Sodium 0.8.14, Lithium 0.21.4, FerriteCore 8.2.0 and ImmediatelyFast 1.14.3 together, without Aurora.
+- Historical recordings: **332/332** exported separately, schemas 1, 2, 4 and 5, zero failures. All original recording lengths, timestamps and SHA-256 hashes remained unchanged. Schema 3 retains unit and client coverage.
+- Offline static checks: passed on **397** historical, synthetic and functional/compatibility/production-client reports.
+- Edge 156 browser review: **280 views** across eight synthetic reports, ten functional-client reports and four large historical reports; zero script errors, external requests or horizontal page overflow. Desktop, tablet and phone viewport emulation, filters, navigation, playback and resizing were exercised. The largest historical examples contain up to 10,000 events.
+
+Remaining limits are documented in the [release notes](RELEASE_NOTES_0.2.1.md): Chromium-only browser evidence, emulated mobile input, unreviewed print output, transient selection loss across responsive breakpoints and one label escaping a long-match chart at extreme zoom. Existing HTML exports retain their old appearance until individually re-exported. These do not compromise the release's recording or offline-report contracts.
+
+The sections below are historical assessments; their former publication restrictions and browser-tool limits do not describe this release.
+
+## 0.1.6 local review status (historical)
 
 Development jar: `build/libs/kwamster-0.1.6.jar`. The [full report](0.1.6.md) establishes the PVPHQ premature-finalization code path, preserves the Bo3tu/Bo3tw screenshot uncertainty, documents additional MCPvP failures and corrections, and defines canonical two-tick attack groups and independent combat exchanges. Automated build/unit/replay/history validation passes; muted client and compatibility evidence is in VALIDATION.md. Original owner data remains unchanged; local commit only.
 
