@@ -111,3 +111,13 @@ tasks.register('generateExchangeExampleReport', JavaExec) {
     mainClass = 'dev.phenomena.ExchangeReportExample'
     javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
 }
+
+tasks.register('generateReportSamples', JavaExec) {
+    group = 'verification'
+    description = 'Export the deterministic synthetic HTML report review set'
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'dev.phenomena.ReportSamples'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    args([providers.gradleProperty('samplesOut').orElse('build/report-samples').get()] + providers.gradleProperty('samplesExtra').map { it.split(';').toList() }.orElse([]).get())
+}

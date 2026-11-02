@@ -58,7 +58,7 @@ def main():
                 assert "'Match rounds'" in code and 'Not announced' in code,html
             if fight.get('session'):
                 manual+=1
-                assert "'Participant '" in code and "'Exchange filter'" in code,html
+                assert "'Participant filter'" in code and "'Exchange filter'" in code,html
             assert 'comboTimeline' in code and 'dominance' in code,html
             count+=1
     result=dict(reports=count,reportsWithRounds=rounds,manualReports=manual,uniqueScripts=len(scripts),

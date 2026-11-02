@@ -5,129 +5,257 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
 <meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="dark">
+<meta name="generator" content="Phenomena">
 <title>Phenomena Fight Report</title>
 <style>
+/* Spxctra tokens, mirrored from dev.phenomena.gui.theme.Theme (named by role, not value). */
 :root{
   color-scheme:dark;
-  --bg:#101316;--surface:#171c21;--surface-2:#1d2329;--hover:#262d34;--pressed:#12161a;
-  --inset:#12161a;--border:#39424b;--border-soft:#2a3138;--grid:#252c33;
-  --text:#e8edeb;--muted:#9ba7ad;--dim:#6d777d;
-  --radius:4px;
-  --accent:#88c8aa;--warn:#e4c46e;
-  --you:#3987e5;--opp:#d95926;--good:#199e70;--neutral:#8a949a;--incomplete:#5e676d;
-  --ideal:#56b4e9;--goodaim:#009e73;--peripheral:#e69f00;--poor:#cc79a7;
-  --mono:"Minecraft","Minecraftia","Monocraft",ui-monospace,"Cascadia Mono",Consolas,"DejaVu Sans Mono",monospace;
+  --bg:#101316;--header:#141920;--surface:#171c21;--surface-2:#1d2329;--hover:#262d34;--pressed:#12161a;--inset:#12161a;
+  --border:#39424b;--border-soft:#2a3138;--grid:#252c33;
+  --text:#e8edeb;--muted:#9ba7ad;--dim:#7a848b;
+  --accent:#88c8aa;--warn:#e4c46e;--error:#e49790;
+  --you:#3987e5;--opp:#d95926;--good:#199e70;
+  --radius:4px;--radius-sm:3px;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"Cascadia Mono",Consolas,"DejaVu Sans Mono",monospace;
+  --ease:120ms cubic-bezier(.2,0,0,1);
+  --gutter:24px;--tabs-h:46px;
 }
 *{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 html,body{margin:0;background:var(--bg);color:var(--text)}
-body{font:14px/1.45 var(--mono);letter-spacing:.01em}
-.wrap{max-width:1080px;margin:0 auto;padding:0 16px 48px}
-header.top{background:#15191c;border-bottom:1px solid var(--border-soft)}
-header.top .wrap{display:flex;align-items:center;gap:14px;padding-top:12px;padding-bottom:12px;flex-wrap:wrap}
-.brand{font-weight:700;letter-spacing:.14em;color:var(--accent)}
-.sub{color:var(--dim)}
-.badges{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
-.badge{border:1px solid var(--border);border-radius:var(--radius);padding:1px 7px;color:var(--muted);font-size:12px}
-.ident{padding:16px 0 4px}
-.ident h1{font-size:18px;margin:0 0 4px;font-weight:700}
-.ident p{margin:0;color:var(--muted)}
-nav.tabs{display:flex;gap:2px;margin-top:14px;border-bottom:1px solid var(--border-soft);overflow-x:auto;scrollbar-width:thin}
-nav.tabs button{background:transparent;border:0;border-bottom:2px solid transparent;color:var(--muted);padding:8px 14px;font:inherit;cursor:pointer;white-space:nowrap}
-nav.tabs button:hover{background:var(--surface-2);color:var(--text)}
-nav.tabs button[aria-selected=true]{background:var(--surface);color:var(--text);border-bottom-color:var(--accent)}
-button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-main.panel{background:var(--surface);border:1px solid var(--border-soft);border-top:0;border-radius:0 0 var(--radius) var(--radius);padding:16px}
+body{font:15px/1.5 var(--sans);font-variant-numeric:tabular-nums;overflow-x:hidden}
+.wrap{max-width:1200px;margin:0 auto;padding:0 var(--gutter)}
+.skip{position:absolute;left:-9999px;top:0}
+.skip:focus{left:8px;top:8px;z-index:10;background:var(--surface-2);color:var(--text);padding:6px 10px;border-radius:var(--radius)}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* App bar: the same quiet wordmark row as the native dashboard. */
+.appbar{background:var(--header);border-bottom:1px solid var(--border-soft)}
+.appbar .wrap{display:flex;align-items:baseline;gap:12px;min-height:48px;padding-top:11px;padding-bottom:11px;flex-wrap:wrap}
+.brand{font-weight:700;font-size:17px;letter-spacing:.02em;color:var(--accent)}
+.appbar .sub{color:var(--muted)}
+.appbar .status{margin-left:auto;color:var(--muted);font-size:13px;display:flex;align-items:center;gap:6px}
+.appbar .status::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block}
+
+/* Report header: the result first, then who, where and when. One static tonal band, no effects. */
+.hero{background:linear-gradient(180deg,var(--header) 0%,var(--bg) 100%);padding:22px 0 18px}
+.result-line{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 6px}
+.result{display:inline-flex;align-items:center;gap:7px;font-weight:700;font-size:14px;padding:3px 10px;border-radius:var(--radius);border:1px solid currentColor;line-height:1.3}
+.result::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.result.win{color:var(--accent)}.result.loss{color:var(--error)}.result.interrupted{color:var(--warn)}.result.neutral{color:var(--muted)}
+.result-detail{color:var(--muted);font-size:14px}
+h1{font-size:26px;line-height:1.25;font-weight:700;margin:4px 0 14px;overflow-wrap:anywhere}
+dl.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 24px;margin:0}
+dl.meta div{min-width:0}
+dl.meta dt{color:var(--dim);font-size:12px;margin:0}
+dl.meta dd{margin:1px 0 0;font-size:14px;overflow-wrap:anywhere}
+.coverage{margin:14px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}
+.coverage li{color:var(--muted);font-size:13px;padding-left:14px;position:relative;max-width:90ch}
+.coverage li::before{content:"";position:absolute;left:2px;top:.6em;width:6px;height:6px;border-radius:1px;background:var(--warn)}
+
+/* Manual session scope. */
+.scope{display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;padding:10px 12px;margin:0 0 14px;background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius)}
+.scope:empty{display:none}
+.scope .lead{color:var(--muted);font-size:13px;margin-right:2px}
+
+/* Tabs: flat at rest, accent underline when selected; sticky so navigation stays in reach. */
+.tabs-bar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--border-soft)}
+nav.tabs{display:flex;overflow-x:auto;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs button{flex:1 0 auto;min-height:var(--tabs-h);background:transparent;border:0;color:var(--muted);padding:0 18px;font:inherit;font-size:15px;cursor:pointer;white-space:nowrap;position:relative;transition:color var(--ease),background-color var(--ease)}
+nav.tabs button::after{content:"";position:absolute;left:12px;right:12px;bottom:0;height:3px;border-radius:2px 2px 0 0;background:transparent;transition:background-color var(--ease)}
+nav.tabs button:hover{color:var(--text);background:var(--surface)}
+nav.tabs button[aria-selected=true]{color:var(--text);font-weight:600}
+nav.tabs button[aria-selected=true]::after{background:var(--accent)}
+nav.tabs button:focus-visible{outline-offset:-2px}
+
+main.panel{padding:18px 0 8px;min-width:0}
 section[role=tabpanel]{display:none}
 section[role=tabpanel].on{display:block}
-nav.sections{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 6px}
-nav.sections a{color:var(--muted);border:1px solid var(--border);padding:2px 9px;text-decoration:none;font-size:12px}
-nav.sections a:hover{color:var(--text);background:var(--surface-2)}
-h2{font-size:14px;font-weight:700;margin:24px 0 8px;display:flex;align-items:center;gap:10px;scroll-margin-top:8px}
-h2:first-child,nav.sections+h2{margin-top:6px}
-h2::after{content:"";flex:1;height:1px;background:var(--border-soft)}
-h2 small{color:var(--dim);font-weight:400;order:2}
-h3{font-size:13px;margin:14px 0 6px;color:var(--muted);font-weight:700}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px}
-.card{background:var(--surface-2);padding:8px 10px;box-shadow:inset 0 1px 0 rgba(255,255,255,.07);min-width:0}
-.card .l{color:var(--muted);font-size:12px}
-.card .v{font-size:18px;font-weight:700;margin:2px 0;overflow-wrap:anywhere}
-.card .v.none{color:var(--dim)}
-.card .c{color:var(--dim);font-size:11px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 6px;align-items:baseline}
-.card.result .v{font-size:16px}
-.tag{display:inline-block;font-size:10px;border:1px solid var(--border);color:var(--dim);padding:0 4px;white-space:nowrap;margin-left:auto}
-.note{background:rgba(34,40,45,.6);border-left:2px solid var(--border);padding:8px 12px;color:var(--muted);margin:10px 0}
+section[role=tabpanel]:focus{outline:none}
+
+/* Section chips (jump links) as in the native sub-navigation. */
+nav.chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 6px}
+nav.chips a{color:var(--muted);border:1px solid var(--border);border-radius:14px;padding:3px 12px;text-decoration:none;font-size:13px;line-height:20px;transition:color var(--ease),background-color var(--ease),border-color var(--ease)}
+nav.chips a:hover{color:var(--text);background:var(--surface-2)}
+nav.chips a[aria-current=true]{color:var(--text);border-color:var(--accent);background:rgba(136,200,170,.08)}
+
+h2{font-size:17px;font-weight:600;margin:30px 0 10px;display:flex;align-items:baseline;gap:12px;scroll-margin-top:calc(var(--tabs-h) + 14px)}
+h2::after{content:"";flex:1;height:1px;background:var(--border-soft);align-self:center;min-width:16px}
+h2 small{color:var(--dim);font-weight:400;font-size:13px;order:2;text-align:right}
+.chips+h2,section>h2:first-child{margin-top:12px}
+h3{font-size:14px;margin:18px 0 6px;color:var(--muted);font-weight:600}
+p{margin:6px 0}
+p.muted{color:var(--muted);max-width:90ch}
+
+/* Metric cards: label, value with unit, caption, and the measurement's confidence in words. */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:8px;margin:8px 0}
+.card{background:var(--surface-2);border:1px solid var(--border-soft);border-radius:var(--radius);padding:10px 12px;min-width:0;display:flex;flex-direction:column;gap:2px}
+@supports (grid-template-rows:subgrid){.cards .card{display:grid;grid-row:span 3;grid-template-rows:subgrid;gap:2px;align-content:start}.cards .card .foot{align-self:end}}
+.card .top{display:flex;align-items:flex-start;gap:6px}
+.card .l{color:var(--muted);font-size:13px;line-height:1.35;flex:1;min-width:0}
+.card .v{font-size:22px;font-weight:700;line-height:1.25;overflow-wrap:anywhere}
+.card .v .u{font-size:14px;font-weight:600;color:var(--muted);margin-left:2px}
+.card .v.none{color:var(--dim);font-weight:600}
+.card .v.text{font-size:16px}
+.card .foot{margin-top:auto;min-width:0}
+.card .c{color:var(--dim);font-size:12.5px;display:flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline;padding-top:2px}
+.card .c span:first-child{flex:1 1 auto;min-width:0}
+.conf{font-size:12px;line-height:17px;border:1px solid var(--border);color:var(--muted);padding:0 5px;border-radius:var(--radius-sm);max-width:100%;overflow-wrap:anywhere}
+.conf.confirmed{color:var(--accent);border-color:rgba(136,200,170,.55)}
+.conf.inferred{border-style:dashed}
+.conf.estimated{color:var(--warn);border-color:rgba(228,196,110,.5)}
+button.info{flex:none;width:22px;height:22px;margin:-2px -4px 0 0;border:1px solid transparent;border-radius:var(--radius-sm);background:transparent;color:var(--dim);font:600 12px/1 var(--sans);cursor:pointer;padding:0}
+button.info:hover{color:var(--text);background:var(--hover)}
+button.info[aria-expanded=true]{color:var(--text);border-color:var(--border)}
+.card .def{margin:6px 0 0;padding-top:6px;border-top:1px solid var(--border-soft);color:var(--muted);font-size:12.5px;line-height:1.45}
+
+/* Compact secondary statistics: one row each, lighter than cards. */
+dl.kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:0 24px;margin:6px 0 10px}
+dl.kv div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 12px;padding:6px 0;border-bottom:1px solid var(--border-soft);align-items:baseline}
+dl.kv dt{color:var(--muted);font-size:13.5px;margin:0}
+dl.kv dd{margin:0;font-weight:600;text-align:right}
+dl.kv dd.none{color:var(--dim)}
+dl.kv small{grid-column:1/-1;color:var(--dim);font-size:12px}
+
+/* Notes: visible callouts for caveats, collapsible blocks for methodology. */
+.note{background:var(--surface);border-left:2px solid var(--border);border-radius:0 var(--radius) var(--radius) 0;padding:9px 13px;color:var(--muted);margin:10px 0;font-size:14px;max-width:110ch}
 .note.warn{border-left-color:var(--warn)}
-ul.facts{margin:6px 0 0;padding-left:18px;color:var(--text)}
-ul.facts li{margin:3px 0}
-p.muted{color:var(--muted);margin:6px 0}
-button.mc,select.mc,select{background:var(--surface-2);color:var(--text);border:1px solid var(--border);padding:5px 10px;font:inherit;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -1px 0 rgba(0,0,0,.25);max-width:100%}
-button.mc:hover,select:hover{background:var(--hover)}
-button.mc:active{background:var(--pressed);box-shadow:none}
-button.mc[aria-pressed=true]{border-color:var(--accent)}
-.controls{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:6px 0 10px}
-.controls label{color:var(--muted);font-size:12px;display:flex;gap:6px;align-items:center}
-.controls output{color:var(--muted);min-width:120px}
-input[type=range]{flex:1;min-width:140px;accent-color:var(--accent)}
-.chart{position:relative;background:rgba(34,40,45,.55);margin:4px 0}
-.chart svg{display:block;width:100%;height:auto}
-.legend{display:flex;gap:6px 16px;flex-wrap:wrap;color:var(--muted);font-size:12px;margin:4px 0 2px}
-.legend i{display:inline-block;width:9px;height:9px;margin-right:6px;vertical-align:0}
+details{margin:10px 0}
+details>summary{cursor:pointer;color:var(--muted);font-size:14px;padding:6px 0;list-style:none;display:flex;align-items:center;gap:8px;width:max-content;max-width:100%}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"";width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(-45deg);transition:transform var(--ease);margin:0 3px 0 1px;flex:none}
+details[open]>summary::before{transform:rotate(45deg)}
+details>summary:hover{color:var(--text)}
+details>summary .count{color:var(--dim)}
+details.method>div{color:var(--muted);font-size:14px;max-width:110ch;padding:2px 0 4px 18px}
+details.method p{margin:0 0 6px}
+ul.facts{margin:6px 0 0;padding-left:20px;max-width:100ch}
+ul.facts li{margin:4px 0}
+
+/* Controls. */
+button.btn,select{background:var(--surface-2);color:var(--text);border:1px solid var(--border);border-radius:var(--radius);min-height:34px;padding:5px 12px;font:inherit;font-size:14px;cursor:pointer;max-width:100%;transition:background-color var(--ease)}
+select{padding-right:8px}
+button.btn:hover,select:hover{background:var(--hover)}
+button.btn:active{background:var(--pressed)}
+button.btn.primary{border-color:rgba(136,200,170,.6)}
+.controls{display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;margin:8px 0 10px}
+.controls label{color:var(--muted);font-size:13px;display:flex;gap:8px;align-items:center;min-width:0}
+.controls .pair{display:inline-flex;gap:8px}
+.controls output{color:var(--muted);font-size:14px;min-width:118px}
+input[type=range]{flex:1 1 160px;min-width:120px;accent-color:var(--accent);height:28px;margin:0}
+
+/* Charts are drawn at their real pixel width, so text stays at its stated size. */
+.chart{position:relative;margin:6px 0;touch-action:pan-y}
+.chart svg{display:block;width:100%;height:auto;overflow:visible;font-family:var(--sans)}
+.legend{display:flex;gap:4px 16px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin:6px 0 4px}
+.legend span{display:inline-flex;align-items:center}
+.legend i{display:inline-block;width:10px;height:10px;margin-right:6px;border-radius:2px;flex:none}
 .legend i.hollow{background:transparent!important;border:2px solid}
-.legend i.dotted{background:repeating-linear-gradient(45deg,var(--incomplete) 0 2px,transparent 2px 4px)!important}
-.tip{position:absolute;pointer-events:none;background:#0d0f11;border:1px solid var(--border);padding:3px 7px;font-size:12px;white-space:nowrap;display:none;z-index:2;max-width:90vw;overflow:hidden;text-overflow:ellipsis}
-table{border-collapse:collapse;width:100%;font-size:12px}
-th,td{text-align:left;padding:4px 8px;border-bottom:1px solid var(--border-soft)}
-th{color:var(--dim);font-weight:400;background:var(--surface-2);position:sticky;top:0}
-td.r,th.r{text-align:right}
+.legend i.dotted{background:repeating-linear-gradient(45deg,#5e676d 0 2px,transparent 2px 4px)!important}
+.tip{position:absolute;pointer-events:none;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 4px 14px rgba(0,0,0,.35);padding:5px 9px;font-size:13px;line-height:1.4;display:none;z-index:4;max-width:min(360px,calc(100% - 8px));white-space:normal;color:var(--text)}
+.bar{display:flex;height:14px;border-radius:var(--radius-sm);overflow:hidden;background:var(--inset);margin:8px 0 2px}
+.bar span{display:block;height:100%;min-width:2px}
+.bar span+span{border-left:2px solid var(--surface)}
+.empty{color:var(--muted);padding:18px;text-align:center;background:var(--inset);border-radius:var(--radius);margin:6px 0}
+
+/* Tables scroll inside their own frame, never the page. */
+.scroll{max-height:380px;overflow:auto;border:1px solid var(--border-soft);border-radius:var(--radius);margin:6px 0;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--border-soft);vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{color:var(--muted);font-weight:500;background:var(--surface-2);position:sticky;top:0;z-index:1;white-space:nowrap}
+td.r,th.r{text-align:right;white-space:nowrap}
+tbody tr:hover td{background:rgba(38,45,52,.55)}
 tr.cur td,tr.sel td{background:var(--hover)}
-.scroll{max-height:360px;overflow:auto;border:1px solid var(--border-soft)}
-.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
-.now{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px;margin:8px 0}
-.annot{background:var(--surface-2);border-left:2px solid var(--accent);padding:8px 12px;min-height:38px}
-.annot b{font-weight:700}
-.empty{color:var(--muted);padding:18px;text-align:center}
-svg .sel{stroke:var(--text);stroke-width:2}
+tr.sel td:first-child,tr.cur td:first-child{box-shadow:inset 2px 0 0 var(--accent)}
+.ink-win{color:var(--accent)}.ink-loss{color:var(--error)}.ink-warn{color:var(--warn)}.ink-dim{color:var(--dim)}
+
+.now{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:10px 0}
+.now .card .v{font-size:19px}
+.annot{background:var(--surface);border-left:2px solid var(--accent);border-radius:0 var(--radius) var(--radius) 0;padding:9px 13px;min-height:42px;font-size:14px}
+.annot b{font-weight:600}
 svg [tabindex]{cursor:pointer}
-footer{color:var(--dim);font-size:12px;padding-top:14px}
-@media (max-width:720px){.split{grid-template-columns:1fr}.badges{margin-left:0}main.panel{padding:12px}}
-@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
-.reduced *{transition:none!important}
+svg [tabindex]:focus{outline:none}
+svg [tabindex]:focus-visible{stroke:var(--accent);stroke-width:2}
+footer{color:var(--dim);font-size:13px;padding:22px 0 40px;border-top:1px solid var(--border-soft);margin-top:30px}
+footer p{margin:2px 0}
+
+@media (max-width:820px){
+  :root{--gutter:16px}
+  .cards{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+  h1{font-size:22px}
+}
+@media (max-width:520px){
+  body{font-size:14.5px}
+  .card{padding:9px 10px}
+  .card .v{font-size:20px}
+  dl.meta{grid-template-columns:1fr 1fr}
+  dl.kv{grid-template-columns:1fr}
+  .controls label{flex-wrap:wrap}
+  .controls select{flex:1 1 auto}
+  h2{flex-wrap:wrap;row-gap:0}
+  h2::after{display:none}
+  h2 small{order:3;flex-basis:100%;text-align:left}
+  table{width:max-content;min-width:100%}
+  td{max-width:240px}
+  .tabs-bar .wrap{padding:0}
+  nav.tabs button{padding:0 9px;font-size:14px}
+  nav.tabs button::after{left:6px;right:6px}
+}
+@media (max-width:380px){nav.tabs{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent)}}
+@media (min-width:1600px){.wrap{max-width:1320px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;scroll-behavior:auto!important}}
+.reduced *,.reduced *::before,.reduced *::after{transition:none!important}
+@media print{
+  :root{--bg:#fff;--surface:#fff;--surface-2:#f4f6f6;--inset:#eef1f1;--text:#111;--muted:#444;--dim:#666;--border:#bbb;--border-soft:#ddd;--header:#fff}
+  .tabs-bar,nav.chips,.controls,button.info,.skip,.scope{display:none!important}
+  .hero{background:none}
+  .scroll{max-height:none;overflow:visible}
+}
 </style>
 </head>
 <body>
-<header class="top"><div class="wrap"><span class="brand">Phenomena</span><span class="sub">Fight report</span><span class="badges" id="badges"></span></div></header>
+<a class="skip" href="#main">Skip to report</a>
+<header class="appbar"><div class="wrap"><span class="brand">Phenomena</span><span class="sub">Fight report</span><span class="status" id="status">Offline file</span></div></header>
+<section class="hero" aria-labelledby="title"><div class="wrap">
+<p class="result-line" id="result-line"></p>
+<h1 id="title">Fight report</h1>
+<dl class="meta" id="meta"></dl>
+<ul class="coverage" id="coverage" aria-label="Data coverage"></ul>
+</div></section>
+<div class="wrap"><div class="scope" id="session-controls" role="group" aria-label="Manual session scope"></div></div>
+<div class="tabs-bar"><div class="wrap"><nav class="tabs" role="tablist" aria-label="Report sections" id="tabs"></nav></div></div>
 <div class="wrap">
-<div class="ident"><h1 id="title">Fight</h1><p id="subtitle"></p></div>
-<div id="session-controls"></div>
-<nav class="tabs" role="tablist" aria-label="Report sections" id="tabs"></nav>
-<main class="panel">
-<section role="tabpanel" id="p-overview" aria-labelledby="t-overview"></section>
-<section role="tabpanel" id="p-offense" aria-labelledby="t-offense"></section>
-<section role="tabpanel" id="p-defense" aria-labelledby="t-defense"></section>
-<section role="tabpanel" id="p-flow" aria-labelledby="t-flow"></section>
-<section role="tabpanel" id="p-timeline" aria-labelledby="t-timeline"></section>
+<main class="panel" id="main" tabindex="-1">
+<section role="tabpanel" id="p-overview" aria-labelledby="t-overview" tabindex="-1"></section>
+<section role="tabpanel" id="p-offense" aria-labelledby="t-offense" tabindex="-1"></section>
+<section role="tabpanel" id="p-defense" aria-labelledby="t-defense" tabindex="-1"></section>
+<section role="tabpanel" id="p-flow" aria-labelledby="t-flow" tabindex="-1"></section>
+<section role="tabpanel" id="p-timeline" aria-labelledby="t-timeline" tabindex="-1"></section>
 </main>
-<footer>Generated locally by Phenomena. This file makes no network requests and nothing was uploaded. Share the folder yourself if you choose.</footer>
+<footer><p>Generated locally by Phenomena. This file makes no network requests and nothing was uploaded; share it yourself if you choose.</p><p id="facts"></p></footer>
 </div>
 <script id="data" type="application/json">__PHENOMENA_PAYLOAD__</script>
 <script>
 'use strict';
 (function(){
 const ROOT=JSON.parse(document.getElementById('data').textContent);
-let renderAbort;
-function render(P){
-if(renderAbort)renderAbort.abort();
-renderAbort=new AbortController();const signal=renderAbort.signal;
-for(const id of ['tabs','badges','p-overview','p-offense','p-defense','p-flow','p-timeline'])document.getElementById(id).replaceChildren();
-const F=P.fight, D=P.derived, S=D.summary, E=F.events||[];
-const base=F.matchEvidence?.timelineStartNanos??(E.length?E[0].nanoTime:0), dur=Math.max(S.duration||0,.001);
 const NS='http://www.w3.org/2000/svg';
 const $=id=>document.getElementById(id);
-if(P.reducedMotion)document.documentElement.classList.add('reduced');
-const METRIC={};for(const m of P.metrics||[])METRIC[m.key]=m;
-const V3=!!S.contextAvailable;
+/* Chart inks resolved once (SVG presentation attributes do not reliably accept CSS variables). */
+const C={text:'#e8edeb',muted:'#9ba7ad',dim:'#7a848b',grid:'#252c33',axis:'#39424b',lane:'#12161a',plot:'#141a1f',
+  you:'#3987e5',opp:'#d95926',good:'#199e70',warn:'#e4c46e',accent:'#88c8aa',neutral:'#8a949a',incomplete:'#5e676d',
+  unknown:'#6c767c',estimated:'#2f7f63',ideal:'#56b4e9',goodaim:'#009e73',peripheral:'#e69f00',poor:'#cc79a7',
+  youBand:'rgba(57,135,229,.38)',oppBand:'rgba(217,89,38,.38)',window:'rgba(25,158,112,.18)'};
+const reduceMotion=ROOT.reducedMotion||matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(ROOT.reducedMotion)document.documentElement.classList.add('reduced');
 
-// ---- formatting (mirrors analytics.Format) ----
+// ---- formatting (mirrors analytics.Format; missing values are never shown as zero) ----
 const NONE='—';
 const fin=v=>typeof v==='number'&&isFinite(v);
 const pct=v=>fin(v)?v.toFixed(1)+'%':NONE;
@@ -135,58 +263,137 @@ const m2=v=>fin(v)?v.toFixed(2)+' m':NONE;
 const s2=v=>fin(v)?v.toFixed(2)+' s':NONE;
 const num=(v,d)=>fin(v)?v.toFixed(d):NONE;
 const sgn=(v,d)=>fin(v)?(v>0?'+':'')+v.toFixed(d):NONE;
-const sec=e=>(e.nanoTime-base)/1e9;
-const isEmpty=e=>!e.attack||(e.detail||'').startsWith('empty-swing');
+const cnt=v=>fin(v)?String(v):NONE;
 const cap=s=>s?(s=String(s).replace(/_/g,' '),s.charAt(0).toUpperCase()+s.slice(1).toLowerCase()):'';
 const item=w=>w?String(w).split(';')[0].replace(/^minecraft:/,'').replace(/_/g,' '):'unknown';
-function el(tag,attrs,text){const n=document.createElement(tag);if(attrs)for(const k in attrs){if(k==='class')n.className=attrs[k];else n.setAttribute(k,attrs[k]);}if(text!=null)n.textContent=String(text);return n;}
+function dur2(s){if(!fin(s))return NONE;if(s<60)return s.toFixed(1)+' s';const m=Math.floor(s/60),r=s-60*m;return m+' min '+r.toFixed(0).padStart(2,'0')+' s';}
+function el(tag,attrs,text){const n=document.createElement(tag);if(attrs)for(const k in attrs){if(attrs[k]==null)continue;if(k==='class')n.className=attrs[k];else n.setAttribute(k,attrs[k]);}if(text!=null)n.textContent=String(text);return n;}
 function sv(tag,attrs){const n=document.createElementNS(NS,tag);if(attrs)for(const k in attrs)n.setAttribute(k,attrs[k]);return n;}
-function svgText(svg,x,y,text,attrs){const t=sv('text',Object.assign({x,y,fill:'#7d878d','font-size':11},attrs||{}));t.textContent=text;svg.append(t);return t;}
+function svgText(svg,x,y,text,attrs){const t=sv('text',Object.assign({x,y,fill:C.muted,'font-size':12},attrs||{}));t.textContent=text;svg.append(t);return t;}
+let uid=0;
+/** Greedy label placement: returns false when a label would collide with one already placed. */
+function slots(){const used=[];return(cx,text,size,anchor)=>{const w=String(text).length*(size||12)*.58+6,x0=anchor==='start'?cx:anchor==='end'?cx-w:cx-w/2;if(used.some(([a,b])=>x0<b&&a<x0+w))return false;used.push([x0,x0+w]);return true;};}
+
+/** Content width of the report panel; charts are laid out in real pixels at this width. */
+function cw(){const p=$('main'),cs=getComputedStyle(p);return Math.max(280,Math.floor(p.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight)));}
+/** 1-2-5 tick spacing aiming at roughly `px` pixels between labels. */
+function niceStep(range,span,px){const raw=range*px/Math.max(1,span),p=Math.pow(10,Math.floor(Math.log10(raw||1)));for(const m of[1,2,5,10])if(m*p>=raw)return m*p;return 10*p;}
+function clock(v,step){if(v>=60){const m=Math.floor(v/60),s=v-60*m;return m+':'+(step<1?s.toFixed(1).padStart(4,'0'):Math.round(s).toString().padStart(2,'0'));}return(step<1?v.toFixed(1):v.toFixed(0))+' s';}
+function timeAxis(svg,x0,x1,y,maxT,opts){const step=niceStep(maxT,x1-x0,(opts&&opts.px)||86);const tx=v=>x0+(x1-x0)*v/maxT;
+  svg.append(sv('line',{x1:x0,x2:x1,y1:y,y2:y,stroke:C.axis}));let lastX=-1e9;
+  for(let k=0;k*step<=maxT+1e-9;k++){const v=k*step,x=tx(v);svg.append(sv('line',{x1:x,x2:x,y1:y,y2:y+4,stroke:C.axis}));
+    if(k>0&&x1-x<36)continue;svgText(svg,x,y+17,clock(v,step),{'text-anchor':k===0?'start':'middle'});lastX=x;}
+  if(x1-lastX>=64)svgText(svg,x1,y+17,clock(maxT,step<1?.1:1),{'text-anchor':'end',fill:C.dim});}
+
+// ---- tooltips: pointer, touch and keyboard focus ----
+function tip(box){const t=el('div',{class:'tip'});box.append(t);return t;}
+function place(t,box,x,y,text){t.textContent=text;t.style.display='block';const r=box.getBoundingClientRect();let left=x-r.left+12;if(left+t.offsetWidth>r.width)left=Math.max(0,x-r.left-t.offsetWidth-12);t.style.left=Math.max(0,Math.min(left,r.width-t.offsetWidth))+'px';let top=y-r.top-t.offsetHeight-10;if(top<0)top=y-r.top+16;t.style.top=top+'px';}
+function hoverTip(node,t,box,text){const show=ev=>place(t,box,ev.clientX,ev.clientY,typeof text==='function'?text():text);
+  node.addEventListener('pointermove',show);node.addEventListener('pointerdown',show);node.addEventListener('pointerleave',ev=>{if(ev.pointerType==='mouse')t.style.display='none';});
+  if(node.hasAttribute('tabindex')){node.addEventListener('focus',()=>{const b=node.getBoundingClientRect();place(t,box,b.left+b.width/2,b.top,typeof text==='function'?text():text);});node.addEventListener('blur',()=>t.style.display='none');}}
+function legend(parent,items){const l=el('div',{class:'legend'});for(const it of items){const s=el('span');const i=el('i',it.hollow?{class:'hollow'}:it.dotted?{class:'dotted'}:null);if(it.hollow)i.style.borderColor=it.color;else i.style.background=it.color;s.append(i,document.createTextNode(it.name));l.append(s);}parent.append(l);return l;}
+function chartBox(parent,W,H,aria){const box=el('div',{class:'chart'});const svg=sv('svg',{viewBox:`0 0 ${W} ${H}`,width:W,height:H,role:'img','aria-label':aria});box.append(svg);parent.append(box);const t=tip(box);svg.addEventListener('pointerleave',ev=>{if(ev.pointerType==='mouse')t.style.display='none';});return{box,svg,t};}
+function emptyText(svg,W,H,text){svgText(svg,W/2,H/2+4,text,{'text-anchor':'middle',fill:C.muted,'font-size':13});}
+function laneBg(svg,x,y,w,h){svg.append(sv('rect',{x,y,width:w,height:h,rx:3,fill:C.lane}));}
+
+let renderAbort,rebuildTab=null;
+function render(P,scopeTitle){
+if(renderAbort)renderAbort.abort();
+renderAbort=new AbortController();const signal=renderAbort.signal;
+for(const id of['tabs','meta','coverage','result-line','facts','p-overview','p-offense','p-defense','p-flow','p-timeline'])$(id).replaceChildren();
+const F=P.fight, D=P.derived, S=D.summary, E=F.events||[];
+const base=F.matchEvidence?.timelineStartNanos??(E.length?E[0].nanoTime:0), dur=Math.max(S.duration||0,.001);
+const METRIC={};for(const m of P.metrics||[])METRIC[m.key]=m;
+const V3=!!S.contextAvailable;
+const sec=e=>(e.nanoTime-base)/1e9;
+const isEmpty=e=>!e.attack||(e.detail||'').startsWith('empty-swing');
+
+// ---- building blocks ----
 function h2(parent,text,small,id){const h=el('h2',id?{id}:null,text);if(small)h.append(el('small',null,small));parent.append(h);return h;}
+function h3Text(parent,text){parent.append(el('h3',null,text));}
 function note(parent,text,warn){parent.append(el('div',{class:'note'+(warn?' warn':'')},text));}
-function card(label,value,caption,key,extra){const c=el('div',{class:'card'+(extra?' '+extra:'')});const d=key&&METRIC[key];const cap0=el('div',{class:'c'});cap0.append(el('span',null,caption||''));if(d){cap0.append(el('span',{class:'tag'},d.confidence));c.title=d.confidence+': '+d.help;}c.append(el('div',{class:'l'},label),el('div',{class:'v'+(value===NONE?' none':'')},value),cap0);return c;}
+/** Methodology stays one click away instead of interrupting the figures. */
+function method(parent,text,title){const d=el('details',{class:'method'});d.append(el('summary',null,title||'How this is measured'));const b=el('div');for(const para of[].concat(text))b.append(el('p',null,para));d.append(b);parent.append(d);return d;}
+function collapsible(parent,title,count,open){const d=el('details',open?{open:''}:null);const s=el('summary',null,title);if(count!=null)s.append(el('span',{class:'count'},'('+count+')'));d.append(s);parent.append(d);return d;}
+function confClass(c){c=(c||'').toLowerCase();return c.startsWith('confirmed')?'confirmed':c.startsWith('estimated')||c.startsWith('legacy')?'estimated':c.startsWith('inferred')?'inferred':'observed';}
+function valueNode(value){const v=el('div',{class:'v'});const s=String(value);
+  if(s===NONE){v.classList.add('none');v.textContent=NONE;v.setAttribute('aria-label','Unavailable');v.title='Unavailable in this recording';return v;}
+  const m=/^([−+-]?[\d.,]+)\s?(%|m|s|HP|t)$/.exec(s);if(m){v.append(document.createTextNode(m[1]),el('span',{class:'u'},m[2]));return v;}
+  if(!/^[\d−+\-.,\s/×()%]+$/.test(s))v.classList.add('text');v.textContent=s;return v;}
+function card(label,value,caption,key,extra){const c=el('div',{class:'card'+(extra?' '+extra:'')});const d=key&&METRIC[key];
+  const top=el('div',{class:'top'});top.append(el('div',{class:'l'},label));c.append(top,valueNode(value));
+  const foot=el('div',{class:'foot'}),cap0=el('div',{class:'c'});cap0.append(el('span',null,caption||''));foot.append(cap0);c.append(foot);
+  if(d){cap0.append(el('span',{class:'conf '+confClass(d.confidence),title:'Confidence: '+d.confidence},d.confidence));
+    const id='def'+(++uid);const b=el('button',{class:'info',type:'button','aria-expanded':'false','aria-controls':id,'aria-label':'Definition of '+label,title:'Definition'},'?');
+    const def=el('p',{class:'def',id,hidden:''},d.help+(d.unit?' Unit: '+d.unit+'.':''));b.onclick=()=>{const open=b.getAttribute('aria-expanded')!=='true';b.setAttribute('aria-expanded',open);def.hidden=!open;};top.append(b);foot.append(def);}
+  return c;}
 function cards(parent,list){const g=el('div',{class:'cards'});for(const x of list)g.append(card(...x));parent.append(g);return g;}
+/** Secondary statistics as a compact list: [label, value, caption?]. */
+function kv(parent,list){const d=el('dl',{class:'kv'});for(const[l,v,c]of list){const r=el('div');r.append(el('dt',null,l),el('dd',v===NONE?{class:'none','aria-label':'Unavailable'}:null,v));if(c)r.append(el('small',null,c));d.append(r);}parent.append(d);return d;}
 function label(key,fallback){return METRIC[key]?METRIC[key].label:fallback;}
-function sections(parent,list){const n=el('nav',{class:'sections','aria-label':'Sections'});for(const[id,name]of list){const a=el('a',{href:'#'+id},name);a.onclick=e=>{e.preventDefault();const t=$(id);if(t)t.scrollIntoView({block:'start'});};n.append(a);}parent.append(n);}
 function facts(parent,lines){const u=el('ul',{class:'facts'});for(const l of lines)u.append(el('li',null,l));parent.append(u);}
 function select(parent,labelText,options,onchange){const l=el('label',null,labelText);const s=el('select');for(const[v,t]of options)s.append(el('option',{value:v},t));s.onchange=()=>onchange(s.value);l.append(s);parent.append(l);return s;}
 function controls(parent){const c=el('div',{class:'controls'});parent.append(c);return c;}
+/** Section jump links with a lightweight current-section indicator. */
+function chips(parent,list){const n=el('nav',{class:'chips','aria-label':'Sections in this tab'});const links={};
+  for(const[id,name]of list){const a=el('a',{href:'#'+id},name);links[id]=a;a.onclick=e=>{e.preventDefault();const t=$(id);if(t)t.scrollIntoView({block:'start',behavior:reduceMotion?'auto':'smooth'});};n.append(a);}
+  parent.prepend(n);
+  if('IntersectionObserver'in window){const io=new IntersectionObserver(es=>{for(const e of es)if(e.isIntersecting){for(const k in links)links[k].removeAttribute('aria-current');links[e.target.id]?.setAttribute('aria-current','true');}},{rootMargin:'-20% 0px -70% 0px'});
+    queueMicrotask(()=>{for(const[id]of list){const t=$(id);if(t)io.observe(t);}});signal.addEventListener('abort',()=>io.disconnect());}
+  return n;}
+function stack(parent,items,aria){const total=items.reduce((a,b)=>a+(b.v||0),0);const box=el('div',{class:'chart'});const bar=el('div',{class:'bar',role:'img','aria-label':aria||items.map(i=>i.name+' '+i.v).join(', ')});const t=tip(box);
+  for(const it of items){if(!total||!it.v)continue;const s=el('span');s.style.width=(100*it.v/total)+'%';s.style.background=it.color;hoverTip(s,t,box,it.name+': '+it.v+' ('+pct(100*it.v/total)+')');bar.append(s);}
+  box.append(bar);parent.append(box);
+  const l=el('div',{class:'legend'});for(const it of items){const s=el('span');const i=el('i');i.style.background=it.color;s.append(i,document.createTextNode(it.name+' '+(it.v??0)+(total?' · '+pct(100*(it.v||0)/total):'')));l.append(s);}parent.append(l);if(!total)parent.append(el('p',{class:'muted'},'No observations.'));}
+function table(parent,heads,rows,right,max){const wrap=el('div',{class:'scroll'});const t=el('table');const tr=el('tr');heads.forEach((h,i)=>tr.append(el('th',right&&right[i]?{class:'r',scope:'col'}:{scope:'col'},h)));const th=el('thead');th.append(tr);t.append(th);const tb=el('tbody');for(const r of rows.slice(0,max||rows.length)){const row=el('tr');r.forEach((c,i)=>{const td=el('td',right&&right[i]?{class:'r'}:null);if(c instanceof Node)td.append(c);else td.textContent=c;row.append(td);});tb.append(row);}t.append(tb);wrap.append(t);if(rows.length)parent.append(wrap);else parent.append(el('p',{class:'muted'},'No rows.'));return tb;}
+function ink(text,cls){return el('span',{class:cls},text);}
 
-// ---- header ----
+// ---- report header ----
+const R=D.resolution||{classification:String(F.outcome||'UNKNOWN'),label:cap(F.outcome),source:'',confidence:'OBSERVED',notes:[]};
+const cls=R.classification||'';
+const short={CONFIRMED_WIN:'Win',INFERRED_WIN:'Win · inferred',CONFIRMED_LOSS:'Loss',INFERRED_LOSS:'Loss · inferred',DRAW:'Draw',UNKNOWN:'Result unknown',INTERRUPTED:'Interrupted'}[cls]||R.label||'Result unknown';
+const tone=cls.endsWith('WIN')?'win':cls.endsWith('LOSS')?'loss':cls==='INTERRUPTED'?'interrupted':'neutral';
 const opp=P.opponentLabel||'Opponent';
-const R=D.resolution||{label:cap(F.outcome),source:'',confidence:'OBSERVED',notes:[]};
-$('title').textContent='Fight vs '+opp+' — '+R.label;
-$('subtitle').textContent=new Date(F.startEpochMillis).toLocaleString()+' · '+num(dur,1)+' s, '+E.length+' events · '+(R.source||'')+(R.derived?' (recording made before 0.1.3)':'');
-for(const b of ['Offline',P.anonymized?'Anonymized':'Not anonymized',P.motionIncluded?'Motion included':'Motion omitted','Report v'+P.version,V3?'Schema '+D.schema:'Schema '+D.schema+': limited observations'])$('badges').append(el('span',{class:'badge'},b));
+$('result-line').append(el('span',{class:'result '+tone},short),el('span',{class:'result-detail'},[R.label,R.source].filter(Boolean).join(' · ')+(R.derived&&!/0\.1\.3/.test(R.source||'')?' · derived from a pre-0.1.3 recording':'')));
+const title=scopeTitle||(F.session?'Manual recording session':'Fight vs '+opp);
+$('title').textContent=title;
+document.title=title+' · '+short+' · Phenomena';
+const server=F.matchEvidence?.server||ROOT.fight.matchEvidence?.server;
+const when=new Date(F.startEpochMillis);
+const whenText=isNaN(when)?NONE:when.toLocaleString(undefined,{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',timeZoneName:'short'});
+const status=cls==='INTERRUPTED'?'Interrupted'+(R.source?' — '+R.source.toLowerCase():''):F.session?'Manual session'+(F.session.termination?' — '+F.session.termination:''):R.derived?'Historical recording':'Complete';
+const meta=[[F.session?'Participants':'Opponent',F.session?String((F.session.participants||[]).length):opp],
+  ['Server',server||(P.anonymized?'Hidden (anonymized)':'Not recorded')],
+  ['Date and time',whenText],
+  ['Duration',dur2(dur)+(fin(S.combatActiveSeconds)?' · '+num(S.combatActiveSeconds,1)+' s in combat':'')],
+  ['Recording',status],
+  ['Evidence',cap(R.confidence)+(R.scope?' · '+cap(R.scope)+' scope':'')]];
+for(const[k,v]of meta){const d=el('div');d.append(el('dt',null,k),el('dd',null,v));$('meta').append(d);}
+const coverage=[];
+if(F.schemaVersion<2)coverage.push('Recorded before 0.1.2: aim regions, perfect-spacing hits and weapon timing were not measured.');
+if(!V3)coverage.push('Recorded before 0.1.3: shield, health, knockback and server critical-hit observations are unavailable. They are shown as “—”, not zero.');
+if(!S.measurementVersion)coverage.push('Historical measurement policy: swing classification and combat-active time are unavailable; original counts are preserved.');
+if(!P.motionIncluded)coverage.push('Motion traces were omitted from this file; derived values still use the complete recording.');
+for(const c of coverage)$('coverage').append(el('li',null,c));
+$('facts').textContent=['Report format v'+P.version,'recording schema '+D.schema,P.anonymized?'names and server anonymized':'names not anonymized',E.length+' events'].join(' · ');
+$('status').textContent=P.anonymized?'Offline · anonymized':'Offline';
 
 // ---- tabs (hash routed, arrow-key navigation) ----
 const TABS=[['overview','Overview'],['offense','Offense'],['defense','Defense'],['flow','Fight Flow'],['timeline','Timeline']];
 const built={};
-for(const[id,name]of TABS){const b=el('button',{role:'tab',id:'t-'+id,'aria-controls':'p-'+id,'aria-selected':'false',tabindex:'-1'},name);b.onclick=()=>show(id,true);$('tabs').append(b);}
+for(const[id,name]of TABS){const b=el('button',{role:'tab',type:'button',id:'t-'+id,'aria-controls':'p-'+id,'aria-selected':'false',tabindex:'-1'},name);b.onclick=()=>show(id,true);$('tabs').append(b);}
 $('tabs').onkeydown=e=>{const i=TABS.findIndex(t=>$('t-'+t[0]).getAttribute('aria-selected')==='true');let j=i;if(e.key==='ArrowRight')j=(i+1)%TABS.length;else if(e.key==='ArrowLeft')j=(i+TABS.length-1)%TABS.length;else if(e.key==='Home')j=0;else if(e.key==='End')j=TABS.length-1;else return;e.preventDefault();show(TABS[j][0],true);$('t-'+TABS[j][0]).focus();};
-function show(id,push){if(!TABS.some(t=>t[0]===id))id='overview';for(const[t]of TABS){const on=t===id;$('t-'+t).setAttribute('aria-selected',on);$('t-'+t).tabIndex=on?0:-1;$('p-'+t).classList.toggle('on',on);}if(!built[id]){built[id]=true;BUILD[id]($('p-'+id));}if(push&&location.hash!=='#'+id){try{history.replaceState(null,'','#'+id);}catch(e){}}}
+let current=null,builtWidth=0;
+function show(id,push){if(!TABS.some(t=>t[0]===id))id='overview';current=id;for(const[t]of TABS){const on=t===id;$('t-'+t).setAttribute('aria-selected',on);$('t-'+t).tabIndex=on?0:-1;$('p-'+t).classList.toggle('on',on);}
+  if(!built[id]){built[id]=true;if(!builtWidth)builtWidth=cw();BUILD[id]($('p-'+id));}
+  if(push){try{if(location.hash!=='#'+id)history.replaceState(null,'','#'+id);}catch(e){}const bar=document.querySelector('.tabs-bar');if(bar.getBoundingClientRect().top<=0)window.scrollTo({top:$('main').getBoundingClientRect().top+window.scrollY-bar.offsetHeight,behavior:'auto'});}}
 window.onhashchange=()=>show(location.hash.slice(1));
-
-// ---- generic charts ----
-function tip(box){const t=el('div',{class:'tip'});box.append(t);return t;}
-function place(t,box,x,y,text){t.textContent=text;t.style.display='block';const r=box.getBoundingClientRect();let left=x-r.left+12;if(left+t.offsetWidth>r.width)left=x-r.left-t.offsetWidth-12;t.style.left=Math.max(0,left)+'px';t.style.top=Math.max(0,y-r.top-28)+'px';}
-function hoverTip(node,t,box,text){node.addEventListener('mousemove',ev=>place(t,box,ev.clientX,ev.clientY,text));node.addEventListener('mouseleave',()=>t.style.display='none');}
-function legend(parent,items){const l=el('div',{class:'legend'});for(const it of items){const s=el('span');const i=el('i',it.hollow?{class:'hollow'}:it.dotted?{class:'dotted'}:null);if(it.hollow)i.style.borderColor=it.color;else i.style.background=it.color;s.append(i,document.createTextNode(it.name));l.append(s);}parent.append(l);}
-function chartBox(parent,W,H,aria){const box=el('div',{class:'chart'});const svg=sv('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':aria});box.append(svg);parent.append(box);return{box,svg,t:tip(box)};}
-function emptyText(svg,W,H,text){svgText(svg,W/2,H/2,text,{'text-anchor':'middle',fill:'#9aa6ac','font-size':13});}
-function timeAxis(svg,L,R,y,W,maxT){for(const v of[0,maxT/4,maxT/2,3*maxT/4,maxT]){const x=L+(W-L-R)*v/maxT;svg.append(sv('line',{x1:x,x2:x,y1:y,y2:y+4,stroke:'#3b434b'}));svgText(svg,x,y+16,num(v,1)+' s',{'text-anchor':v===0?'start':v===maxT?'end':'middle'});}}
-function stack(parent,items,aria){const total=items.reduce((a,b)=>a+b.v,0);const W=900,H=18;const{box,svg,t}=chartBox(parent,W,H,aria||items.map(i=>i.name+' '+i.v).join(', '));let x=0;for(const it of items){if(!total||!it.v)continue;const w=W*it.v/total;const r=sv('rect',{x,y:0,width:Math.max(1,w-2),height:H,fill:it.color});hoverTip(r,t,box,it.name+': '+it.v+' ('+pct(100*it.v/total)+')');svg.append(r);x+=w;}if(!total)emptyText(svg,W,H,'No observations');const l=el('div',{class:'legend'});for(const it of items){const s=el('span');const i=el('i');i.style.background=it.color;s.append(i,document.createTextNode(it.name+' '+it.v));l.append(s);}parent.append(l);}
-function table(parent,heads,rows,right,max){const wrap=el('div',{class:'scroll'});const t=el('table');const tr=el('tr');heads.forEach((h,i)=>tr.append(el('th',right&&right[i]?{class:'r',scope:'col'}:{scope:'col'},h)));const th=el('thead');th.append(tr);t.append(th);const tb=el('tbody');for(const r of rows.slice(0,max||rows.length)){const row=el('tr');r.forEach((c,i)=>row.append(el('td',right&&right[i]?{class:'r'}:null,c)));tb.append(row);}t.append(tb);wrap.append(t);parent.append(wrap);if(!rows.length)parent.append(el('p',{class:'muted'},'No rows.'));return tb;}
-function bars(parent,o){
-  const W=900,H=o.h||180,L=40,R=10,T=10,B=24;const{box,svg,t}=chartBox(parent,W,H,o.aria||'');
-  const n=o.labels.length,g=o.groups.length;let max=0;for(const gr of o.groups)for(const v of gr.values)max=Math.max(max,v);
-  const top=Math.max(1,max);for(const v of[0,top]){const y=T+(H-T-B)*(1-v/top);svg.append(sv('line',{x1:L,x2:W-R,y1:y,y2:y,stroke:v?'#2a3036':'#3b434b'}));svgText(svg,L-6,y+4,String(v),{'text-anchor':'end'});}
-  const slot=(W-L-R)/n,bw=Math.min(28,(slot-6)/g);
-  o.labels.forEach((lab,i)=>{o.groups.forEach((gr,k)=>{const v=gr.values[i]||0,h=(H-T-B)*v/top,x=L+i*slot+(slot-bw*g)/2+k*bw;const color=gr.colors?gr.colors[i]:gr.color;svg.append(sv('rect',{x:x+1,y:H-B-h,width:Math.max(1,bw-2),height:Math.max(0,h),fill:color}));const hit=sv('rect',{x,y:T,width:bw,height:H-T-B,fill:'transparent'});hoverTip(hit,t,box,lab+' · '+gr.name+': '+v);svg.append(hit);});
-    svgText(svg,L+i*slot+slot/2,H-7,lab,{'text-anchor':'middle'});});
-  if(!max)emptyText(svg,W,H,o.empty||'No samples');
-  if(g>1)legend(parent,o.groups.map(gr=>({name:gr.name,color:gr.color})));
-}
+/** Charts are pixel-true, so a material width change rebuilds the visible tab and keeps its control values. */
+rebuildTab=()=>{const w=cw();if(!current||Math.abs(w-builtWidth)<24)return;builtWidth=w;const p=$('p-'+current);
+  const vals=[...p.querySelectorAll('select,input')].map(x=>x.value);const y=window.scrollY;
+  for(const k in built)delete built[k];p.replaceChildren();built[current]=true;BUILD[current](p);
+  [...p.querySelectorAll('select,input')].forEach((x,i)=>{if(vals[i]!=null&&x.value!==vals[i]){x.value=vals[i];x.dispatchEvent(new Event(x.tagName==='SELECT'?'change':'input'));}});window.scrollTo(0,y);
+  for(const[t]of TABS)if(t!==current)$('p-'+t).replaceChildren();};
 
 // ---- derived helpers ----
 const hits=D.hits||[],misses=D.misses||[];
@@ -199,61 +406,66 @@ const comboList=(combos.streaks||[]).filter(s=>s.length>=2);
 const incoming=D.incomingDetail||[];
 const shields=D.shields||{available:false,events:[]};
 const dom=D.dominance||null;
+const rounds=(F.matchEvidence?.rounds||[]).map(r=>({n:r.number,start:(r.startNanos-base)/1e9,end:r.endNanos==null?null:(r.endNanos-base)/1e9,outcome:r.outcome,rule:r.rule}));
+const active=S.measurementVersion?(D.combatExchanges||[]):[];
 const endWord={RETALIATION:'an attributed return hit',TRADE:'a same-tick trade',DISENGAGE:'disengagement',RECORDING_END:'the end of the recording',ROUND_BOUNDARY:'a round boundary'};
 const attrName={OPPONENT_DIRECT:'Opponent, melee',OPPONENT_INDIRECT:'Opponent, indirect',OPPONENT_LEGACY:'Opponent (pre-0.1.3)',OTHER_ENTITY:'Third party',UNATTRIBUTED:'Unattributed'};
-const gradeColor={IDEAL:'var(--ideal)',GOOD:'var(--goodaim)',PERIPHERAL:'var(--peripheral)',POOR:'var(--poor)',UNAVAILABLE:'#9aa6ac'};
-const timingColor={PERFECT:'var(--good)',TOO_FAST:'var(--opp)',TOO_SLOW:'var(--you)'};
+const gradeColor={IDEAL:C.ideal,GOOD:C.goodaim,PERIPHERAL:C.peripheral,POOR:C.poor,UNAVAILABLE:C.muted};
+const timingColor={PERFECT:C.good,TOO_FAST:C.opp,TOO_SLOW:C.you};
 function unavailable(parent,what){note(parent,'This recording was made before 0.1.3 and has no '+what+'. Shown as unavailable rather than zero.');}
+function roundInk(o){if(!o)return ink('Not announced','ink-dim');const s=String(o);return ink(/^[A-Z_]+$/.test(s)?cap(s):s,/win|won/i.test(s)?'ink-win':/loss|lost/i.test(s)?'ink-loss':'');}
 
-// ---- 0.1.3 charts ----
+// ---- charts ----
 /** Two-lane combo timeline; combos are selectable (click, Enter) and listed in the select. */
 function comboTimeline(parent,onSelect){
-  const W=900,H=150,L=86,R=12,T=14,LH=36,G=14;const{box,svg,t}=chartBox(parent,W,H,'Combo timeline: your confirmed hits above, attributed opponent hits below; combos are bands labeled with their length');
+  const W=cw(),narrow=W<560,H=158,L=narrow?60:92,R=10,T=18,LH=38,G=16;const{box,svg,t}=chartBox(parent,W,H,'Combo timeline: your confirmed hits above, attributed opponent hits below; combos are bands labeled with their length');
   const tx=v=>L+(W-L-R)*Math.max(0,Math.min(1,v/dur));const top=T,bot=T+LH+G;
-  svgText(svg,8,top+LH/2+4,'You',{fill:'#3987e5'});svgText(svg,8,bot+LH/2+4,'Opponent',{fill:'#d95926'});
-  for(const y of[top,bot])svg.append(sv('rect',{x:L,y,width:W-L-R,height:LH,fill:'rgba(34,40,45,.9)'}));
-  for(const ex of combos.exchanges||[])svg.append(sv('line',{x1:tx(ex.start)-3,x2:tx(ex.start)-3,y1:top,y2:bot+LH,stroke:'#2a3036'}));
-  const bands=[];
+  svgText(svg,0,top+LH/2+4,'You',{fill:C.you,'font-size':13,'font-weight':600});svgText(svg,0,bot+LH/2+4,narrow?'Opp.':'Opponent',{fill:C.opp,'font-size':13,'font-weight':600});
+  for(const y of[top,bot])laneBg(svg,L,y,W-L-R,LH);
+  for(const r of rounds)if(r.n>1){const x=tx(r.start);svg.append(sv('line',{x1:x,x2:x,y1:top-4,y2:bot+LH,stroke:C.axis,'stroke-dasharray':'3 3'}));}
+  for(const ex of combos.exchanges||[])svg.append(sv('line',{x1:tx(ex.start)-3,x2:tx(ex.start)-3,y1:top,y2:bot+LH,stroke:C.grid}));
+  const bands=[],fitTop=slots(),fitBot=slots();
   comboList.forEach((c,i)=>{const local=c.side==='LOCAL',y=local?top:bot,x0=tx(c.start)-4,x1=Math.max(x0+8,tx(c.end)+4);
-    const r=sv('rect',{x:x0,y:y+5,width:x1-x0,height:LH-10,rx:3,fill:local?'rgba(57,135,229,.35)':'rgba(217,89,38,.35)',tabindex:0,role:'button','aria-label':(local?'Your':'Opponent')+' combo of '+c.length+' hits at '+num(c.start,2)+' s'});
+    const r=sv('rect',{x:x0,y:y+5,width:x1-x0,height:LH-10,rx:3,fill:local?C.youBand:C.oppBand,tabindex:0,role:'button','aria-label':(local?'Your':'Opponent')+' combo of '+c.length+' hits at '+num(c.start,2)+' s'});
     r.addEventListener('click',()=>onSelect(i));r.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();onSelect(i);}});
     hoverTip(r,t,box,(local?'Your':'Opponent')+' combo: '+c.length+' hits, '+num(c.end-c.start,2)+' s, ended by '+endWord[c.endedBy]);svg.append(r);bands.push(r);
-    svgText(svg,(x0+x1)/2,local?y+3:y+LH+10,'×'+c.length,{'text-anchor':'middle',fill:'#e6ecea','font-size':12});});
-  for(const m of combos.marks||[]){const local=m.side==='LOCAL',y=local?top:bot,x=tx(m.t),color=local?'var(--you)':'var(--opp)';
-    const n=m.traded?sv('rect',{x:x-4,y:y+LH/2-4,width:8,height:8,fill:'none',stroke:color,'stroke-width':2}):sv('rect',{x:x-1.5,y:y+9,width:3,height:LH-18,fill:color});
+    if((local?fitTop:fitBot)((x0+x1)/2,'×'+c.length,12))svgText(svg,(x0+x1)/2,y-3,'×'+c.length,{'text-anchor':'middle',fill:C.text,'font-size':12,'font-weight':600});});
+  for(const m of combos.marks||[]){const local=m.side==='LOCAL',y=local?top:bot,x=tx(m.t),color=local?C.you:C.opp;
+    const n=m.traded?sv('rect',{x:x-4,y:y+LH/2-4,width:8,height:8,fill:'none',stroke:color,'stroke-width':2}):sv('rect',{x:x-1.5,y:y+9,width:3,height:LH-18,rx:1,fill:color});
     hoverTip(n,t,box,(local?'Your confirmed hit':'Attributed opponent hit')+' at '+num(m.t,2)+' s'+(m.traded?' (same-tick trade)':''));svg.append(n);}
-  timeAxis(svg,L,R,bot+LH+4,W,dur);
-  if(!(combos.marks||[]).length)emptyText(svg,W,H,'No confirmed hits in this fight');
-  legend(parent,[{name:'Your hit',color:'var(--you)'},{name:'Attributed opponent hit',color:'var(--opp)'},{name:'Same-tick trade',color:'var(--muted)',hollow:true},{name:'Combo band (×length)',color:'rgba(57,135,229,.55)'}]);
-  return i=>bands.forEach((b,k)=>b.classList.toggle('sel',k===i));
+  timeAxis(svg,L,W-R,bot+LH+6,dur);
+  if(!(combos.marks||[]).length)emptyText(svg,W,H-24,'No confirmed hits in this fight');
+  legend(parent,[{name:'Your hit',color:C.you},{name:'Attributed opponent hit',color:C.opp},{name:'Same-tick trade',color:C.muted,hollow:true},{name:'Combo band (×length)',color:'rgba(57,135,229,.6)'},...(rounds.length>1?[{name:'Round start',color:C.axis}]:[])]);
+  return i=>bands.forEach((b,k)=>{const on=k===i;b.setAttribute('stroke',on?C.text:'none');b.setAttribute('stroke-width',on?2:0);});
 }
 /** Dominance: positive = you, negative = opponent; gaps where evidence is insufficient. */
 function dominanceChart(parent){
   if(!dom){note(parent,'Dominance data unavailable in this report version.');return;}
-  const W=900,H=260,L=64,R=12,T=12,B=40,PH=H-T-B-14;const{box,svg,t}=chartBox(parent,W,H,'Encounter dominance over time. Above the centerline favors you, below favors the opponent. Empty columns have no evidence; dotted columns have unattributed incoming damage.');
+  const W=cw(),narrow=W<560,H=280,L=narrow?44:70,R=10,T=14,PH=H-T-58;const{box,svg,t}=chartBox(parent,W,H,'Encounter dominance over time. Above the centerline favors you, below favors the opponent. Empty columns have no evidence; dotted columns have unattributed incoming damage.');
   const step=dom.step,vals=dom.values||[],st=dom.states||'',maxT=Math.max(dur,(vals.length-1)*step);
   const tx=v=>L+(W-L-R)*v/maxT,ty=v=>T+PH/2-v*(PH/2-2),zero=ty(0);
-  svg.append(sv('rect',{x:L,y:T,width:W-L-R,height:PH,fill:'rgba(34,40,45,.9)'}));
-  svgText(svg,L-6,T+10,'+1 you',{'text-anchor':'end',fill:'#3987e5'});svgText(svg,L-6,zero+4,'0',{'text-anchor':'end'});svgText(svg,L-6,T+PH-2,'−1 opp',{'text-anchor':'end',fill:'#d95926'});
-  for(const b of D.boundaries||[])if(b.accepted&&['START','ROUND_START','RESULT'].includes(b.kind)){const x=tx(b.time);svg.append(sv('line',{x1:x,x2:x,y1:T,y2:T+PH,stroke:'#59636b','stroke-dasharray':'3 3'}));const right=x>W-R-60;svgText(svg,right?x-2:x+2,T+9,cap(b.kind),{'font-size':9,'text-anchor':right?'end':'start'});}
+  const defs=sv('defs');const pat=sv('pattern',{id:'dots',width:4,height:4,patternUnits:'userSpaceOnUse'});pat.append(sv('rect',{width:2,height:2,fill:C.incomplete}));defs.append(pat);svg.append(defs);
+  laneBg(svg,L,T,W-L-R,PH);
+  for(const v of[.5,-.5])svg.append(sv('line',{x1:L,x2:W-R,y1:ty(v),y2:ty(v),stroke:C.grid}));
+  svgText(svg,L-6,T+12,narrow?'+1':'+1 you',{'text-anchor':'end',fill:C.you});svgText(svg,L-6,zero+4,'0',{'text-anchor':'end'});svgText(svg,L-6,T+PH-3,narrow?'−1':'−1 opp.',{'text-anchor':'end',fill:C.opp});
+  const fitB=slots(),bounds=(D.boundaries||[]).filter(b=>b.accepted&&['START','ROUND_START','RESULT'].includes(b.kind)&&fin(b.time)&&b.time>=-1e-6&&b.time<=maxT+1e-6),dense=bounds.length>12;for(const b of bounds){const x=tx(b.time);svg.append(sv('line',{x1:x,x2:x,y1:T,y2:T+PH,stroke:'#59636b','stroke-dasharray':'3 3','stroke-opacity':dense?.45:1}));if(!dense){const right=x>W-R-70,lab=b.kind==='ROUND_START'?'Round':cap(b.kind);if(fitB(right?x-3:x+3,lab,11,right?'end':'start'))svgText(svg,right?x-3:x+3,T+11,lab,{'font-size':11,'text-anchor':right?'end':'start',fill:C.dim});}}
   const color={L:'rgba(57,135,229,.55)',O:'rgba(217,89,38,.55)',N:'rgba(138,148,154,.45)'};
-  let d='',pen=false;
-  for(let k=0;k<vals.length;k++){const v=vals[k],s=st[k];const x=tx(k*step),w=Math.max(1,tx(step)-tx(0)+.5);
+  let d='',pen=false;const cw0=Math.max(1,tx(step)-tx(0)+.5);
+  for(let k=0;k<vals.length;k++){const v=vals[k],s=st[k];const x=tx(k*step);
     if(v==null||s==='I'){pen=false;continue;}
-    const y=ty(v);if(s==='C')svg.append(sv('rect',{x,y:Math.min(y,zero),width:w,height:Math.abs(zero-y)+1,fill:'url(#dots)'}));else svg.append(sv('rect',{x,y:Math.min(y,zero),width:w,height:Math.abs(zero-y)+.5,fill:color[s]}));
+    const y=ty(v);svg.append(sv('rect',{x,y:Math.min(y,zero),width:cw0,height:Math.abs(zero-y)+(s==='C'?1:.5),fill:s==='C'?'url(#dots)':color[s]}));
     d+=(pen?'L':'M')+x.toFixed(1)+' '+y.toFixed(1);pen=true;}
-  const defs=sv('defs');const pat=sv('pattern',{id:'dots',width:4,height:4,patternUnits:'userSpaceOnUse'});pat.append(sv('rect',{width:2,height:2,fill:'#5e676d'}));defs.append(pat);svg.prepend(defs);
-  svg.append(sv('path',{d,fill:'none',stroke:'#e6ecea','stroke-width':1.5,'stroke-opacity':.85}));
-  svg.append(sv('line',{x1:L,x2:W-R,y1:zero,y2:zero,stroke:'#e6ecea','stroke-opacity':.6}));
-  for(const c of comboList)if(c.side==='LOCAL')svg.append(sv('rect',{x:tx(c.start),y:T+3,width:Math.max(2,tx(c.end)-tx(c.start)),height:3,fill:'var(--you)'}));
-  for(const m of combos.marks||[]){const x=tx(m.t);svg.append(m.side==='LOCAL'?sv('rect',{x:x-.5,y:T,width:1.5,height:6,fill:'var(--you)'}):sv('rect',{x:x-.5,y:T+PH-6,width:1.5,height:6,fill:'var(--opp)'}));}
-  const sy=T+PH+3;for(let k=0;k<st.length;k++){const s=st[k];if(s==='I')continue;svg.append(sv('rect',{x:tx(k*step),y:sy,width:Math.max(1,tx(step)-tx(0)+.5),height:6,fill:s==='C'?'#5e676d':color[s]||'#5e676d'}));}
-  timeAxis(svg,L,R,sy+8,W,maxT);
-  const cross=sv('line',{y1:T,y2:T+PH,stroke:'rgba(230,236,234,.4)',visibility:'hidden'});svg.append(cross);
+  svg.append(sv('path',{d,fill:'none',stroke:C.text,'stroke-width':1.5,'stroke-opacity':.85,'stroke-linejoin':'round'}));
+  svg.append(sv('line',{x1:L,x2:W-R,y1:zero,y2:zero,stroke:C.text,'stroke-opacity':.5}));
+  for(const c of comboList)if(c.side==='LOCAL')svg.append(sv('rect',{x:tx(c.start),y:T+3,width:Math.max(2,tx(c.end)-tx(c.start)),height:3,fill:C.you}));
+  for(const m of combos.marks||[]){const x=tx(m.t);svg.append(m.side==='LOCAL'?sv('rect',{x:x-.5,y:T,width:1.5,height:6,fill:C.you}):sv('rect',{x:x-.5,y:T+PH-6,width:1.5,height:6,fill:C.opp}));}
+  const sy=T+PH+5;for(let k=0;k<st.length;k++){const s=st[k];if(s==='I')continue;svg.append(sv('rect',{x:tx(k*step),y:sy,width:cw0,height:6,fill:s==='C'?C.incomplete:color[s]||C.incomplete}));}
+  timeAxis(svg,L,W-R,sy+12,maxT);
+  const cross=sv('line',{y1:T,y2:T+PH,stroke:'rgba(232,237,235,.45)',visibility:'hidden'});svg.append(cross);
   const name={L:'advantage: you',O:'advantage: opponent',N:'neutral',C:'incomplete attribution',I:'no evidence'};
-  svg.addEventListener('mousemove',ev=>{const r=svg.getBoundingClientRect(),mx=(ev.clientX-r.left)*W/r.width;if(mx<L||mx>W-R){t.style.display='none';cross.setAttribute('visibility','hidden');return;}const tm=(mx-L)/(W-L-R)*maxT,k=Math.min(vals.length-1,Math.max(0,Math.round(tm/step)));cross.setAttribute('x1',mx);cross.setAttribute('x2',mx);cross.setAttribute('visibility','visible');place(t,box,ev.clientX,ev.clientY,num(tm,2)+' s: '+(vals[k]==null?'':num(vals[k],2)+', ')+name[st[k]||'I']);});
-  svg.addEventListener('mouseleave',()=>{t.style.display='none';cross.setAttribute('visibility','hidden');});
-  legend(parent,[{name:'Advantage: you',color:'rgba(57,135,229,.8)'},{name:'Advantage: opponent',color:'rgba(217,89,38,.8)'},{name:'Neutral',color:'rgba(138,148,154,.8)'},{name:'Incomplete attribution',color:'#5e676d',dotted:true},{name:'No evidence (empty)',color:'#22282d',hollow:true}]);
+  svg.addEventListener('pointermove',ev=>{const r=svg.getBoundingClientRect(),mx=(ev.clientX-r.left)*W/r.width;if(mx<L||mx>W-R){t.style.display='none';cross.setAttribute('visibility','hidden');return;}const tm=(mx-L)/(W-L-R)*maxT,k=Math.min(vals.length-1,Math.max(0,Math.round(tm/step)));cross.setAttribute('x1',mx);cross.setAttribute('x2',mx);cross.setAttribute('visibility','visible');place(t,box,ev.clientX,ev.clientY,num(tm,2)+' s: '+(vals[k]==null?'':num(vals[k],2)+', ')+name[st[k]||'I']);});
+  svg.addEventListener('pointerleave',()=>{t.style.display='none';cross.setAttribute('visibility','hidden');});
+  legend(parent,[{name:'Advantage: you',color:'rgba(57,135,229,.85)'},{name:'Advantage: opponent',color:'rgba(217,89,38,.85)'},{name:'Neutral',color:'rgba(138,148,154,.85)'},{name:'Incomplete attribution',color:C.incomplete,dotted:true},{name:'No evidence (empty)',color:C.axis,hollow:true}]);
 }
 /** Reach histogram with weapon filter, shaded target window and individual hit strip. */
 function reachHistogram(parent){
@@ -262,21 +474,22 @@ function reachHistogram(parent){
   const holder=el('div');parent.append(holder);
   function draw(w){holder.replaceChildren();const vals=(r.values||[]).filter((v,i)=>w==='all'||r.weapons[i]===w);
     const LO=2,HI=4,BIN=.05,n=Math.round((HI-LO)/BIN)+2,bins=new Array(n).fill(0);const bin=v=>v<LO?0:v>=HI?n-1:1+Math.floor((v-LO)/BIN+1e-9);for(const v of vals)bins[bin(v)]++;
-    const W=900,H=230,L=40,R=12,T=10,B=64,PH=H-T-B;const{box,svg,t}=chartBox(holder,W,H,'Reach histogram in blocks with the target window shaded');
+    const W=cw(),narrow=W<560,H=244,L=34,R=8,T=12,B=70,PH=H-T-B;const{box,svg,t}=chartBox(holder,W,H,'Reach histogram in blocks with the target window shaded');
     const max=Math.max(1,...bins),slot=(W-L-R)/n,xOf=v=>v<LO?.5:v>HI?n-.5:1+(v-LO)/BIN,px=v=>L+xOf(v)*slot;
-    svg.append(sv('rect',{x:px(r.target-r.tolerance),y:T,width:Math.max(2,px(r.target+r.tolerance)-px(r.target-r.tolerance)),height:PH,fill:'rgba(25,158,112,.18)'}));
-    for(const v of[0,max]){const y=T+PH*(1-v/max);svg.append(sv('line',{x1:L,x2:W-R,y1:y,y2:y,stroke:v?'#2a3036':'#3b434b'}));svgText(svg,L-6,y+4,String(v),{'text-anchor':'end'});}
+    laneBg(svg,L,T,W-L-R,PH);
+    svg.append(sv('rect',{x:px(r.target-r.tolerance),y:T,width:Math.max(2,px(r.target+r.tolerance)-px(r.target-r.tolerance)),height:PH,fill:C.window}));
+    for(const v of[0,max]){const y=T+PH*(1-v/max);if(v)svg.append(sv('line',{x1:L,x2:W-R,y1:y,y2:y,stroke:C.grid}));svgText(svg,L-6,y+4,String(v),{'text-anchor':'end'});}
     bins.forEach((c,i)=>{const mid=i===0?LO-BIN:i===n-1?HI+BIN:LO+(i-.5)*BIN,inWin=Math.abs(mid-r.target)<=r.tolerance+1e-9,h=PH*c/max,x=L+i*slot;
-      if(c)svg.append(sv('rect',{x:x+.5,y:T+PH-h,width:Math.max(1,slot-1),height:h,fill:inWin?'var(--good)':'var(--you)'}));
+      if(c)svg.append(sv('rect',{x:x+.5,y:T+PH-h,width:Math.max(1,slot-1),height:h,rx:Math.min(2,slot/4),fill:inWin?C.good:C.you}));
       const lab=i===0?'< 2.00':i===n-1?'≥ 4.00':(LO+(i-1)*BIN).toFixed(2)+'–'+(LO+i*BIN).toFixed(2);const hit=sv('rect',{x,y:T,width:slot,height:PH,fill:'transparent'});hoverTip(hit,t,box,lab+' blocks: '+c+' hit'+(c===1?'':'s')+(inWin?' (in target window)':''));svg.append(hit);});
-    svg.append(sv('line',{x1:px(r.target),x2:px(r.target),y1:T,y2:T+PH,stroke:'#e6ecea','stroke-width':1.5}));svgText(svg,px(r.target)+3,T+10,'target '+num(r.target,2),{fill:'#e6ecea'});
-    for(let v=LO;v<=HI+1e-9;v+=.25)svgText(svg,px(v),T+PH+14,v.toFixed(2),{'text-anchor':'middle'});
-    // individual hits strip
-    const sy=T+PH+24;svg.append(sv('line',{x1:L,x2:W-R,y1:sy,y2:sy,stroke:'#2a3036'}));
-    vals.forEach((v,i)=>{const c=sv('circle',{cx:px(Math.max(LO-.04,Math.min(HI+.04,v))),cy:sy+((i%3)-1)*4,r:3,fill:Math.abs(v-r.target)<=r.tolerance+1e-9?'var(--good)':'var(--you)',stroke:'#1b2025'});hoverTip(c,t,box,'Hit: '+v.toFixed(3)+' blocks');svg.append(c);});
-    svgText(svg,W-R,H-6,'reach in blocks (eye to hitbox contact)',{'text-anchor':'end'});
-    if(!vals.length)emptyText(svg,W,H-30,'No eligible confirmed hits for this filter');
-    legend(holder,[{name:'In target window ('+num(r.target,2)+' ± '+num(r.tolerance,2)+')',color:'var(--good)'},{name:'Outside window',color:'var(--you)'},{name:'Shaded: target window',color:'rgba(25,158,112,.35)'}]);}
+    svg.append(sv('line',{x1:px(r.target),x2:px(r.target),y1:T,y2:T+PH,stroke:C.text,'stroke-width':1.5}));if(vals.length)svgText(svg,px(r.target)+4,T+13,'target '+num(r.target,2),{fill:C.text});
+    svg.append(sv('line',{x1:L,x2:W-R,y1:T+PH,y2:T+PH,stroke:C.axis}));
+    for(let v=LO;v<=HI+1e-9;v+=narrow?.5:.25)svgText(svg,px(v),T+PH+16,v.toFixed(narrow?1:2),{'text-anchor':'middle'});
+    const sy=T+PH+34;svg.append(sv('line',{x1:L,x2:W-R,y1:sy,y2:sy,stroke:C.grid}));
+    vals.forEach((v,i)=>{const c=sv('circle',{cx:px(Math.max(LO-.04,Math.min(HI+.04,v))),cy:sy+((i%3)-1)*5,r:3.5,fill:Math.abs(v-r.target)<=r.tolerance+1e-9?C.good:C.you,stroke:C.lane});hoverTip(c,t,box,'Hit: '+v.toFixed(3)+' blocks');svg.append(c);});
+    svgText(svg,W-R,H-4,narrow?'reach (blocks)':'reach in blocks, eye to hitbox contact; dots are individual hits',{'text-anchor':'end',fill:C.dim});
+    if(!vals.length)emptyText(svg,W,PH+T,'No eligible confirmed hits for this filter');
+    legend(holder,[{name:'In target window ('+num(r.target,2)+' ± '+num(r.tolerance,2)+')',color:C.good},{name:'Outside window',color:C.you},{name:'Shaded: target window',color:'rgba(25,158,112,.4)'}]);}
   select(ctl,'Weapon',[['all','All weapons'],...weapons.map(w=>[w,item(w)])],draw);draw('all');
 }
 /** Weapon timing scatter: interval minus expected cooldown per attempt, filtered. */
@@ -284,23 +497,23 @@ function timingChart(parent){
   const all=D.timingSamples||[];const ctl=controls(parent);const holder=el('div');parent.append(holder);
   const weapons=[...new Set(all.map(t=>t.weapon))].sort();let w='all',o='all';
   function draw(){holder.replaceChildren();const pts=all.filter(t=>(w==='all'||t.weapon===w)&&(o==='all'||(o==='hit'?t.outcome==='HIT':t.outcome!=='HIT')));
-    const W=900,H=240,L=56,R=12,T=10,B=34,PH=H-T-B;const{box,svg,t}=chartBox(holder,W,H,'Attack interval minus expected cooldown in ticks for each attempt');
+    const W=cw(),narrow=W<560,H=252,L=narrow?40:58,R=10,T=12,B=40,PH=H-T-B;const{box,svg,t}=chartBox(holder,W,H,'Attack interval minus expected cooldown in ticks for each attempt');
     let m=4;for(const p of pts)if(fin(p.delta))m=Math.max(m,Math.abs(p.delta));const range=Math.min(40,Math.ceil(m+1));const tol=F.policy?.timingToleranceTicks??1;
     const tx=v=>L+(W-L-R)*v/dur,ty=v=>T+PH/2-Math.max(-range,Math.min(range,v))/range*(PH/2-4);
-    svg.append(sv('rect',{x:L,y:T,width:W-L-R,height:PH,fill:'rgba(34,40,45,.9)'}));
-    svg.append(sv('rect',{x:L,y:ty(tol),width:W-L-R,height:Math.max(1,ty(-tol)-ty(tol)),fill:'rgba(25,158,112,.18)'}));
-    svg.append(sv('line',{x1:L,x2:W-R,y1:ty(0),y2:ty(0),stroke:'#e6ecea','stroke-opacity':.6}));
-    for(const v of[range,0,-range])svgText(svg,L-6,ty(v)+4,(v>0?'+':'')+v+' t',{'text-anchor':'end'});
-    svgText(svg,L+4,ty(0)-4,'expected cooldown',{fill:'#9aa6ac'});
-    for(const p of pts){const x=tx(p.t);if(p.grade==='OPENER'||!fin(p.delta)){svg.append(sv('line',{x1:x,x2:x,y1:T,y2:T+PH,stroke:'#9aa6ac','stroke-dasharray':'2 3','stroke-opacity':.7}));svgText(svg,x+2,T+PH-4,'reset',{'font-size':9,fill:'#9aa6ac'});const r=sv('rect',{x:x-3,y:T,width:6,height:PH,fill:'transparent'});hoverTip(r,t,box,item(p.weapon)+' · reset / opener (ungraded) · '+cap(p.outcome));svg.append(r);continue;}
-      const y=ty(p.delta),c=timingColor[p.grade]||'#8a949a';let n;
-      if(p.outcome==='HIT')n=sv('rect',{x:x-3.5,y:y-3.5,width:7,height:7,fill:c});
-      else if(p.outcome.startsWith('SHIELD'))n=sv('path',{d:`M${x} ${y-5}L${x+5} ${y}L${x} ${y+5}L${x-5} ${y}Z`,fill:c});
-      else n=sv('circle',{cx:x,cy:y,r:4,fill:'none',stroke:c,'stroke-width':2});
+    laneBg(svg,L,T,W-L-R,PH);
+    svg.append(sv('rect',{x:L,y:ty(tol),width:W-L-R,height:Math.max(1,ty(-tol)-ty(tol)),fill:C.window}));
+    svg.append(sv('line',{x1:L,x2:W-R,y1:ty(0),y2:ty(0),stroke:C.text,'stroke-opacity':.5}));
+    for(const v of[range,0,-range])svgText(svg,L-6,ty(v)+4,(v>0?'+':v<0?'−':'')+Math.abs(v)+' t',{'text-anchor':'end'});
+    if(pts.length)svgText(svg,L+6,ty(0)-6,'expected cooldown',{fill:C.dim,'font-size':11});
+    for(const p of pts){const x=tx(p.t);if(p.grade==='OPENER'||!fin(p.delta)){svg.append(sv('line',{x1:x,x2:x,y1:T,y2:T+PH,stroke:C.muted,'stroke-dasharray':'2 3','stroke-opacity':.6}));const r=sv('rect',{x:x-4,y:T,width:8,height:PH,fill:'transparent'});hoverTip(r,t,box,item(p.weapon)+' · reset / opener (ungraded) · '+cap(p.outcome));svg.append(r);continue;}
+      const y=ty(p.delta),c=timingColor[p.grade]||C.neutral;let n;
+      if(p.outcome==='HIT')n=sv('rect',{x:x-4,y:y-4,width:8,height:8,rx:1,fill:c});
+      else if(p.outcome.startsWith('SHIELD'))n=sv('path',{d:`M${x} ${y-5.5}L${x+5.5} ${y}L${x} ${y+5.5}L${x-5.5} ${y}Z`,fill:c});
+      else n=sv('circle',{cx:x,cy:y,r:4.5,fill:'none',stroke:c,'stroke-width':2});
       hoverTip(n,t,box,item(p.weapon)+' · interval '+num(p.interval,1)+' t, expected '+num(p.expected,2)+' t ('+sgn(p.delta,1)+') · '+cap(p.grade)+' · '+cap(p.outcome));svg.append(n);}
-    timeAxis(svg,L,R,T+PH,W,dur);
-    if(!pts.length)emptyText(svg,W,H,'No timing samples for this filter');
-    legend(holder,[{name:'Perfect',color:'var(--good)'},{name:'Too fast',color:'var(--opp)'},{name:'Too slow',color:'var(--you)'},{name:'Square: hit',color:'#e6ecea'},{name:'Circle: no hit',color:'#e6ecea',hollow:true},{name:'Diamond: shield',color:'#9aa6ac'},{name:'Dashed line: reset (ungraded opener)',color:'#9aa6ac'}]);
+    timeAxis(svg,L,W-R,T+PH,dur);
+    if(!pts.length)emptyText(svg,W,PH+T,'No timing samples for this filter');
+    legend(holder,[{name:'Perfect',color:C.good},{name:'Too fast',color:C.opp},{name:'Too slow',color:C.you},{name:'Square: hit',color:C.text},{name:'Circle: no hit',color:C.text,hollow:true},{name:'Diamond: shield',color:C.muted},{name:'Dashed: reset (ungraded opener)',color:C.muted}]);
     const graded=pts.filter(p=>['PERFECT','TOO_FAST','TOO_SLOW'].includes(p.grade));const per={};for(const p of graded){per[p.weapon]=per[p.weapon]||{n:0,perfect:0,abs:0};per[p.weapon].n++;per[p.weapon].abs+=Math.abs(p.delta);if(p.grade==='PERFECT')per[p.weapon].perfect++;}
     table(holder,['Weapon','Graded','Perfect','Mean |diff|'],Object.entries(per).map(([k,v])=>[item(k),String(v.n),v.perfect+' ('+pct(100*v.perfect/v.n)+')',num(v.abs/v.n,1)+' t']),[false,true,true,true]);}
   select(ctl,'Weapon',[['all','All weapons'],...weapons.map(x=>[x,item(x)])],v=>{w=v;draw();});
@@ -313,18 +526,18 @@ function jumpTimeline(parent){
   const t0=Math.min(...att.map(i=>i.tick),...jumps.map(j=>j.clientTick)),t1=Math.max(...att.map(i=>i.tick),...jumps.map(j=>j.clientTick));
   const ctl=controls(parent);const holder=el('div');parent.append(holder);
   const span=el('input',{type:'range',min:20,max:Math.max(40,t1-t0+10),step:5,value:Math.min(200,Math.max(40,t1-t0+10)),'aria-label':'Visible tick span'});const pos=el('input',{type:'range',min:0,max:Math.max(0,t1-t0),step:1,value:0,'aria-label':'Start tick'});
-  ctl.append(el('label',null,'Window (ticks)'),span,el('label',null,'Start'),pos);
-  const color={IDEAL_CANDIDATE:'var(--good)',ATTEMPT_CANDIDATE:'var(--you)',OUTSIDE_WINDOW:'#8a949a',NO_JUMP:'#59636b',EXCLUDED:'#cc79a7',UNAVAILABLE:'#59636b'};
+  const l1=el('label',null,'Window (ticks)'),l2=el('label',null,'Start');l1.append(span);l2.append(pos);ctl.append(l1,l2);
+  const color={IDEAL_CANDIDATE:C.good,ATTEMPT_CANDIDATE:C.you,OUTSIDE_WINDOW:C.neutral,NO_JUMP:'#59636b',EXCLUDED:C.poor,UNAVAILABLE:'#59636b'};
   function draw(){holder.replaceChildren();const a=t0+Number(pos.value)-5,b=a+Number(span.value);
-    const W=900,H=164,L=86,R=12,T=14,LH=34,G=18;const{box,svg,t}=chartBox(holder,W,H,'Incoming hits and jumps on a shared client-tick axis');svgText(svg,W-R,H-4,'client ticks since the first observation (20 ticks = 1 s)',{'text-anchor':'end'});const tx=v=>L+(W-L-R)*(v-a)/(b-a);
-    svgText(svg,8,T+LH/2+4,'Incoming hit');svgText(svg,8,T+LH+G+LH/2+4,'Jump');
-    for(const y of[T,T+LH+G])svg.append(sv('rect',{x:L,y,width:W-L-R,height:LH,fill:'rgba(34,40,45,.9)'}));
-    for(let k=Math.ceil(a/10)*10;k<=b;k+=10){const x=tx(k);svg.append(sv('line',{x1:x,x2:x,y1:T,y2:T+2*LH+G,stroke:'#2a3036'}));svgText(svg,x,T+2*LH+G+14,'t'+(k-t0),{'text-anchor':'middle'});}
-    for(const i of att){if(i.tick<a||i.tick>b)continue;const x=tx(i.tick);const w=Math.max(2,tx(i.tick+1)-x);
-      if(i.jumpOffsetTicks!=null){const jx=tx(i.tick+i.jumpOffsetTicks);svg.append(sv('line',{x1:x+w/2,x2:jx+w/2,y1:T+LH,y2:T+LH+G,stroke:color[i.jumpClass]||'#8a949a','stroke-width':1.5}));svgText(svg,(x+jx)/2+w/2,T+LH+G-4,sgn(i.jumpOffsetTicks,0),{'text-anchor':'middle',fill:'#e6ecea','font-size':10});}
-      const r=sv('rect',{x,y:T+6,width:w,height:LH-12,fill:color[i.jumpClass]||'#8a949a'});hoverTip(r,t,box,'Incoming hit at tick '+(i.tick-t0)+' · '+cap(i.jumpClass)+(i.jumpOffsetTicks!=null?' ('+sgn(i.jumpOffsetTicks,0)+' t)':'')+' · '+(i.ground==null?'movement unknown':(i.ground?'ground':'air')+(i.sprinting?', sprint':''))+(i.knockback!=null?' · knockback '+num(i.knockback,2):''));svg.append(r);}
-    for(const j of jumps){if(j.clientTick<a||j.clientTick>b)continue;const x=tx(j.clientTick),w=Math.max(2,tx(j.clientTick+1)-x);const r=sv('path',{d:`M${x} ${T+2*LH+G-6}L${x+w/2} ${T+LH+G+6}L${x+w} ${T+2*LH+G-6}Z`,fill:'#9aa6ac'});hoverTip(r,t,box,'Actual jump at tick '+(j.clientTick-t0));svg.append(r);}
-    legend(holder,[{name:'Same tick (ideal-timing candidate)',color:'var(--good)'},{name:'Within ±'+(D.jumpWindowTicks??4)+' (attempt candidate)',color:'var(--you)'},{name:'Outside window',color:'#8a949a'},{name:'Excluded movement state',color:'#cc79a7'},{name:'No jump',color:'#59636b'}]);}
+    const W=cw(),narrow=W<560,H=176,L=narrow?64:104,R=10,T=14,LH=36,G=20;const{box,svg,t}=chartBox(holder,W,H,'Incoming hits and jumps on a shared client-tick axis');svgText(svg,W-R,H-3,narrow?'client ticks (20 = 1 s)':'client ticks since the first observation (20 ticks = 1 s)',{'text-anchor':'end',fill:C.dim});const tx=v=>L+(W-L-R)*(v-a)/(b-a);
+    svgText(svg,0,T+LH/2+4,narrow?'Incoming':'Incoming hit');svgText(svg,0,T+LH+G+LH/2+4,'Jump');
+    for(const y of[T,T+LH+G])laneBg(svg,L,y,W-L-R,LH);
+    const tickStep=niceStep(b-a,W-L-R,60);for(let k=Math.ceil(a/tickStep)*tickStep;k<=b;k+=tickStep){const x=tx(k);svg.append(sv('line',{x1:x,x2:x,y1:T,y2:T+2*LH+G,stroke:C.grid}));svgText(svg,x,T+2*LH+G+16,'t'+(k-t0),{'text-anchor':'middle'});}
+    const fitJ=slots();for(const i of att){if(i.tick<a||i.tick>b)continue;const x=tx(i.tick);const w=Math.max(3,tx(i.tick+1)-x);
+      if(i.jumpOffsetTicks!=null){const jx=tx(i.tick+i.jumpOffsetTicks);svg.append(sv('line',{x1:x+w/2,x2:jx+w/2,y1:T+LH,y2:T+LH+G,stroke:color[i.jumpClass]||C.neutral,'stroke-width':1.5}));const lx=Math.min((x+jx)/2+w/2+4,W-R-2),an=lx>W-R-20?'end':'start',lt=sgn(i.jumpOffsetTicks,0);if(fitJ(lx,lt,11,an))svgText(svg,lx,T+LH+G/2+4,lt,{fill:C.text,'font-size':11,'text-anchor':an});}
+      const r=sv('rect',{x,y:T+6,width:w,height:LH-12,rx:1,fill:color[i.jumpClass]||C.neutral});hoverTip(r,t,box,'Incoming hit at tick '+(i.tick-t0)+' · '+cap(i.jumpClass)+(i.jumpOffsetTicks!=null?' ('+sgn(i.jumpOffsetTicks,0)+' t)':'')+' · '+(i.ground==null?'movement unknown':(i.ground?'ground':'air')+(i.sprinting?', sprint':''))+(i.knockback!=null?' · knockback '+num(i.knockback,2):''));svg.append(r);}
+    for(const j of jumps){if(j.clientTick<a||j.clientTick>b)continue;const x=tx(j.clientTick),w=Math.max(6,tx(j.clientTick+1)-x);const r=sv('path',{d:`M${x} ${T+2*LH+G-7}L${x+w/2} ${T+LH+G+7}L${x+w} ${T+2*LH+G-7}Z`,fill:C.muted});hoverTip(r,t,box,'Actual jump at tick '+(j.clientTick-t0));svg.append(r);}
+    legend(holder,[{name:'Same tick (ideal-timing candidate)',color:C.good},{name:'Within ±'+(D.jumpWindowTicks??4)+' (attempt candidate)',color:C.you},{name:'Outside window',color:C.neutral},{name:'Excluded movement state',color:C.poor},{name:'No jump',color:'#59636b'}]);}
   span.oninput=draw;pos.oninput=draw;draw();
 }
 /** Hitbox face with measured hit coordinates and derived region colors, filterable. */
@@ -338,172 +551,213 @@ function aimView(parent){
     if(!list.length){holder.append(el('p',{class:'empty'},'No hits for this filter.'));return;}
     const pick=list.find(s=>s.seq===sel)||list[list.length-1];const h=measured.find(m=>m.seq===pick.seq);
     const faceList=list.filter(s=>s.face===pick.face);
-    const W=900,H=400;const{box,svg,t}=chartBox(holder,W,H,'Contacted '+pick.face+' face with recorded impacts and alignment regions');
+    const W=cw(),H=Math.min(420,Math.max(320,Math.round(W*.6)));const{box,svg,t}=chartBox(holder,W,H,'Contacted '+pick.face+' face with recorded impacts and alignment regions');
     const size=h?[h.measurement.box.maxX-h.measurement.box.minX,h.measurement.box.maxY-h.measurement.box.minY,h.measurement.box.maxZ-h.measurement.box.minZ]:[.6,1.8,.6];
     const axes=pick.face==='TOP'||pick.face==='BOTTOM'?[0,2]:pick.face==='EAST'||pick.face==='WEST'?[2,1]:[0,1];const[u,v]=axes;
-    const scale=Math.min(360/size[u],300/size[v]),bw=size[u]*scale,bh=size[v]*scale,bx=(W-bw)/2,by=24;
-    if(h){const r=h.measurement.idealRegion,ideal=[r.ideal.x,r.ideal.y,r.ideal.z],point=[pick.x,pick.y,pick.z];const cols=30,rows=40;
-      for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){const n=[...point];n[u]=(x+.5)/cols;n[v]=1-(y+.5)/rows;const d=Math.hypot(...n.map((a,k)=>(a-ideal[k])*size[k]));const k=!r.reachable?'POOR':d<=r.idealRadius?'IDEAL':d<=r.goodRadius?'GOOD':d<=r.peripheralRadius?'PERIPHERAL':'POOR';
-        const cell=sv('rect',{x:bx+x*bw/cols,y:by+y*bh/rows,width:bw/cols+.1,height:bh/rows+.1,fill:gradeColor[k],'fill-opacity':.38});hoverTip(cell,t,box,'Derived region: '+cap(k)+' · '+d.toFixed(3)+' blocks from the ideal point');svg.append(cell);}}
-    svg.append(sv('rect',{x:bx,y:by,width:bw,height:bh,fill:'none',stroke:'#9aa6ac'}));
-    for(const s of faceList){const p=[s.x,s.y,s.z],cx=bx+p[u]*bw,cy=by+(1-p[v])*bh;const c=sv('circle',{cx,cy,r:s.seq===pick.seq?6:4,fill:gradeColor[s.grade]||'#9aa6ac',stroke:s.seq===pick.seq?'#fff':'#111417','stroke-width':s.seq===pick.seq?2:1,tabindex:0,role:'button','aria-label':'Hit at '+num(s.t,2)+' s, '+cap(s.grade)});
-      c.addEventListener('click',()=>{sel=s.seq;draw();});c.addEventListener('keydown',e=>{if(e.key==='Enter'){sel=s.seq;draw();}});
+    const scale=Math.min((W-40)/size[u],(H-64)/size[v]),bw=size[u]*scale,bh=size[v]*scale,bx=(W-bw)/2,by=14;
+    if(h){const r=h.measurement.idealRegion,ideal=[r.ideal.x,r.ideal.y,r.ideal.z],point=[pick.x,pick.y,pick.z];const cols=30,rows=40;const grade=new Array(cols*rows);
+      const dist=(x,y)=>{const n=[...point];n[u]=(x+.5)/cols;n[v]=1-(y+.5)/rows;return Math.hypot(...n.map((a,k)=>(a-ideal[k])*size[k]));};
+      const g=sv('g',{'fill-opacity':.38});
+      for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){const d=dist(x,y);const k=!r.reachable?'POOR':d<=r.idealRadius?'IDEAL':d<=r.goodRadius?'GOOD':d<=r.peripheralRadius?'PERIPHERAL':'POOR';grade[y*cols+x]=k;
+        g.append(sv('rect',{x:bx+x*bw/cols,y:by+y*bh/rows,width:bw/cols+.1,height:bh/rows+.1,fill:gradeColor[k]}));}
+      svg.append(g);
+      // One listener for the whole region grid instead of one per cell.
+      g.addEventListener('pointermove',ev=>{const rc=svg.getBoundingClientRect(),mx=(ev.clientX-rc.left)*W/rc.width,my=(ev.clientY-rc.top)*H/rc.height;const x=Math.min(cols-1,Math.max(0,Math.floor((mx-bx)/bw*cols))),y=Math.min(rows-1,Math.max(0,Math.floor((my-by)/bh*rows)));place(t,box,ev.clientX,ev.clientY,'Derived region: '+cap(grade[y*cols+x])+' · '+dist(x,y).toFixed(3)+' blocks from the ideal point');});}
+    svg.append(sv('rect',{x:bx,y:by,width:bw,height:bh,fill:'none',stroke:C.muted,rx:2}));
+    for(const s of faceList){const p=[s.x,s.y,s.z],cx=bx+p[u]*bw,cy=by+(1-p[v])*bh;const on=s.seq===pick.seq;const c=sv('circle',{cx,cy,r:on?7:5,fill:gradeColor[s.grade]||C.muted,stroke:on?'#fff':C.lane,'stroke-width':on?2.5:1.5,tabindex:0,role:'button','aria-label':'Hit at '+num(s.t,2)+' s, '+cap(s.grade)+(on?', selected':'')});
+      c.addEventListener('click',()=>{sel=s.seq;draw();});c.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();sel=s.seq;draw();}});
       hoverTip(c,t,box,'Measured contact at '+num(s.t,2)+' s ('+item(s.weapon)+', '+s.band+'): '+[s.x,s.y,s.z].map(x=>x.toFixed(2)).join(', ')+' · derived grade '+cap(s.grade)+(fin(s.distance)?' · '+s.distance.toFixed(3)+' blocks from ideal':''));svg.append(c);}
-    svgText(svg,W/2,by+bh+22,cap(pick.face)+' face ('+(u===0?'X':'Z')+' across, '+(v===1?'height':'Z')+' up) · '+faceList.length+' hits on this face; selected hit outlined',{'text-anchor':'middle',fill:'#c9d3d9','font-size':13});
+    svgText(svg,W/2,by+bh+24,cap(pick.face)+' face · '+faceList.length+' hit'+(faceList.length===1?'':'s')+' on this face · selected hit outlined',{'text-anchor':'middle',fill:C.text,'font-size':13});
+    svgText(svg,W/2,by+bh+42,(u===0?'X':'Z')+' across, '+(v===1?'height':'Z')+' up',{'text-anchor':'middle',fill:C.dim,'font-size':12});
     legend(holder,['IDEAL','GOOD','PERIPHERAL','POOR'].map(k=>({name:cap(k)+' (derived)',color:gradeColor[k]})));
-    note(holder,'Dots are measured ray intersections (raw normalized coordinates). Background colors are a derived heuristic for the selected hit: the ideal point follows the nearest reachable surface with an edge inset and changes with elevation and pose. Other surface cells do not reconstruct occlusion. Missed swings have no impact point and are not drawn.');}
+    method(holder,'Dots are measured ray intersections (raw normalized coordinates). Background colors are a derived heuristic for the selected hit: the ideal point follows the nearest reachable surface with an edge inset and changes with elevation and pose. Other surface cells do not reconstruct occlusion. Missed swings have no impact point and are not drawn.','How aim regions are derived');}
   select(ctl,'Weapon',[['all','All weapons'],...weapons.map(x=>[x,item(x)])],x=>{w=x;draw();});
   select(ctl,'Fight segment',[['all','Whole fight'],['1','First third'],['2','Middle third'],['3','Last third']],x=>{seg=x;draw();});draw();
 }
+function shieldTimeline(parent){const ev=shields.events||[];if(!ev.length)return;const W=cw(),narrow=W<560,H=92,L=narrow?64:92,R=10;const{box,svg,t}=chartBox(parent,W,H,'Shield events over time');const tx=v=>L+(W-L-R)*v/dur;
+  svgText(svg,0,26,narrow?'Opp.':'Opponent');svgText(svg,0,52,'You');for(const y of[12,38])laneBg(svg,L,y,W-L-R,22);
+  const color={BLOCK:C.good,DISABLE:C.warn,ESTIMATED_BLOCK:C.estimated};
+  for(const e of ev){const y=e.subject==='local'?49:23,x=tx(e.time);const n=e.type==='ESTIMATED_BLOCK'?sv('rect',{x:x-4.5,y:y-4.5,width:9,height:9,fill:'none',stroke:color[e.type],'stroke-width':2}):sv('rect',{x:x-4.5,y:y-4.5,width:9,height:9,rx:1,fill:color[e.type]||C.muted});hoverTip(n,t,box,cap(e.type)+' at '+num(e.time,2)+' s'+(e.weapon?' · '+item(e.weapon):''));svg.append(n);}
+  timeAxis(svg,L,W-R,64,dur);legend(parent,[{name:'Block',color:C.good},{name:'Disable',color:C.warn},{name:'Estimated block',color:C.estimated,hollow:true}]);}
+/** Combat-active intervals on one strip, numbered to match the exchange table. */
+function exchangeStrip(parent){const W=cw(),H=58,L=0,R=2;const{box,svg,t}=chartBox(parent,W,H,'Combat exchanges and breaks');const x=v=>L+(W-L-R)*v/dur;
+  laneBg(svg,L,6,W-L-R,24);
+  active.forEach((e,i)=>{const x0=x(e.start),w=Math.max(2,x(e.end)-x0);const r=sv('rect',{x:x0,y:6,width:w,height:24,rx:2,fill:C.you,tabindex:0,'aria-label':'Exchange '+(i+1)+': '+num(e.start,1)+' to '+num(e.end,1)+' s'});hoverTip(r,t,box,'Exchange #'+(i+1)+' · '+num(e.start,2)+'–'+num(e.end,2)+' s · '+e.hits+' hits, '+e.misses+' misses');svg.append(r);if(w>22)svgText(svg,x0+w/2,22,'#'+(i+1),{'text-anchor':'middle',fill:'#fff','font-size':11,'font-weight':600});});
+  timeAxis(svg,L,W-R,32,dur);}
 
 // ---- tab builders ----
 const BUILD={
 overview(p){
-  if(F.session) {
-    h2(p,'Manual recording','session-level outcome is independent of exchange results');
-    note(p,'Server: '+(F.matchEvidence?.server||'Hidden for privacy')+' · '+F.session.termination);
-    facts(p,F.session.participants.map(x=>'Participant: '+(x.label||x.id)));
-    table(p,['Exchange','Opponent','Result','Duration'],F.session.exchanges.map((x,i)=>[String(i+1),x.opponentLabel||x.opponent,x.resolution.classification,s2(x.durationNanos/1e9)]));
-    h2(p,'Round and match announcement timeline');
-    table(p,['Time','Kind','Rule','Evidence'],F.session.announcements.map(x=>[s2((x.nanoTime-base)/1e9),x.kind,x.rule,x.text]));
+  if(F.session){
+    h2(p,'Manual recording','session result is independent of exchange results');
+    p.append(el('p',{class:'muted'},'Participants: '+(F.session.participants.map(x=>x.label||x.id).join(', ')||NONE)));
+    table(p,['Exchange','Opponent','Result','Duration'],F.session.exchanges.map((x,i)=>['#'+(i+1),x.opponentLabel||x.opponent||NONE,cap(x.resolution.classification),s2(x.durationNanos/1e9)]),[false,false,false,true]);
+    const ann=collapsible(p,'Round and match announcement timeline',F.session.announcements.length);
+    table(ann,['Time','Kind','Rule','Evidence'],F.session.announcements.map(x=>[s2((x.nanoTime-base)/1e9),cap(x.kind),x.rule,x.text]),[true,false,false,false]);
   }
-  h2(p,'Result');
-  if(F.matchEvidence?.rounds?.length) {
-    h2(p,'Match rounds','Round outcomes are separate from the overall match result');
-    table(p,['Round','Start','End','Round outcome','Evidence'],F.matchEvidence.rounds.map(r=>[
-      String(r.number),s2((r.startNanos-base)/1e9),r.endNanos==null?'Unknown':s2((r.endNanos-base)/1e9),
-      r.outcome||'Not announced',r.rule||'Boundary observed; result unavailable']));
-  }
+  h2(p,'Summary','key measurements; select ? for a definition');
+  const reachOk=D.reach&&D.reach.eligible;
+  cards(p,[[label('accuracy','Combat accuracy'),pct(S.accuracy),S.hits+' / '+(S.accuracyDenominator??S.attempts)+' attempts','accuracy'],
+    [label('hits','Correlated hits'),String(S.hits),'confirmed by the server','hits'],
+    [label('incoming','Attributed incoming hits'),cnt(S.attributedIncoming??S.incoming),'from the tracked opponent','incoming'],
+    [label('reachWithin','Reach in target window'),reachOk?D.reach.within+' / '+D.reach.eligible:NONE,reachOk?pct(D.reach.withinPercent)+' of eligible hits':'no eligible hits','reachWithin'],
+    [label('longestCombo','Longest combo'),String(S.longestCombo),(S.comboCount??0)+' combos','longestCombo'],
+    [label('dominanceShare','Advantage share'),dom&&dom.availability==='AVAILABLE'?pct(dom.localShare):NONE,dom?dom.availabilityLabel:'unavailable','dominanceShare']]);
+  h2(p,'What the measurements say','generated from recorded values');
+  const lines=(D.interpretations||[]).slice(1);if(lines.length)facts(p,lines);else p.append(el('p',{class:'muted'},'Not enough evidence for a written summary.'));
+  h2(p,'Attack outcomes','every eligible attempt');
+  stack(p,[{name:'Hits',v:S.hits,color:C.you},{name:'Empty swings',v:S.emptyMisses,color:C.opp},{name:'Uncertain',v:S.uncertain,color:C.unknown},...(V3?[{name:'Shield blocks',v:shields.confirmedBlocks||0,color:C.good}]:[])],'Attack outcomes');
+  if(!V3)p.append(el('p',{class:'muted'},'Shield blocks were not observable before 0.1.3, so blocked attacks of this recording remain counted as uncertain.'));
+  h2(p,'Result evidence',R.source||null);
   const establishing=R.evidenceIndex!=null?(F.matchEvidence?.entries||[])[R.evidenceIndex]:null;
-  cards(p,[[ 'Result',R.label,(R.source||'')+(R.derived?' · pre-0.1.3':''),null,'result'],['Evidence confidence',cap(R.confidence),'scope: '+cap(R.scope||'')],['Duration',num(dur,1)+' s',E.length+' events'],[label('accuracy','Hit accuracy'),pct(S.accuracy),S.hits+' / '+(S.accuracyDenominator??S.attempts)+' attempts','accuracy'],[label('reachWithin','Reach in target window'),D.reach&&D.reach.eligible?D.reach.within+' / '+D.reach.eligible:NONE,pct(D.reach?.withinPercent),'reachWithin'],[label('longestCombo','Longest combo'),String(S.longestCombo),(S.comboCount??0)+' combos','longestCombo'],[label('dominanceShare','Advantage share'),dom&&dom.availability==='AVAILABLE'?pct(dom.localShare):NONE,dom?dom.availabilityLabel:'unavailable','dominanceShare']]);
+  if(!establishing&&!(R.notes||[]).length)p.append(el('p',{class:'muted'},R.label+(R.source?' from '+R.source.toLowerCase():'')+'. No establishing announcement was recorded.'));
   if(establishing)p.append(el('p',{class:'muted'},'Established by '+establishing.kind.toLowerCase()+' announcement ('+establishing.rule+'): '+establishing.text));
   if((R.notes||[]).length)facts(p,R.notes.map(n=>'Note: '+n));
-  h2(p,'What the measurements say','generated from recorded values');
-  facts(p,(D.interpretations||[]).slice(1));
-  h2(p,'Attempts');
-  stack(p,[{name:'Hits',v:S.hits,color:'var(--you)'},{name:'Empty swings',v:S.emptyMisses,color:'var(--opp)'},{name:'Uncertain',v:S.uncertain,color:'#6c767c'},...(V3?[{name:'Shield blocks',v:shields.confirmedBlocks||0,color:'var(--good)'}]:[])]);
-  if(!V3)p.append(el('p',{class:'muted'},'Shield blocks were not observable before 0.1.3, so blocked attacks of this recording remain counted as uncertain.'));
+  if(rounds.length){
+    h2(p,'Match rounds','round outcomes are separate from the overall match result');
+    table(p,['Round','Start','End','Round outcome','Evidence'],rounds.map(r=>[String(r.n),s2(r.start),r.end==null?'Unknown':s2(r.end),roundInk(r.outcome),r.rule||'Boundary observed; result unavailable']),[false,true,true,false,false]);
+  }
   const evidence=F.matchEvidence?.entries||[];
-  if(evidence.length){h2(p,'Match evidence','establishing entry highlighted');const tb=table(p,['Kind','Origin','Rule','Accepted','Original text'],evidence.map(e=>[e.kind,e.origin,e.rule,e.accepted?'Yes':'No',e.text]));if(R.evidenceIndex!=null&&tb.children[R.evidenceIndex])tb.children[R.evidenceIndex].className='sel';}
-  note(p,'Confirmed results need an exact server announcement naming both players in the current round. Kill messages, deaths and generic text are inferred at most; an opponent death with no announcement stays Unknown. Hits are server-reported local melee damage matched to observed attacks. Reach, aim and critical conditions are client observations.');
+  if(evidence.length){const d=collapsible(p,'Match evidence (establishing entry highlighted)',evidence.length);const tb=table(d,['Kind','Origin','Rule','Accepted','Original text'],evidence.map(e=>[cap(e.kind),cap(e.origin),e.rule,e.accepted?'Yes':'No',e.text]));if(R.evidenceIndex!=null&&tb.children[R.evidenceIndex]){tb.children[R.evidenceIndex].className='sel';d.open=true;}}
+  method(p,'Confirmed results need an exact server announcement naming both players in the current round. Kill messages, deaths and generic text are inferred at most; an opponent death with no announcement stays Unknown. Hits are server-reported local melee damage matched to observed attacks. Reach, aim and critical conditions are client observations.','How results and hits are established');
 },
 offense(p){
-  sections(p,[['o-acc','Accuracy'],['o-reach','Reach & spacing'],['o-aim','Aim'],['o-timing','Weapon timing'],['o-crit','Critical & sprint']]);
   h2(p,'Accuracy','denominator excludes confirmed shield blocks','o-acc');
-  if(S.measurementVersion){cards(p,[['Total swings',String(S.totalInputs),'raw local inputs'],['Unique attacks',String(S.uniqueAttacks),S.deduplicatedAttacks+' duplicate observations'],['Eligible combat attempts',String(S.attempts),'before shield exclusion'],['Eligible misses',String(S.eligibleMisses),'aimed opening misses included'],['Excluded noncombat swings',String(S.excludedSwings),'excluded from accuracy'],['Unresolved attacks',String(S.unresolved),'included in denominator'],['Uncertain shields',String(S.uncertainShield),'also in denominator']]);
-    note(p,'Inclusive two-client-tick deduplication is anchored to the first observation. Accuracy = confirmed hits / (unique eligible combat attempts minus confirmed shield blocks). Unresolved and uncertain shield attempts remain in the denominator. Excluded swings and duplicate observations never count as misses. Aimed empty swings wait for the bounded confirmation window before becoming eligible misses.');}
-  else note(p,'Historical measurement policy: new swing classifications and combat-active intervals are unavailable. Original recorded counts and outcomes are preserved.');
-  cards(p,[[label('attempts','Attack attempts'),String(S.attempts),'observed','attempts'],[label('hits','Correlated hits'),String(S.hits),'confirmed source','hits'],[S.measurementVersion?'Eligible misses':'Legacy empty swings',String(S.emptyMisses),S.measurementVersion?'inferred from aim evidence':'original measurement policy','emptyMisses'],[label('uncertain','Uncertain attacks'),String(S.uncertain),'not proven misses','uncertain'],[label('shieldBlocks','Confirmed shield blocks'),V3?String(shields.confirmedBlocks||0):NONE,V3?'excluded from denominator':'unavailable','shieldBlocks'],[label('accuracy','Hit accuracy'),pct(S.accuracy),S.hits+' / '+(S.accuracyDenominator??S.attempts),'accuracy']]);
-  note(p,'Accuracy = confirmed hits / (attempts − confirmed shield blocks). A blocked attack met the shield: it is neither a hit nor a miss. Estimated blocks and other attacks without a server report stay uncertain and remain in the denominator.');
+  cards(p,[[label('accuracy','Combat accuracy'),pct(S.accuracy),S.hits+' / '+(S.accuracyDenominator??S.attempts),'accuracy'],[label('hits','Correlated hits'),String(S.hits),'confirmed source','hits'],[label('attempts','Attack attempts'),String(S.attempts),'observed','attempts'],[S.measurementVersion?'Eligible misses':'Legacy empty swings',String(S.emptyMisses),S.measurementVersion?'inferred from aim evidence':'original measurement policy','emptyMisses'],[label('uncertain','Uncertain attacks'),String(S.uncertain),'not proven misses','uncertain'],[label('shieldBlocks','Confirmed shield blocks'),V3?String(shields.confirmedBlocks||0):NONE,V3?'excluded from denominator':'unavailable','shieldBlocks']]);
+  if(S.measurementVersion){h3Text(p,'Input breakdown');kv(p,[['Total swings',String(S.totalInputs),'raw local inputs'],['Unique attacks',String(S.uniqueAttacks),S.deduplicatedAttacks+' duplicate observations'],['Eligible combat attempts',String(S.attempts),'before shield exclusion'],['Eligible misses',String(S.eligibleMisses),'aimed opening misses included'],['Excluded noncombat swings',String(S.excludedSwings),'excluded from accuracy'],['Unresolved attacks',String(S.unresolved),'included in denominator'],['Uncertain shields',String(S.uncertainShield),'also in denominator']]);
+    method(p,['Accuracy = confirmed hits / (attempts − confirmed shield blocks). A blocked attack met the shield: it is neither a hit nor a miss. Estimated blocks and other attacks without a server report stay uncertain and remain in the denominator.','Inclusive two-client-tick deduplication is anchored to the first observation. Unresolved and uncertain shield attempts remain in the denominator. Excluded swings and duplicate observations never count as misses. Aimed empty swings wait for the bounded confirmation window before becoming eligible misses.']);}
+  else{note(p,'Historical measurement policy: new swing classifications and combat-active intervals are unavailable. Original recorded counts and outcomes are preserved.');method(p,'Accuracy = confirmed hits / (attempts − confirmed shield blocks). A blocked attack met the shield: it is neither a hit nor a miss. Estimated blocks and other attacks without a server report stay uncertain and remain in the denominator.');}
   h2(p,'Reach & spacing','eligible confirmed hits','o-reach');
   const r=D.reach||{};
   cards(p,[[label('reachWithin','Reach in target window'),r.eligible?r.within+' / '+r.eligible:NONE,pct(r.withinPercent),'reachWithin'],[label('averageReach','Average reach'),m2(r.mean),(r.eligible||0)+' eligible hits','averageReach'],[label('reachDeviation','Reach consistency'),m2(r.deviation),'standard deviation','reachDeviation'],[label('reachError','Average deviation from target'),m2(r.meanAbsoluteError),'from '+num(r.target,2)+' m','reachError'],[label('maxReach','Maximum reach'),m2(r.max),'eligible hits','maxReach'],['Perfect-spacing hits',S.perfectReachHits==null?NONE:String(S.perfectReachHits),'source-confirmed, in window']]);
   reachHistogram(p);
   const bw=Object.entries(r.byWeapon||{});if(bw.length){h3Text(p,'By weapon');table(p,['Weapon','Eligible','In window','Mean','SD','Max'],bw.map(([k,v])=>[item(k),String(v.eligible),v.within+' ('+pct(100*v.within/v.eligible)+')',m2(v.mean),m2(v.deviation),m2(v.max)]),[false,true,true,true,true,true]);}
-  note(p,'Reach is the client distance from your interpolated eye to the ray contact on the target\'s client hitbox (inflated by pick radius), in blocks. It is not the server\'s registration decision, and a value above the target is not evidence of a rule violation: interpolation, latency and server configuration differ. Attack ranges can differ per weapon component; compare weapons separately.');
+  method(p,'Reach is the client distance from your interpolated eye to the ray contact on the target\'s client hitbox (inflated by pick radius), in blocks. It is not the server\'s registration decision, and a value above the target is not evidence of a rule violation: interpolation, latency and server configuration differ. Attack ranges can differ per weapon component; compare weapons separately.');
   h2(p,'Aim','measured contacts and derived alignment','o-aim');
   const a=D.aim||{grades:[0,0,0,0]};const g=a.grades||[0,0,0,0],gt=g.reduce((x,y)=>x+y,0);
-  cards(p,[[label('aimCentral','Central aim'),gt?pct(100*(g[0]+g[1])/gt):NONE,(g[0]+g[1])+' of '+gt+' graded hits','aimCentral'],['Peripheral or poor',String(g[2]+g[3]),gt?pct(100*(g[2]+g[3])/gt):NONE],[label('aimDistance','Distance from ideal point'),m2(a.meanDistance),'SD '+m2(a.distanceDeviation),'aimDistance']]);
+  cards(p,[[label('aimCentral','Central aim'),gt?pct(100*(g[0]+g[1])/gt):NONE,(g[0]+g[1])+' of '+gt+' graded hits','aimCentral'],['Peripheral or poor',gt?String(g[2]+g[3]):NONE,gt?pct(100*(g[2]+g[3])/gt):'no graded hits'],[label('aimDistance','Distance from ideal point'),m2(a.meanDistance),'SD '+m2(a.distanceDeviation),'aimDistance']]);
   aimView(p);
-  const br=Object.entries(a.byReach||{});if(br.length){h3Text(p,'By reach range');table(p,['Reach','Ideal','Good','Peripheral','Poor'],br.map(([k,v])=>[k,...v.map(String)]),[false,true,true,true,true]);}
-  const bwa=Object.entries(a.byWeapon||{});if(bwa.length){h3Text(p,'By weapon');table(p,['Weapon','Ideal','Good','Peripheral','Poor'],bwa.map(([k,v])=>[item(k),...v.map(String)]),[false,true,true,true,true]);}
+  const br=Object.entries(a.byReach||{}),bwa=Object.entries(a.byWeapon||{});
+  if(br.length||bwa.length){const d=collapsible(p,'Aim grades by reach range and weapon');
+    if(br.length){h3Text(d,'By reach range');table(d,['Reach','Ideal','Good','Peripheral','Poor'],br.map(([k,v])=>[k,...v.map(String)]),[false,true,true,true,true]);}
+    if(bwa.length){h3Text(d,'By weapon');table(d,['Weapon','Ideal','Good','Peripheral','Poor'],bwa.map(([k,v])=>[item(k),...v.map(String)]),[false,true,true,true,true]);}}
   h2(p,'Weapon timing','interval minus each weapon\'s expected cooldown','o-timing');
   timingChart(p);
-  note(p,'The previous attack\'s effective cooldown (20 / attack speed, from client attributes) defines the next interval. Within '+num(F.policy?.timingToleranceTicks,2)+' ticks is perfect; earlier is too fast; later, up to two cooldowns, is too slow. A weapon switch or a longer gap resets the sequence and the first attack is ungraded. Weapons are never pooled into one raw average. Cooldown readiness is mechanical, not a judgement of tactical timing.');
+  method(p,'The previous attack\'s effective cooldown (20 / attack speed, from client attributes) defines the next interval. Within '+num(F.policy?.timingToleranceTicks,2)+' ticks is perfect; earlier is too fast; later, up to two cooldowns, is too slow. A weapon switch or a longer gap resets the sequence and the first attack is ungraded. Weapons are never pooled into one raw average. Cooldown readiness is mechanical, not a judgement of tactical timing.');
   h2(p,'Critical & sprint hits',null,'o-crit');
   cards(p,[[label('criticalRate','Critical-hit rate'),pct(S.criticalRate),S.criticalConditions+' with conditions','criticalRate'],[label('serverCrits','Server critical hits'),V3?String(S.serverCrits??0):NONE,V3?'server animation':'unavailable','serverCrits'],[label('sprintRate','Sprint-hit rate'),pct(S.sprintRate),S.sprintHits+' of '+S.hits+' hits','sprintRate']]);
-  note(p,'Critical conditions are observed client state. A server critical-hit animation on the opponent within one tick of a confirmed hit is counted separately. Neither reports the damage multiplier.');
+  method(p,'Critical conditions are observed client state. A server critical-hit animation on the opponent within one tick of a confirmed hit is counted separately. Neither reports the damage multiplier.');
+  chips(p,[['o-acc','Accuracy'],['o-reach','Reach & spacing'],['o-aim','Aim'],['o-timing','Weapon timing'],['o-crit','Critical & sprint']]);
 },
 defense(p){
-  sections(p,[['d-in','Incoming hits'],['d-shield','Shields'],['d-jump','Jump resets'],['d-dmg','Damage & knockback']]);
   h2(p,'Incoming hits',null,'d-in');
-  cards(p,[[label('incoming','Attributed incoming hits'),String(S.attributedIncoming??S.incoming),'cause = tracked opponent','incoming'],[label('unattributedIncoming','Unattributed damage'),String(S.unattributedIncoming??0),'no cause entity','unattributedIncoming'],['Third-party damage',String(S.thirdPartyIncoming??0),'another entity'],['Health drops without a damage event',V3?String(S.unexplainedHealthDrops??0):NONE,V3?'observed':'unavailable']]);
-  stack(p,[{name:'Attributed to opponent',v:S.attributedIncoming??0,color:'var(--opp)'},{name:'Unattributed',v:S.unattributedIncoming??0,color:'var(--incomplete)'},{name:'Third party',v:S.thirdPartyIncoming??0,color:'#6c767c'}]);
-  table(p,['Time','Attribution','Type','Health lost','Knockback','Crit on you'],incoming.map(i=>[s2(i.time),attrName[i.attribution]||i.attribution,i.damageType?item(i.damageType):NONE,i.damage!=null?num(i.damage,1)+' HP':NONE,i.knockback!=null?num(i.knockback,2):NONE,i.crit?'Yes':NONE]),[true,false,false,true,true,false]);
-  note(p,'Only damage whose server-reported cause is the tracked opponent counts as an opponent hit. Fall, fire, environmental and third-party damage is listed but never breaks your combos or moves dominance.');
+  cards(p,[[label('incoming','Attributed incoming hits'),cnt(S.attributedIncoming??S.incoming),'cause = tracked opponent','incoming'],[label('unattributedIncoming','Unattributed damage'),cnt(S.unattributedIncoming),'no cause entity','unattributedIncoming'],['Third-party damage',cnt(S.thirdPartyIncoming),'another entity'],['Health drops without a damage event',V3?cnt(S.unexplainedHealthDrops):NONE,V3?'observed':'unavailable']]);
+  stack(p,[{name:'Attributed to opponent',v:S.attributedIncoming??0,color:C.opp},{name:'Unattributed',v:S.unattributedIncoming??0,color:C.incomplete},{name:'Third party',v:S.thirdPartyIncoming??0,color:C.unknown}],'Incoming damage attribution');
+  if(incoming.length){const d=collapsible(p,'Incoming hit list',incoming.length);table(d,['Time','Attribution','Type','Health lost','Knockback','Crit on you'],incoming.map(i=>[s2(i.time),attrName[i.attribution]||i.attribution,i.damageType?item(i.damageType):NONE,i.damage!=null?num(i.damage,1)+' HP':NONE,i.knockback!=null?num(i.knockback,2):NONE,i.crit?'Yes':NONE]),[true,false,false,true,true,false]);}
+  method(p,'Only damage whose server-reported cause is the tracked opponent counts as an opponent hit. Fall, fire, environmental and third-party damage is listed but never breaks your combos or moves dominance.');
   h2(p,'Shields','confirmed, estimated and unknown kept apart','d-shield');
   if(!shields.available)unavailable(p,'shield observations');
-  else{cards(p,[[label('attacksIntoShield','Attacks into a raised shield'),String(shields.attacksIntoShield),'observed state','attacksIntoShield'],[label('shieldBlocks','Confirmed shield blocks'),String(shields.confirmedBlocks),'sound + no damage','shieldBlocks'],[label('estimatedShieldBlocks','Estimated shield blocks'),String(shields.estimatedBlocks),'no sound','estimatedShieldBlocks'],[label('shieldDisables','Shield disables'),String(shields.disables),'disable sound','shieldDisables'],[label('hitsAfterDisable','Hits after a disable'),String(shields.hitsAfterDisable),'within 5 s','hitsAfterDisable'],['Hits past a raised shield',String(shields.bypassed),'behind or after disable'],[label('localShieldBlocks','Your shield blocks'),String(shields.localBlocks),'attacker not reported','localShieldBlocks'],['Your shield disabled',String(shields.localDisabled),'disable sound at you']]);
-    const est=shields.estimatedBlocks||0;stack(p,[{name:'Hit',v:S.hits,color:'var(--you)'},{name:'Block',v:shields.confirmedBlocks-shields.disables,color:'var(--good)'},{name:'Shield disable',v:shields.disables,color:'var(--warn)'},{name:'Estimated block',v:est,color:'#2f7f63'},{name:'Unknown result',v:Math.max(0,S.uncertain-est),color:'#6c767c'},{name:'Miss (empty swing)',v:S.emptyMisses,color:'var(--opp)'}]);
+  else{cards(p,[[label('attacksIntoShield','Attacks into a raised shield'),String(shields.attacksIntoShield),'observed state','attacksIntoShield'],[label('shieldBlocks','Confirmed shield blocks'),String(shields.confirmedBlocks),'sound + no damage','shieldBlocks'],[label('estimatedShieldBlocks','Estimated shield blocks'),String(shields.estimatedBlocks),'no sound','estimatedShieldBlocks'],[label('shieldDisables','Shield disables'),String(shields.disables),'disable sound','shieldDisables']]);
+    kv(p,[[label('hitsAfterDisable','Hits after a disable'),String(shields.hitsAfterDisable),'within 5 s'],['Hits past a raised shield',String(shields.bypassed),'behind or after disable'],[label('localShieldBlocks','Your shield blocks'),String(shields.localBlocks),'attacker not reported'],['Your shield disabled',String(shields.localDisabled),'disable sound at you']]);
+    const est=shields.estimatedBlocks||0;stack(p,[{name:'Hit',v:S.hits,color:C.you},{name:'Block',v:shields.confirmedBlocks-shields.disables,color:C.good},{name:'Shield disable',v:shields.disables,color:C.warn},{name:'Estimated block',v:est,color:C.estimated},{name:'Unknown result',v:Math.max(0,S.uncertain-est),color:C.unknown},{name:'Miss (empty swing)',v:S.emptyMisses,color:C.opp}],'Attack results against shields');
     shieldTimeline(p);
-    table(p,['Time','Event','Shield of','Your weapon'],(shields.events||[]).map(e=>[s2(e.time),cap(e.type),e.subject==='local'?'You':'Opponent',e.weapon?item(e.weapon):NONE]),[true,false,false,false]);}
-  note(p,'Minecraft 1.21.11 sends no damage event for a blocked melee hit; it plays the shield-block sound at the blocker. A confirmed block needs a visibly blocking target, no damage report and that sound at the target. Blocking state with no sound is an estimate and stays uncertain. Damage prevented is never inferred.');
+    if((shields.events||[]).length){const d=collapsible(p,'Shield event list',shields.events.length);table(d,['Time','Event','Shield of','Your weapon'],shields.events.map(e=>[s2(e.time),cap(e.type),e.subject==='local'?'You':'Opponent',e.weapon?item(e.weapon):NONE]),[true,false,false,false]);}}
+  method(p,'Minecraft 1.21.11 sends no damage event for a blocked melee hit; it plays the shield-block sound at the blocker. A confirmed block needs a visibly blocking target, no damage report and that sound at the target. Blocking state with no sound is an estimate and stays uncertain. Damage prevented is never inferred.');
   h2(p,'Jump resets','signed client ticks; candidates only','d-jump');
   const cls={};for(const i of incoming)if(i.attributed)cls[i.jumpClass]=(cls[i.jumpClass]||0)+1;
-  cards(p,[['Same tick',String(cls.IDEAL_CANDIDATE||0),'ideal-timing candidates'],['Within ±'+(D.jumpWindowTicks??4)+' ticks',String(cls.ATTEMPT_CANDIDATE||0),'attempt candidates'],['Outside window',String(cls.OUTSIDE_WINDOW||0),'not candidates'],['No jump',String(cls.NO_JUMP||0),'within 20 ticks'],['Excluded',String(cls.EXCLUDED||0),'water, climbing, riding'],['Unavailable',String(cls.UNAVAILABLE||0),'no client ticks'],['Reset success','Not measured','no success rate'],['Speed after knockback (experimental)',D.jumpEffect?num(D.jumpEffect.candidateSpeed,3)+' vs '+num(D.jumpEffect.otherSpeed,3):'Unavailable',D.jumpEffect?D.jumpEffect.candidates+' candidates vs '+D.jumpEffect.others+' no-jump hits':'needs 3+ samples per group']]);
+  const attTotal=incoming.filter(i=>i.attributed).length,ticked=attTotal-(cls.UNAVAILABLE||0)>0,jc=k=>ticked?String(cls[k]||0):NONE;
+  cards(p,[['Same tick',jc('IDEAL_CANDIDATE'),ticked?'ideal-timing candidates':'no client ticks'],['Within ±'+(D.jumpWindowTicks??4)+' ticks',jc('ATTEMPT_CANDIDATE'),'attempt candidates'],['Outside window',jc('OUTSIDE_WINDOW'),'not candidates'],['No jump',jc('NO_JUMP'),'within 20 ticks']]);
+  kv(p,[['Excluded',String(cls.EXCLUDED||0),'water, climbing, riding'],['Unavailable',String(cls.UNAVAILABLE||0),'no client ticks'],['Reset success','Not measured','no success rate is claimed'],['Speed after knockback (experimental)',D.jumpEffect?num(D.jumpEffect.candidateSpeed,3)+' vs '+num(D.jumpEffect.otherSpeed,3):'Unavailable',D.jumpEffect?D.jumpEffect.candidates+' candidates vs '+D.jumpEffect.others+' no-jump hits':'needs 3+ samples per group']]);
   jumpTimeline(p);
-  table(p,['Hit time','Tick offset','Category','Movement','Knockback','Confidence'],incoming.filter(i=>i.attributed).map(i=>[s2(i.time),i.jumpOffsetTicks==null?NONE:sgn(i.jumpOffsetTicks,0),cap(i.jumpClass),i.ground==null?NONE:(i.ground?'ground':'air')+(i.sprinting?', sprint':''),i.knockback!=null?num(i.knockback,2):NONE,i.tick==null?'unavailable':'observed ticks']),[true,true,false,false,true,false]);
+  const attIn=incoming.filter(i=>i.attributed);if(attIn.length){const d=collapsible(p,'Jump timing per attributed hit',attIn.length);table(d,['Hit time','Tick offset','Category','Movement','Knockback','Confidence'],attIn.map(i=>[s2(i.time),i.jumpOffsetTicks==null?NONE:sgn(i.jumpOffsetTicks,0),cap(i.jumpClass),i.ground==null?NONE:(i.ground?'ground':'air')+(i.sprinting?', sprint':''),i.knockback!=null?num(i.knockback,2):NONE,i.tick==null?'unavailable':'observed ticks']),[true,true,false,false,true,false]);}
   note(p,'Offsets compare client ticks of the actual jump action and the incoming-hit observation; network delay can shift the server\'s view. A candidate is not a successful reset. The experimental speed comparison is descriptive only and confounded by attacker sprint, enchantments, terrain and input.',true);
   h2(p,'Damage & knockback',null,'d-dmg');
   const att=incoming.filter(i=>i.attributed),kb=att.filter(i=>i.knockback!=null);
-  cards(p,[[label('damageTaken','Health lost'),V3?num(S.damageTaken,1)+' HP':NONE,'health + absorption','damageTaken'],['Hits with a health drop',att.filter(i=>i.damage!=null).length+' / '+att.length,'within 2 ticks'],[label('knockback','Knockback observed'),kb.length+' / '+att.length,'velocity within 1 tick','knockback'],['Mean knockback',kb.length?num(kb.reduce((a,b)=>a+b.knockback,0)/kb.length,2):NONE,'blocks/tick, horizontal'],['Damage dealt','Unavailable','opponent health not trusted']]);
+  cards(p,[[label('damageTaken','Health lost'),V3?num(S.damageTaken,1)+' HP':NONE,'health + absorption','damageTaken'],['Hits with a health drop',V3?att.filter(i=>i.damage!=null).length+' / '+att.length:NONE,'within 2 ticks'],[label('knockback','Knockback observed'),V3?kb.length+' / '+att.length:NONE,'velocity within 1 tick','knockback'],['Mean knockback',kb.length?num(kb.reduce((a,b)=>a+b.knockback,0)/kb.length,2):NONE,'blocks/tick, horizontal'],['Damage dealt','Unavailable','opponent health not trusted']]);
   if(!V3)unavailable(p,'health or knockback observations');
+  chips(p,[['d-in','Incoming hits'],['d-shield','Shields'],['d-jump','Jump resets'],['d-dmg','Damage & knockback']]);
 },
 flow(p){
-  if(F.session){ h2(p,'Session exchanges');note(p,'Session-wide dominance and combo timelines are unavailable. Choose a participant and exchange above to inspect its own evidence, combos, dominance, shields, reach, aim, timing and jump resets.');
-    table(p,['Exchange','Participant','Result','Hits','Duration'],F.session.exchanges.map((x,i)=>[String(i+1),x.opponentLabel||x.opponent,x.resolution.classification,String(x.statistics.hits),s2(x.durationNanos/1e9)])); return; }
-  sections(p,[['f-combo','Combos'],['f-dom','Dominance'],['f-ex','Exchanges']]);
+  if(F.session){h2(p,'Session exchanges');note(p,'Session-wide dominance and combo timelines are unavailable. Choose a participant and exchange above to inspect its own evidence, combos, dominance, shields, reach, aim, timing and jump resets.');
+    table(p,['Exchange','Participant','Result','Hits','Duration'],F.session.exchanges.map((x,i)=>['#'+(i+1),x.opponentLabel||x.opponent||NONE,cap(x.resolution.classification),String(x.statistics.hits),s2(x.durationNanos/1e9)]),[false,false,false,true,true]);return;}
   h2(p,'Combos','consecutive confirmed hits without a confirmed return hit','f-combo');
   cards(p,[[label('longestCombo','Longest combo'),String(S.longestCombo),'your best','longestCombo'],[label('comboCount','Combos'),String(S.comboCount??0),'two or more hits','comboCount'],[label('averageCombo','Average combo'),num(S.averageLocalCombo,2),'mean length','averageCombo'],[label('comboHits','Hits in combos'),String(S.comboHits??0),'of '+S.hits+' hits','comboHits'],[label('longestUnanswered','Longest unanswered streak'),String(S.longestUnanswered??S.longestCombo),'ignores gaps','longestUnanswered'],[label('longestOpponentCombo','Longest opponent combo'),S.opponentComboAvailability==='Unavailable'?NONE:String(S.longestOpponentCombo??0),cap(S.opponentComboAvailability||'observed'),'longestOpponentCombo']]);
   const ctl=controls(p);const detail=el('div');
-  const comboSel=select(ctl,'Combo',[['-1','Select a combo'],...comboList.map((c,i)=>[String(i),(c.side==='LOCAL'?'You':'Opponent')+' ×'+c.length+' at '+num(c.start,2)+' s'])],v=>pick(Number(v)));
+  const comboSel=select(ctl,'Combo',[['-1',comboList.length?'Select a combo':'No combos in this fight'],...comboList.map((c,i)=>[String(i),(c.side==='LOCAL'?'You':'Opponent')+' ×'+c.length+' at '+num(c.start,2)+' s'])],v=>pick(Number(v)));
+  const prevB=el('button',{class:'btn',type:'button'},'Previous'),nextB=el('button',{class:'btn',type:'button'},'Next');const pair=el('span',{class:'pair'});pair.append(prevB,nextB);ctl.append(pair);
+  const step=d=>{if(!comboList.length)return;const i=Number(comboSel.value);const j=i<0?(d>0?0:comboList.length-1):(i+d+comboList.length)%comboList.length;comboSel.value=String(j);pick(j);};prevB.onclick=()=>step(-1);nextB.onclick=()=>step(1);
   const highlight=comboTimeline(p,i=>{comboSel.value=String(i);pick(i);});p.append(detail);
   function pick(i){highlight(i);detail.replaceChildren();if(i<0||!comboList[i])return;const c=comboList[i];
     h3Text(detail,(c.side==='LOCAL'?'Your':'Opponent')+' combo: '+c.length+' hits in '+num(c.end-c.start,2)+' s, ended by '+endWord[c.endedBy]);
     const byIn={};for(const x of incoming)byIn[x.sequence]=x;
     table(detail,['#','Time','Side','Reach','Weapon / type','Critical'],c.seqs.map((s,k)=>{const h=hitBySeq[s],x=byIn[s];return h?['#'+(k+1),s2(h.evidenceT),'Your hit',m2(h.reach),item(h.weapon),h.serverCrit?'server crit':h.critical?'crit conditions':NONE]:['#'+(k+1),x?s2(x.time):NONE,'Opponent hit',NONE,x&&x.damageType?item(x.damageType):NONE,x&&x.crit?'crit on you':NONE];}),[false,true,false,true,false,false]);}
-  note(p,'A combo ends on an attributed return hit, a same-tick trade (order unknown, so neither side is extended), or a gap longer than '+num(combos.gap,1)+' s. Empty swings, shield blocks, knockback and unattributed damage never extend or end a combo.');
+  method(p,'A combo ends on an attributed return hit, a same-tick trade (order unknown, so neither side is extended), or a gap longer than '+num(combos.gap,1)+' s. Empty swings, shield blocks, knockback and unattributed damage never extend or end a combo.','How combos are counted');
   h2(p,'Encounter dominance',dom?dom.availabilityLabel:'unavailable','f-dom');
   if(dom&&dom.availability!=='AVAILABLE')note(p,dom.availability==='INCOMPLETE'?'Incoming-hit attribution was incomplete, so encounter dominance could not be established confidently. Dotted columns mark unattributed damage; they are not counted for either player.':'Too few confirmed exchanges were observed to estimate encounter dominance.',true);
   dominanceChart(p);
-  if(dom)cards(p,[[label('dominanceShare','Advantage share'),pct(dom.localShare),'you, of '+num(dom.active,1)+' s active','dominanceShare'],['Opponent advantage',pct(dom.opponentShare),'of active time'],['Neutral',pct(dom.neutralShare),'balanced evidence'],['Longest advantage',dom.longest?num(dom.longest.end-dom.longest.start,1)+' s':NONE,dom.longest?(dom.longest.side==='LOCAL'?'you':'opponent')+' from '+num(dom.longest.start,1)+' s':'none'],['Largest swing',dom.swing?sgn(dom.swing.toValue-dom.swing.fromValue,2):NONE,dom.swing?'within 3 s at '+num(dom.swing.from,1)+' s':'none'],['Dominance changes',String(dom.changes),'you ↔ opponent'],['No evidence / incomplete',num(dom.insufficient,1)+' s / '+num(dom.incomplete,1)+' s','excluded from shares']]);
-  if(dom){const m=dom.model;note(p,'Model: each confirmed hit weighs '+m.hit+' (+'+m.streakBonus+' when it continues a combo); opponent blocks −'+m.shieldBlocked+', shield disables ±'+m.shieldDisabled+', your blocks +'+m.localBlock+'; every input decays with a '+m.tau+' s time constant. D = (you − opponent) / (you + opponent + 1), so thin evidence stays near zero and one event reaches at most 0.5. States: above +'+m.threshold+' you, below −'+m.threshold+' opponent; evidence mass under '+m.minMass+' is "no evidence"; unattributed damage mass of '+m.maxUnattributed+' or more is "incomplete". Accuracy, aim and reach are not inputs. This is combat advantage from observed hits, not physical momentum and not a win probability.');}
+  if(dom){cards(p,[[label('dominanceShare','Advantage share'),pct(dom.localShare),'you, of '+num(dom.active,1)+' s active','dominanceShare'],['Opponent advantage',pct(dom.opponentShare),'of active time'],['Neutral',pct(dom.neutralShare),'balanced evidence']]);
+    kv(p,[['Longest advantage',dom.longest?num(dom.longest.end-dom.longest.start,1)+' s':NONE,dom.longest?(dom.longest.side==='LOCAL'?'you':'opponent')+' from '+num(dom.longest.start,1)+' s':'none'],['Largest swing',dom.swing?sgn(dom.swing.toValue-dom.swing.fromValue,2):NONE,dom.swing?'within 3 s at '+num(dom.swing.from,1)+' s':'none'],['Dominance changes',String(dom.changes),'you ↔ opponent'],['No evidence / incomplete',num(dom.insufficient,1)+' s / '+num(dom.incomplete,1)+' s','excluded from shares']]);
+    const m=dom.model;method(p,'Model: each confirmed hit weighs '+m.hit+' (+'+m.streakBonus+' when it continues a combo); opponent blocks −'+m.shieldBlocked+', shield disables ±'+m.shieldDisabled+', your blocks +'+m.localBlock+'; every input decays with a '+m.tau+' s time constant. D = (you − opponent) / (you + opponent + 1), so thin evidence stays near zero and one event reaches at most 0.5. States: above +'+m.threshold+' you, below −'+m.threshold+' opponent; evidence mass under '+m.minMass+' is "no evidence"; unattributed damage mass of '+m.maxUnattributed+' or more is "incomplete". Accuracy, aim and reach are not inputs. This is combat advantage from observed hits, not physical momentum and not a win probability.','How dominance is modelled');}
   h2(p,'Exchanges','separated by gaps over '+num(combos.gap,1)+' s','f-ex');
-  if(S.measurementVersion){const active=D.combatExchanges||[];h3Text(p,'Combat-active intervals');
-    const W=900,H=64,{svg}=chartBox(p,W,H,'Combat exchanges and breaks'),x=t=>10+880*t/dur;
-    svg.append(sv('rect',{x:10,y:10,width:880,height:22,fill:'#2a3036'}));
-    for(const e of active)svg.append(sv('rect',{x:x(e.start),y:10,width:Math.max(1,x(e.end)-x(e.start)),height:22,fill:'var(--you)'}));
-    svgText(svg,10,52,'0 s');svgText(svg,780,52,num(dur,1)+' s');
-    note(p,num(S.combatActiveSeconds,1)+' s combat-active in '+num(dur,1)+' s recorded. Filled intervals are combat; the background shows breaks. Exchange timeout: '+num(D.exchangeTimeoutSeconds,1)+' s, independent of recording timeout.');
-    table(p,['Exchange','Start / end (s)','Duration','Hits','Misses','Combos','Momentum turns','End'],active.map((e,i)=>['#'+(i+1),num(e.start,2)+' / '+num(e.end,2),num(e.end-e.start,2),String(e.hits),String(e.misses),String(e.combos),String(e.momentumChanges),cap(e.endedBy)]));
-    note(p,'Hit-only streak segments below retain the combo timeout. Exchange and round boundaries also split combos and reset dominance. Finalization: '+(F.reason||'unavailable'));}
+  if(S.measurementVersion){h3Text(p,'Combat-active intervals');
+    exchangeStrip(p);
+    p.append(el('p',{class:'muted'},num(S.combatActiveSeconds,1)+' s combat-active in '+num(dur,1)+' s recorded. Filled intervals are combat; the background shows breaks. Exchange timeout: '+num(D.exchangeTimeoutSeconds,1)+' s, independent of recording timeout.'));
+    table(p,['Exchange','Start / end (s)','Duration','Hits','Misses','Combos','Momentum turns','End'],active.map((e,i)=>['#'+(i+1),num(e.start,2)+' / '+num(e.end,2),num(e.end-e.start,2),String(e.hits),String(e.misses),String(e.combos),String(e.momentumChanges),cap(e.endedBy)]),[false,true,true,true,true,true,true,false]);
+    method(p,'Hit-only streak segments below retain the combo timeout. Exchange and round boundaries also split combos and reset dominance. Finalization: '+(F.reason||'unavailable'),'How exchanges are separated');}
   const ex=combos.exchanges||[];
-  table(p,['Exchange','Time','Your hits','Opponent hits','Best combo (you / opp)','Advantage'],ex.map((e,i)=>['#'+(i+1),num(e.start,1)+'–'+num(e.end,1)+' s',String(e.local),String(e.opponent),e.longestLocal+' / '+e.longestOpponent,sgn(e.local-e.opponent,0)]),[false,true,true,true,true,true]);
+  h3Text(p,'Hit streak segments');
+  table(p,['Segment','Time','Your hits','Opponent hits','Best combo (you / opp)','Advantage'],ex.map((e,i)=>['#'+(i+1),num(e.start,1)+'–'+num(e.end,1)+' s',String(e.local),String(e.opponent),e.longestLocal+' / '+e.longestOpponent,sgn(e.local-e.opponent,0)]),[false,true,true,true,true,true]);
   if(dom&&(dom.turningPoints||[]).length){h3Text(p,'Key turning points');table(p,['Time','Change','Dominance'],dom.turningPoints.map(t=>[s2(t[0]),t[1]>0?'Advantage to you':'Advantage to opponent',num(t[1],2)]),[true,false,true]);}
+  chips(p,[['f-combo','Combos'],['f-dom','Dominance'],['f-ex','Exchanges']]);
 },
 timeline(p){
   h2(p,'Playback','recorded event timestamps; no world-state replay');
-  const ctl=el('div',{class:'controls'});const play=el('button',{class:'mc','aria-label':'Play'},'Play');const prev=el('button',{class:'mc'},'Prev event');const next=el('button',{class:'mc'},'Next event');
-  const speed=el('select',{class:'mc','aria-label':'Playback speed'});for(const s of[.25,.5,1,2,4]){const o=el('option',{value:s},s+'×');if(s===1)o.selected=true;speed.append(o);}
-  const seek=el('input',{type:'range',min:0,max:1000,step:1,value:0,'aria-label':'Playback position'});const clock=el('output');
-  ctl.append(play,prev,next,speed,seek,clock);p.append(ctl);
-  const W=900,lanes=[['Your attacks',0],['Incoming',1],['Shields',2],['Jumps',3],['Sprint',4]],LH=22,L=112,H=lanes.length*LH+14;
-  const{box,svg,t}=chartBox(p,W,H,'Event track');
-  const tx=v=>L+(W-L-10)*v/dur;
-  for(const[name,i]of lanes){const y=8+i*LH;svg.append(sv('line',{x1:L,x2:W-10,y1:y+LH/2,y2:y+LH/2,stroke:'#2a3036'}));svgText(svg,8,y+LH/2+4,name);}
-  const marks=[];let sprintOn=null;
+  const ctl=el('div',{class:'controls'});const play=el('button',{class:'btn primary',type:'button','aria-label':'Play'},'Play');const prev=el('button',{class:'btn',type:'button','aria-label':'Previous event'},'‹ Prev');const next=el('button',{class:'btn',type:'button','aria-label':'Next event'},'Next ›');
+  const speed=el('select',{'aria-label':'Playback speed'});for(const s of[.25,.5,1,2,4]){const o=el('option',{value:s},s+'×');if(s===1)o.selected=true;speed.append(o);}
+  const seek=el('input',{type:'range',min:0,max:1000,step:1,value:0,'aria-label':'Playback position'});const clk=el('output',{'aria-live':'off'});
+  ctl.append(play,prev,next,speed,seek,clk);p.append(ctl);
+  // Round and exchange navigation.
+  const jumps=[['','Jump to…'],['0','Start of recording'],...rounds.map(r=>['r'+r.n,'Round '+r.n+' · '+s2(r.start)]),...active.map((e,i)=>['e'+i,'Exchange #'+(i+1)+' · '+s2(e.start)])];
+  if(jumps.length>2){const nav=controls(p);const js=select(nav,'Go to',jumps,v=>{if(!v)return;setT(v==='0'?0:v[0]==='r'?rounds.find(r=>'r'+r.n===v).start:active[Number(v.slice(1))].start);js.value='';});js.setAttribute('aria-label','Jump to round or exchange');}
+  const W=cw(),narrow=W<560,L=narrow?74:112,R=10,LH=narrow?26:24;
+  const lanes=[...(rounds.length?[['Rounds','rounds']]:[]),...(active.length?[['Exchanges','exch']]:[]),['Your attacks','atk'],['Incoming','in'],['Shields','sh'],['Jumps','jump'],['Sprint','spr']];
+  const LY={};lanes.forEach(([,k],i)=>LY[k]=8+i*LH);const H=8+lanes.length*LH+30;
+  const{box,svg,t}=chartBox(p,W,H,'Event track: '+lanes.map(l=>l[0]).join(', '));
+  const tx=v=>L+(W-L-R)*Math.max(0,Math.min(1,v/dur));
+  for(const[name,k]of lanes){const y=LY[k];svg.append(sv('line',{x1:L,x2:W-R,y1:y+LH/2,y2:y+LH/2,stroke:C.grid}));svgText(svg,0,y+LH/2+4,narrow&&name==='Your attacks'?'Attacks':name);}
+  for(const r of rounds){const x0=tx(r.start),x1=tx(r.end??dur),y=LY.rounds;const b=sv('rect',{x:x0,y:y+4,width:Math.max(2,x1-x0-1),height:LH-8,rx:2,fill:r.n%2?'#2b3540':'#222a32'});b.dataset.seg='1';hoverTip(b,t,box,'Round '+r.n+' · '+s2(r.start)+'–'+(r.end==null?'unknown':s2(r.end))+' · '+(r.outcome||'not announced'));svg.append(b);if(x1-x0>26)svgText(svg,x0+4,y+LH/2+4,'R'+r.n,{fill:C.text,'font-size':11});}
+  active.forEach((e,i)=>{const x0=tx(e.start),y=LY.exch;const b=sv('rect',{x:x0,y:y+6,width:Math.max(2,tx(e.end)-x0),height:LH-12,rx:2,fill:'rgba(57,135,229,.55)'});b.dataset.seg='1';hoverTip(b,t,box,'Exchange #'+(i+1)+' · '+s2(e.start)+'–'+s2(e.end)+' · '+e.hits+' hits');svg.append(b);});
+  const marks=[];let sprintOn=null;const sprint=(a,b)=>svg.append(sv('rect',{x:tx(a),y:LY.spr+LH/2-3,width:Math.max(1,tx(b)-tx(a)),height:6,rx:1,fill:C.unknown}));
   for(const e of E){if(e.kind==='ATTACK'&&!isCanonical(e))continue;const x=tx(sec(e));let m=null;const o=outcomes[e.sequence];
-    if(e.kind==='ATTACK'){const y=8+LH/2;const h=hitBySeq[e.sequence];m=h?sv('circle',{cx:x,cy:y,r:5,fill:'var(--you)'}):o&&o.startsWith('SHIELD')?sv('path',{d:`M${x} ${y-6}L${x+6} ${y}L${x} ${y+6}L${x-6} ${y}Z`,fill:'var(--good)'}):!isEmpty(e)?sv('circle',{cx:x,cy:y,r:4.5,fill:'none',stroke:'var(--opp)','stroke-width':2}):sv('rect',{x:x-1,y:y-6,width:2,height:12,fill:'#9aa6ac'});m.dataset.k=h?'Correlated hit':o&&o.startsWith('SHIELD')?'Shield block':!isEmpty(e)?'No server report':'Empty swing';}
-    else if(e.kind==='DAMAGE_IN'){const att=e.context?.attribution;const attributed=att?att.startsWith('OPPONENT'):!!e.actor;m=attributed?sv('rect',{x:x-4,y:8+LH+LH/2-4,width:8,height:8,fill:'var(--opp)'}):sv('rect',{x:x-4,y:8+LH+LH/2-4,width:8,height:8,fill:'none',stroke:'#9aa6ac','stroke-width':1.5});m.dataset.k=attributed?'Attributed incoming hit':'Unattributed damage';}
-    else if(e.kind==='SHIELD'){const y=8+2*LH+LH/2;m=sv('rect',{x:x-3,y:y-5,width:6,height:10,fill:e.context?.shield==='DISABLE'?'var(--warn)':'var(--good)'});m.dataset.k='Shield '+(e.context?.shield||'').toLowerCase()+' ('+(e.context?.subject==='local'?'you':'opponent')+')';}
-    else if(e.kind==='CRIT'){const y=e.context?.subject==='local'?8+LH+LH/2:8+LH/2;m=sv('path',{d:`M${x-4} ${y-8}L${x+4} ${y-8}L${x} ${y-3}Z`,fill:'var(--warn)'});m.dataset.k='Server critical hit on '+(e.context?.subject==='local'?'you':'opponent');}
-    else if(e.kind==='JUMP'){m=sv('path',{d:`M${x-5} ${8+3*LH+LH/2+4}L${x} ${8+3*LH+LH/2-5}L${x+5} ${8+3*LH+LH/2+4}Z`,fill:'#9aa6ac'});m.dataset.k='Jump';}
-    else if(e.kind==='SPRINT'){if(e.detail==='true')sprintOn=sec(e);else if(sprintOn!=null){svg.append(sv('rect',{x:tx(sprintOn),y:8+4*LH+LH/2-3,width:Math.max(1,tx(sec(e))-tx(sprintOn)),height:6,fill:'#6c767c'}));sprintOn=null;}}
-    else if(e.kind==='DEATH'){m=sv('rect',{x:x-1,y:8,width:2,height:LH*5,fill:'var(--warn)'});m.dataset.k='Death observed';}
+    if(e.kind==='ATTACK'){const y=LY.atk+LH/2;const h=hitBySeq[e.sequence];m=h?sv('circle',{cx:x,cy:y,r:5,fill:C.you}):o&&o.startsWith('SHIELD')?sv('path',{d:`M${x} ${y-6}L${x+6} ${y}L${x} ${y+6}L${x-6} ${y}Z`,fill:C.good}):!isEmpty(e)?sv('circle',{cx:x,cy:y,r:4.5,fill:'none',stroke:C.opp,'stroke-width':2}):sv('rect',{x:x-1,y:y-6,width:2,height:12,fill:C.muted});m.dataset.k=h?'Correlated hit':o&&o.startsWith('SHIELD')?'Shield block':!isEmpty(e)?'No server report':'Empty swing';}
+    else if(e.kind==='DAMAGE_IN'){const att=e.context?.attribution;const attributed=att?att.startsWith('OPPONENT'):!!e.actor;const y=LY.in+LH/2;m=attributed?sv('rect',{x:x-4,y:y-4,width:8,height:8,fill:C.opp}):sv('rect',{x:x-4,y:y-4,width:8,height:8,fill:'none',stroke:C.muted,'stroke-width':1.5});m.dataset.k=attributed?'Attributed incoming hit':'Unattributed damage';}
+    else if(e.kind==='SHIELD'){const y=LY.sh+LH/2;m=sv('rect',{x:x-3,y:y-5,width:6,height:10,fill:e.context?.shield==='DISABLE'?C.warn:C.good});m.dataset.k='Shield '+(e.context?.shield||'').toLowerCase()+' ('+(e.context?.subject==='local'?'you':'opponent')+')';}
+    else if(e.kind==='CRIT'){const y=(e.context?.subject==='local'?LY.in:LY.atk)+LH/2;m=sv('path',{d:`M${x-4} ${y-9}L${x+4} ${y-9}L${x} ${y-4}Z`,fill:C.warn});m.dataset.k='Server critical hit on '+(e.context?.subject==='local'?'you':'opponent');}
+    else if(e.kind==='JUMP'){const y=LY.jump+LH/2;m=sv('path',{d:`M${x-5} ${y+4}L${x} ${y-5}L${x+5} ${y+4}Z`,fill:C.muted});m.dataset.k='Jump';}
+    else if(e.kind==='SPRINT'){if(e.detail==='true')sprintOn=sec(e);else if(sprintOn!=null){sprint(sprintOn,sec(e));sprintOn=null;}}
+    else if(e.kind==='DEATH'){m=sv('rect',{x:x-1,y:LY.atk,width:2,height:LH*5,fill:C.warn});m.dataset.k='Death observed';}
     if(m){m.dataset.t=sec(e);svg.append(m);marks.push(m);}}
-  if(sprintOn!=null)svg.append(sv('rect',{x:tx(sprintOn),y:8+4*LH+LH/2-3,width:Math.max(1,tx(dur)-tx(sprintOn)),height:6,fill:'#6c767c'}));
-  const head=sv('line',{y1:2,y2:H-4,stroke:'#e4c46e','stroke-width':1.5});svg.append(head);
-  svg.addEventListener('mousemove',ev=>{const r=svg.getBoundingClientRect(),mx=(ev.clientX-r.left)*W/r.width;let best=null,bd=8;for(const m of marks){const d=Math.abs(tx(+m.dataset.t)-mx);if(d<bd){bd=d;best=m;}}if(best)place(t,box,ev.clientX,ev.clientY,best.dataset.k+' · '+(+best.dataset.t).toFixed(2)+' s');else t.style.display='none';});
-  svg.addEventListener('mouseleave',()=>t.style.display='none');
-  svg.addEventListener('click',ev=>{const r=svg.getBoundingClientRect(),mx=(ev.clientX-r.left)*W/r.width;setT((mx-L)/(W-L-10)*dur);});
-  legend(p,[{name:'Correlated hit',color:'var(--you)'},{name:'No server report',color:'var(--opp)',hollow:true},{name:'Shield block',color:'var(--good)'},{name:'Empty swing',color:'#9aa6ac'},{name:'Attributed incoming',color:'var(--opp)'},{name:'Unattributed damage',color:'#9aa6ac',hollow:true},{name:'Server crit',color:'var(--warn)'}]);
+  if(sprintOn!=null)sprint(sprintOn,dur);
+  marks.sort((a,b)=>a.dataset.t-b.dataset.t);const markT=marks.map(m=>+m.dataset.t);
+  timeAxis(svg,L,W-R,8+lanes.length*LH+4,dur);
+  const head=sv('line',{y1:2,y2:8+lanes.length*LH+2,stroke:C.warn,'stroke-width':2});svg.append(head);
+  svg.addEventListener('pointermove',ev=>{if(ev.target.dataset&&ev.target.dataset.seg)return;const r=svg.getBoundingClientRect(),mx=(ev.clientX-r.left)*W/r.width;let best=null,bd=8;const i=upper(markT,(mx-L)/(W-L-R)*dur);for(let k=Math.max(0,i-12);k<Math.min(marks.length,i+12);k++){const d=Math.abs(tx(markT[k])-mx);if(d<bd){bd=d;best=marks[k];}}if(best)place(t,box,ev.clientX,ev.clientY,best.dataset.k+' · '+(+best.dataset.t).toFixed(2)+' s');else t.style.display='none';});
+  svg.addEventListener('click',ev=>{const r=svg.getBoundingClientRect(),mx=(ev.clientX-r.left)*W/r.width;if(mx>=L)setT((mx-L)/(W-L-R)*dur);});
+  legend(p,[{name:'Correlated hit',color:C.you},{name:'No server report',color:C.opp,hollow:true},{name:'Shield block',color:C.good},{name:'Empty swing',color:C.muted},{name:'Attributed incoming',color:C.opp},{name:'Unattributed damage',color:C.muted,hollow:true},{name:'Server crit',color:C.warn},{name:'Playhead',color:C.warn}]);
   const now=el('div',{class:'now'});p.append(now);
   const annot=el('div',{class:'annot','aria-live':'polite'});p.append(annot);
   h2(p,'Events up to playhead');
-  const fl=el('div',{class:'controls'});const filter=el('select',{class:'mc','aria-label':'Event filter'});for(const k of['All','ATTACK','HURT','DAMAGE_IN','SHIELD','CRIT','JUMP','SPRINT','HEALTH','VELOCITY','DEATH','MOTION'])filter.append(el('option',{value:k},k==='All'?'All events':k));fl.append(filter);p.append(fl);
-  const wrap=el('div',{class:'scroll'});const tbl=el('table');const hr=el('tr');for(const h of['Time','Event','Confidence','Details'])hr.append(el('th',null,h));const thd=el('thead');thd.append(hr);tbl.append(thd);const tb=el('tbody');tbl.append(tb);wrap.append(tbl);p.append(wrap);
-  const times=E.filter(e=>e.kind!=='MOTION').map(sec);
-  let T=0,playing=false,last=0;
+  const fl=controls(p);const filter=el('select',{'aria-label':'Event filter'});for(const k of['All','ATTACK','HURT','DAMAGE_IN','SHIELD','CRIT','JUMP','SPRINT','HEALTH','VELOCITY','DEATH','MOTION'])filter.append(el('option',{value:k},k==='All'?'All events':cap(k)));const fll=el('label',null,'Show');fll.append(filter);fl.append(fll);
+  const wrap=el('div',{class:'scroll'});const tbl=el('table');const hr=el('tr');for(const[h,r]of[['Time',1],['Event',0],['Confidence',0],['Details',0]])hr.append(el('th',r?{class:'r',scope:'col'}:{scope:'col'},h));const thd=el('thead');thd.append(hr);tbl.append(thd);const tb=el('tbody');tbl.append(tb);wrap.append(tbl);p.append(wrap);
+  // Sorted indexes make each playhead update proportional to what changed, not to the recording size.
+  const ET=E.map(sec);const ORDER=E.map((e,i)=>i).sort((a,b)=>ET[a]-ET[b]||a-b);const OT=ORDER.map(i=>ET[i]);
+  const times=OT.filter((x,k)=>E[ORDER[k]].kind!=='MOTION');
+  function upper(arr,v){let lo=0,hi=arr.length;while(lo<hi){const m=(lo+hi)>>1;if(arr[m]<=v+1e-9)lo=m+1;else hi=m;}return lo;}
+  const hitT=hits.map(h=>h.t).sort((a,b)=>a-b);
+  const atT=ORDER.filter(i=>E[i].kind==='ATTACK'&&isCanonical(E[i])&&outcomes[E[i].sequence]!=='EXCLUDED').map(i=>ET[i]);
+  const inT=(D.incoming||[]).slice().sort((a,b)=>a-b);
+  const cmarks=(combos.marks||[]).slice().sort((a,b)=>a.t-b.t);const cmT=cmarks.map(m=>m.t);
+  let T=0,playing=false,last=0,lastIdx=-1,lastKind=null,shownMarks=marks.length;
   function describe(e){if(!e)return['Start of recording',''];const h=hitBySeq[e.sequence];const o=outcomes[e.sequence];
     if(e.kind==='ATTACK'&&S.measurementVersion&&isCanonical(e)&&o==='UNRESOLVED')return['Unresolved attack','Outcome evidence is insufficient; included in the accuracy denominator.'];
     if(e.kind==='ATTACK'&&S.measurementVersion){if(!isCanonical(e))return['Deduplicated observation','Canonical attack '+canonicalId(e)+'; no additional attempt, hit or miss.'];if(o==='EXCLUDED')return['Excluded noncombat swing','No aimed opponent evidence. Excluded from combat accuracy.'];if(o==='MISS')return['Eligible miss','Aimed empty swing; no hit confirmation in the bounded window.'];if(o==='UNCERTAIN_SHIELD')return['Uncertain shield interaction','Blocking/facing observation without a correlated shield sound; retained in the denominator.'];}
@@ -514,47 +768,47 @@ timeline(p){
     if(e.kind==='CRIT')return['Server critical hit','On '+(e.context?.subject==='local'?'you':'the opponent')];
     if(e.kind==='JUMP')return['Jump',e.detail||''];if(e.kind==='SPRINT')return[e.detail==='true'?'Sprint started':'Sprint stopped',''];
     if(e.kind==='DEATH')return['Death observed',e.detail||''];if(e.kind==='DISCONNECT')return['Disconnected',e.detail||''];return[cap(e.kind),e.detail||''];}
-  function detailText(e){const h=hitBySeq[e.sequence];if(e.attack)return(h?'Hit · ':'')+'Cooldown '+e.attack.cooldown.toFixed(2)+' · Reach '+e.attack.reach.toFixed(2)+' m'+(e.attack.rayContact?' · Aim '+[e.attack.aimX,e.attack.aimY,e.attack.aimZ].map(v=>v.toFixed(2)).join(', '):' · no ray contact');const c=e.context;if(c){if(e.kind==='HEALTH')return'Health '+num(c.health,1)+(c.absorption?' + '+num(c.absorption,1):'');if(e.kind==='VELOCITY')return'Velocity '+[c.vx,c.vy,c.vz].map(v=>num(v,3)).join(', ');if(e.kind==='DAMAGE_IN')return(attrName[c.attribution]||'')+(c.damageType?' · '+item(c.damageType):'');}return e.detail||'';}
-  function render(){const k=filter.value;seek.value=Math.round(1000*T/dur);clock.textContent=T.toFixed(2)+' / '+dur.toFixed(2)+' s';head.setAttribute('x1',tx(T));head.setAttribute('x2',tx(T));
-    const upTo=E.filter(e=>sec(e)<=T+1e-9);const shown=upTo.filter(e=>k==='All'?e.kind!=='MOTION':e.kind===k);
-    tb.replaceChildren();for(const e of shown.slice(-200)){const r=el('tr');for(const c of[sec(e).toFixed(3),e.kind,cap(e.confidence),detailText(e)])r.append(el('td',null,c));tb.append(r);}if(tb.lastChild)tb.lastChild.className='cur';wrap.scrollTop=wrap.scrollHeight;
-    const lastEv=[...upTo].reverse().find(e=>e.kind!=='MOTION');const[a,b]=describe(lastEv);annot.replaceChildren(el('b',null,a),document.createTextNode(b?' — '+b:''));
-    const hs=hits.filter(h=>h.t<=T),at=upTo.filter(e=>e.kind==='ATTACK'&&isCanonical(e)&&outcomes[e.sequence]!=='EXCLUDED').length,inc=(D.incoming||[]).filter(x=>x<=T).length;const k2=dom?Math.min((dom.values||[]).length-1,Math.max(0,Math.round(T/dom.step))):-1;const dv=dom&&k2>=0?dom.values[k2]:null;
-    const cur=(combos.marks||[]).filter(m=>m.t<=T);let run=0;for(let i=cur.length-1;i>=0&&cur[i].side==='LOCAL'&&!cur[i].traded;i--)run++;
-    now.replaceChildren(card('Hits so far',String(hs.length),at+' attempts'),card('Attributed incoming',String(inc),'opponent hits'),card('Current streak',String(run),'your unanswered hits'),card('Dominance',dv==null?NONE:num(dv,2),dom?{L:'you',O:'opponent',N:'neutral',C:'incomplete',I:'no evidence'}[(dom.states||'')[k2]]||'':'unavailable','dominance'));
-    for(const m of marks)m.setAttribute('opacity',+m.dataset.t<=T?1:.35);}
-  function setT(v){T=Math.max(0,Math.min(dur,v));render();}
+  function detailText(e){const h=hitBySeq[e.sequence];if(e.attack)return(h?'Hit · ':'')+'Cooldown '+num(e.attack.cooldown,2)+' · Reach '+num(e.attack.reach,2)+' m'+(e.attack.rayContact?' · Aim '+[e.attack.aimX,e.attack.aimY,e.attack.aimZ].map(v=>num(v,2)).join(', '):' · no ray contact');const c=e.context;if(c){if(e.kind==='HEALTH')return'Health '+num(c.health,1)+(c.absorption?' + '+num(c.absorption,1):'');if(e.kind==='VELOCITY')return'Velocity '+[c.vx,c.vy,c.vz].map(v=>num(v,3)).join(', ');if(e.kind==='DAMAGE_IN')return(attrName[c.attribution]||'')+(c.damageType?' · '+item(c.damageType):'');}return e.detail||'';}
+  function update(){const k=filter.value;seek.value=Math.round(1000*T/dur);clk.textContent=T.toFixed(2)+' / '+dur.toFixed(2)+' s';head.setAttribute('x1',tx(T));head.setAttribute('x2',tx(T));
+    const mi=upper(markT,T);if(mi!==shownMarks){const a=Math.min(mi,shownMarks),b=Math.max(mi,shownMarks);for(let i=a;i<b;i++)marks[i].setAttribute('opacity',i<mi?1:.35);shownMarks=mi;}
+    const idx=upper(OT,T);if(idx===lastIdx&&k===lastKind)return;lastIdx=idx;lastKind=k;
+    const rows=[];for(let j=idx-1;j>=0&&rows.length<200;j--){const e=E[ORDER[j]];if(k==='All'?e.kind!=='MOTION':e.kind===k)rows.push(e);}rows.reverse();
+    tb.replaceChildren();if(!rows.length){const r=el('tr');r.append(el('td',{colspan:4,class:'muted'},k==='All'?'No events before the playhead yet.':'No '+cap(k).toLowerCase()+' events before the playhead.'));tb.append(r);}for(const e of rows){const r=el('tr');r.append(el('td',{class:'r'},sec(e).toFixed(3)),el('td',null,cap(e.kind)),el('td',null,cap(e.confidence)),el('td',null,detailText(e)));tb.append(r);}if(rows.length)tb.lastChild.className='cur';wrap.scrollTop=wrap.scrollHeight;
+    let lastEv=null;for(let j=idx-1;j>=0;j--){const e=E[ORDER[j]];if(e.kind!=='MOTION'){lastEv=e;break;}}const[a,b]=describe(lastEv);annot.replaceChildren(el('b',null,a),document.createTextNode(b?' — '+b:''));
+    const k2=dom?Math.min((dom.values||[]).length-1,Math.max(0,Math.round(T/dom.step))):-1;const dv=dom&&k2>=0?dom.values[k2]:null;
+    let run=0;for(let i=upper(cmT,T)-1;i>=0&&cmarks[i].side==='LOCAL'&&!cmarks[i].traded;i--)run++;
+    now.replaceChildren(card('Hits so far',String(upper(hitT,T)),upper(atT,T)+' attempts'),card('Attributed incoming',String(upper(inT,T)),'opponent hits'),card('Current streak',String(run),'your unanswered hits'),card('Dominance',dv==null?NONE:num(dv,2),dom?{L:'you',O:'opponent',N:'neutral',C:'incomplete',I:'no evidence'}[(dom.states||'')[k2]]||'':'unavailable','dominance'));}
+  function setT(v){T=Math.max(0,Math.min(dur,v));update();}
   function frame(ts){if(!playing||signal.aborted)return;if(last)setT(T+(ts-last)/1000*Number(speed.value));last=ts;if(T>=dur){toggle(false);return;}requestAnimationFrame(frame);}
   function toggle(on){playing=on;play.textContent=on?'Pause':'Play';play.setAttribute('aria-label',on?'Pause':'Play');last=0;if(on){if(T>=dur)T=0;requestAnimationFrame(frame);}}
   play.onclick=()=>toggle(!playing);
-  next.onclick=()=>{const n=times.find(x=>x>T+1e-6);setT(n!=null?n:dur);};
-  prev.onclick=()=>{const c=[...times].reverse().find(x=>x<T-1e-6);setT(c!=null?c:0);};
-  seek.oninput=()=>setT(Number(seek.value)/1000*dur);filter.onchange=render;
-  document.addEventListener('keydown',e=>{if(!$('p-timeline').classList.contains('on')||e.target.tagName==='SELECT'||e.target.tagName==='INPUT')return;if(e.key===' '){e.preventDefault();toggle(!playing);}else if(e.key==='.')next.click();else if(e.key===',')prev.click();},{signal});
-  render();
-  note(p,'Playback advances through the recorded timestamps at the chosen speed. It annotates what Phenomena observed; it does not reconstruct positions or the Minecraft world. Space plays or pauses; comma and period step between events.');
+  next.onclick=()=>{const n=times[upper(times,T+1e-6)];setT(n!=null?n:dur);};
+  prev.onclick=()=>{const i=upper(times,T-1e-6)-1;let j=i;while(j>=0&&times[j]>=T-1e-6)j--;setT(j>=0?times[j]:0);};
+  seek.oninput=()=>setT(Number(seek.value)/1000*dur);filter.onchange=()=>{lastIdx=-1;update();};
+  document.addEventListener('keydown',e=>{if(!$('p-timeline').classList.contains('on')||['SELECT','INPUT','BUTTON','TEXTAREA','SUMMARY'].includes(e.target.tagName))return;if(e.key===' '){e.preventDefault();toggle(!playing);}else if(e.key==='.')next.click();else if(e.key===',')prev.click();},{signal});
+  update();
+  method(p,'Playback advances through the recorded timestamps at the chosen speed. It annotates what Phenomena observed; it does not reconstruct positions or the Minecraft world. Space plays or pauses; comma and period step between events. Select a point on the track to move the playhead.','About playback and shortcuts');
 }};
-function h3Text(parent,text){parent.append(el('h3',null,text));}
-function shieldTimeline(parent){const ev=shields.events||[];if(!ev.length)return;const W=900,H=72,L=86,R=12;const{box,svg,t}=chartBox(parent,W,H,'Shield events over time');const tx=v=>L+(W-L-R)*v/dur;
-  svgText(svg,8,20,'Opponent');svgText(svg,8,42,'You');for(const y of[14,36])svg.append(sv('line',{x1:L,x2:W-R,y1:y,y2:y,stroke:'#2a3036'}));
-  const color={BLOCK:'var(--good)',DISABLE:'var(--warn)',ESTIMATED_BLOCK:'#2f7f63'};
-  for(const e of ev){const y=e.subject==='local'?36:14,x=tx(e.time);const n=e.type==='ESTIMATED_BLOCK'?sv('rect',{x:x-4,y:y-4,width:8,height:8,fill:'none',stroke:color[e.type],'stroke-width':2}):sv('rect',{x:x-4,y:y-4,width:8,height:8,fill:color[e.type]||'#9aa6ac'});hoverTip(n,t,box,cap(e.type)+' at '+num(e.time,2)+' s'+(e.weapon?' · '+item(e.weapon):''));svg.append(n);}
-  timeAxis(svg,L,R,48,W,dur);legend(parent,[{name:'Block',color:'var(--good)'},{name:'Disable',color:'var(--warn)'},{name:'Estimated block',color:'#2f7f63',hollow:true}]);}
 show(location.hash.slice(1)||'overview');
 }
+let rz=0;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>rebuildTab&&rebuildTab(),160);});
+window.addEventListener('beforeprint',()=>{for(const d of document.querySelectorAll('details'))d.open=true;});
 if(ROOT.scopes){
-  const host=document.getElementById('session-controls');host.className='controls';
+  const host=document.getElementById('session-controls');
   const participant=document.createElement('select');participant.setAttribute('aria-label','Participant filter');
   const exchange=document.createElement('select');exchange.setAttribute('aria-label','Exchange filter');
   function option(s,value,text){const o=document.createElement('option');o.value=value;o.textContent=text;s.append(o);}
+  function labelled(text,control){const l=document.createElement('label');l.className='lead';l.append(document.createTextNode(text+' '),control);return l;}
   option(participant,'','All participants');
   for(const p of ROOT.fight.session.participants)option(participant,p.id,p.label||p.id);
-  host.append(document.createTextNode('Participant '),participant,document.createTextNode('Exchange '),exchange);
+  const lead=document.createElement('span');lead.className='lead';lead.textContent='Viewing';
+  host.append(lead,labelled('Participant',participant),labelled('Exchange',exchange));
+  function current(){const v=exchange.value;return v===''?[ROOT,null]:[ROOT.scopes[Number(v)],'Exchange '+(Number(v)+1)+' vs '+(ROOT.scopes[Number(v)].opponentLabel||ROOT.scopes[Number(v)].fight.opponent||'Unknown')];}
   function refresh(){exchange.replaceChildren();if(!participant.value)option(exchange,'','Entire manual session');
     ROOT.scopes.forEach((p,i)=>{if(!participant.value||p.fight.opponent===participant.value)option(exchange,String(i),'Exchange '+(i+1)+' vs '+(p.opponentLabel||p.fight.opponent||'Unknown'));});
     if(!exchange.options.length){option(exchange,'','No attributed exchange; session overview');}
-    render(exchange.value===''?ROOT:ROOT.scopes[Number(exchange.value)]);}
-  participant.onchange=refresh;exchange.onchange=()=>render(exchange.value===''?ROOT:ROOT.scopes[Number(exchange.value)]);refresh();
+    render(...current());}
+  participant.onchange=refresh;exchange.onchange=()=>render(...current());refresh();
 }else render(ROOT);
 })();
 </script>
