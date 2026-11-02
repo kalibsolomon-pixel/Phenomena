@@ -158,7 +158,13 @@ public final class Content {
   }
 
   void add(AbstractWidget w, int x, int y, int width, int height) {
-    if (w instanceof KTextField) {
+    if (w instanceof KToggle) {
+      // Switches keep their intrinsic size, vertically centered on the row.
+      w.setWidth(KToggle.W);
+      w.setHeight(KToggle.H);
+      items.add(
+          new Item(w, null, x + width - KToggle.W, y + (height - KToggle.H) / 2, KToggle.W, KToggle.H, 0, 0));
+    } else if (w instanceof KTextField) {
       int pad = KTextField.PAD;
       w.setWidth(Math.max(10, width - 2 * pad));
       w.setHeight(8);

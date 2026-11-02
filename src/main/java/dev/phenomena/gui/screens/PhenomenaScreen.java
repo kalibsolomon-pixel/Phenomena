@@ -3,6 +3,7 @@ package dev.phenomena.gui.screens;
 import dev.phenomena.PhenomenaClient;
 import dev.phenomena.gui.Notices;
 import dev.phenomena.gui.components.*;
+import dev.phenomena.gui.pixel.Pixel;
 import dev.phenomena.gui.theme.Theme;
 import dev.phenomena.gui.ui.Layout;
 import dev.phenomena.gui.ui.Layout.Rect;
@@ -433,7 +434,7 @@ public final class PhenomenaScreen extends Screen {
 
   @Override
   public void renderBackground(GuiGraphics g, int mx, int my, float d) {
-    g.fill(0, 0, width, height, Theme.BACKGROUND);
+    Pixel.fillLogical(g, 0, 0, width, height, Theme.BACKGROUND);
   }
 
   @Override
@@ -441,9 +442,9 @@ public final class PhenomenaScreen extends Screen {
     Viewport.set(viewport);
     boolean compact = tight();
     int accent = Theme.accent();
-    // Header band
-    g.fill(0, 0, width, headerH, Theme.HEADER);
-    g.fill(0, headerH - 1, width, headerH, Theme.BORDER_SOFT);
+    // Header band: quiet chrome, hairline division, live status dot.
+    Pixel.fillLogical(g, 0, 0, width, headerH, Theme.HEADER);
+    Pixel.line(g, 0, headerH - 0.5f, width, headerH - 0.5f, 1, Theme.BORDER_SOFT);
     int hy = (headerH - 8) / 2;
     g.drawString(font, Component.literal("Phenomena").withStyle(net.minecraft.ChatFormatting.BOLD), frame.x(), hy, accent, false);
     int nameW = font.width(Component.literal("Phenomena").withStyle(net.minecraft.ChatFormatting.BOLD));
@@ -451,19 +452,19 @@ public final class PhenomenaScreen extends Screen {
     String status = liveStatus();
     int sw = font.width(status);
     int dot = PhenomenaClient.config.tracking ? (PhenomenaClient.engine.engaged() ? Theme.WARN : Theme.OK) : Theme.DIM;
-    g.fill(frame.right() - sw - 8, hy + 2, frame.right() - sw - 4, hy + 6, dot);
+    Pixel.circle(g, frame.right() - sw - 6, hy + 4, 1.8f, dot);
     g.drawString(font, status, frame.right() - sw, hy, Theme.MUTED, false);
 
-    // Tab strip baseline and sliding indicator
+    // Tab strip baseline and sliding accent indicator (one accent edge, no double emphasis).
     var active = tabButtons.get(state.tab.ordinal());
-    g.fill(frame.x(), active.getBottom(), frame.right(), active.getBottom() + 1, Theme.BORDER_SOFT);
+    Pixel.line(g, frame.x(), active.getBottom() - 0.5f, frame.right(), active.getBottom() - 0.5f, 1, Theme.BORDER_SOFT);
     float target = active.getX();
     if (indicatorX < 0 || Theme.reducedMotion()) indicatorX = target;
     else indicatorX += (target - indicatorX) * Math.min(1, d * .6f);
 
-    // Content panel
-    g.fill(panel.x(), panel.y(), panel.right(), panel.bottom(), Theme.SURFACE);
-    g.renderOutline(panel.x(), panel.y(), panel.w(), panel.h(), Theme.BORDER_SOFT);
+    // Content panel: one rounded card floating on the scrim.
+    Pixel.rounded(g, panel.x(), panel.y(), panel.w(), panel.h(), Theme.RADIUS, Theme.SURFACE);
+    Pixel.outline(g, panel.x(), panel.y(), panel.w(), panel.h(), Theme.RADIUS, 1, Theme.BORDER_SOFT);
     var page = page();
     int toolsLeft = frame.right();
     for (var child : children())
@@ -478,11 +479,16 @@ public final class PhenomenaScreen extends Screen {
     }
 
     super.render(g, mx, my, d);
-    // Animated underline under the active tab (drawn after tab faces).
-    if (!Theme.reducedMotion() && Math.abs(indicatorX - target) > .5f) {
-      int ix = Math.round(indicatorX);
-      g.fill(ix, active.getBottom() - 2, ix + active.getWidth(), active.getBottom(), Theme.alpha(accent, 0x90));
-    }
+    // Accent edge under the active tab; slides between tabs unless motion is reduced.
+    int ix = Math.round(indicatorX);
+    Pixel.rounded(
+        g,
+        ix + 2,
+        active.getBottom() - 2,
+        active.getWidth() - 4,
+        2,
+        1,
+        Math.abs(indicatorX - target) > .5f ? Theme.alpha(accent, 0x90) : accent);
 
     // Scrolled content, clipped to the viewport
     g.enableScissor(viewport.x(), viewport.y(), viewport.right(), viewport.bottom());
@@ -497,16 +503,34 @@ public final class PhenomenaScreen extends Screen {
     g.disableScissor();
     var track = scrollTrack();
     if (track != null) {
-      g.fill(track.x(), track.y(), track.right(), track.bottom(), Theme.alpha(Theme.BORDER_SOFT, 0x80));
+      Pixel.rounded(
+          g, track.x() - 1.5f, track.y(), 6, track.h(), 3, Theme.alpha(Theme.BORDER_SOFT, 0x80));
       var thumb = Layout.thumb(track, contentHeight, scroll);
-      if (thumb != null) g.fill(thumb.x(), thumb.y(), thumb.right(), thumb.bottom(), draggingBar ? Theme.MUTED : Theme.BORDER);
+      if (thumb != null)
+        Pixel.rounded(
+            g,
+            track.x() - 1,
+            thumb.y(),
+            5,
+            thumb.h(),
+            2.5f,
+            draggingBar ? Theme.MUTED : Theme.BORDER);
       // Fade hints that more content exists above / below.
-      if (scroll > 0) g.fillGradient(viewport.x(), viewport.y(), viewport.right(), viewport.y() + 6, 0x60000000, 0);
+      if (scroll > 0)
+        Pixel.gradientV(g, viewport.x(), viewport.y(), viewport.w(), 6, 0x60000000, 0x00000000);
       if (scroll < contentHeight - viewport.h())
-        g.fillGradient(viewport.x(), viewport.bottom() - 6, viewport.right(), viewport.bottom(), 0, 0x60000000);
+        Pixel.gradientV(g, viewport.x(), viewport.bottom() - 6, viewport.w(), 6, 0x00000000, 0x60000000);
     }
 
     // Footer status
+    Pixel.line(
+        g,
+        frame.x(),
+        height - (compact ? 16 : 20) - 1.5f,
+        frame.right(),
+        height - (compact ? 16 : 20) - 1.5f,
+        1,
+        Theme.BORDER_SOFT);
     int fy = height - (compact ? 16 : 20) + (compact ? 4 : 6);
     String text;
     int color;

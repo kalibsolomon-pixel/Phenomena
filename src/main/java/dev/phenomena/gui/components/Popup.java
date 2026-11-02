@@ -1,5 +1,6 @@
 package dev.phenomena.gui.components;
 
+import dev.phenomena.gui.pixel.Pixel;
 import dev.phenomena.gui.theme.Theme;
 import dev.phenomena.gui.ui.Layout.Rect;
 import java.util.List;
@@ -62,16 +63,16 @@ public abstract class Popup {
     @Override
     public void render(GuiGraphics g, int mx, int my, int sw, int sh) {
       var font = Minecraft.getInstance().font;
-      g.fill(rect.x(), rect.y(), rect.right(), rect.bottom(), Theme.SURFACE);
-      g.renderOutline(rect.x(), rect.y(), rect.w(), rect.h(), Theme.BORDER);
+      Pixel.fillLogical(g, rect.x(), rect.y(), rect.right(), rect.bottom(), Theme.SURFACE);
+      Pixel.outline(g, rect.x(), rect.y(), rect.w(), rect.h(), 2, 1, Theme.BORDER);
       for (int i = 0; i < visible; i++) {
         int idx = offset + i;
         int ry = rect.y() + 1 + i * ROW;
         boolean hover = mx >= rect.x() && mx < rect.right() && my >= ry && my < ry + ROW;
         if (hover) highlighted = idx;
         if (idx == highlighted) {
-          g.fill(rect.x() + 1, ry, rect.right() - 1, ry + ROW, Theme.SURFACE_HOVER);
-          g.fill(rect.x() + 1, ry, rect.x() + 3, ry + ROW, Theme.accent());
+          Pixel.fillLogical(g, rect.x() + 1, ry, rect.right() - 1, ry + ROW, Theme.SURFACE_HOVER);
+          Pixel.fillLogical(g, rect.x() + 1, ry, rect.x() + 3, ry + ROW, Theme.accent());
         }
         g.drawString(
             font,
@@ -84,7 +85,7 @@ public abstract class Popup {
       if (options.size() > visible) {
         int th = Math.max(6, rect.h() * visible / options.size());
         int ty = rect.y() + (rect.h() - th) * offset / Math.max(1, options.size() - visible);
-        g.fill(rect.right() - 3, ty, rect.right() - 1, ty + th, Theme.BORDER);
+        Pixel.fillLogical(g, rect.right() - 3, ty, rect.right() - 1, ty + th, Theme.BORDER);
       }
     }
 
@@ -147,14 +148,14 @@ public abstract class Popup {
     @Override
     public void render(GuiGraphics g, int mx, int my, int sw, int sh) {
       var font = Minecraft.getInstance().font;
-      g.fill(0, 0, sw, sh, 0xA0000000);
+      Pixel.fillLogical(g, 0, 0, sw, sh, 0xA0000000);
       int w = Math.min(280, sw - 24);
       var lines = font.split(Component.literal(message), w - 20);
       int h = 26 + lines.size() * 10 + 30;
       rect = new Rect((sw - w) / 2, (sh - h) / 2, w, h);
-      g.fill(rect.x(), rect.y(), rect.right(), rect.bottom(), Theme.SURFACE);
-      g.fill(rect.x(), rect.y(), rect.right(), rect.y() + 1, Theme.BEVEL_LIGHT);
-      g.renderOutline(rect.x(), rect.y(), rect.w(), rect.h(), Theme.BORDER);
+      Pixel.fillLogical(g, rect.x(), rect.y(), rect.right(), rect.bottom(), Theme.SURFACE);
+      Pixel.fillLogical(g, rect.x(), rect.y(), rect.right(), rect.y() + 1, Theme.BEVEL_LIGHT);
+      Pixel.outline(g, rect.x(), rect.y(), rect.w(), rect.h(), 2, 1, Theme.BORDER);
       g.drawString(font, title, rect.x() + 10, rect.y() + 9, Theme.TEXT, false);
       for (int i = 0; i < lines.size(); i++)
         g.drawString(font, lines.get(i), rect.x() + 10, rect.y() + 24 + i * 10, Theme.MUTED, false);
@@ -168,8 +169,8 @@ public abstract class Popup {
     private void button(GuiGraphics g, Rect r, String text, boolean focused, boolean danger, int mx, int my) {
       var font = Minecraft.getInstance().font;
       boolean hover = r.contains(mx, my);
-      g.fill(r.x(), r.y(), r.right(), r.bottom(), hover ? Theme.SURFACE_HOVER : Theme.SURFACE_2);
-      g.fill(r.x() + 1, r.y() + 1, r.right() - 1, r.y() + 2, Theme.BEVEL_LIGHT);
+      Pixel.fillLogical(g, r.x(), r.y(), r.right(), r.bottom(), hover ? Theme.SURFACE_HOVER : Theme.SURFACE_2);
+      Pixel.fillLogical(g, r.x() + 1, r.y() + 1, r.right() - 1, r.y() + 2, Theme.BEVEL_LIGHT);
       g.renderOutline(
           r.x(), r.y(), r.w(), r.h(), focused ? Theme.accent() : danger ? Theme.alpha(Theme.ERROR, 0x90) : Theme.BORDER);
       String t = KButton.fit(font, text, r.w() - 6);

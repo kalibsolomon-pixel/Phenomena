@@ -2,6 +2,7 @@ package dev.phenomena.gui.components;
 
 import dev.phenomena.analytics.*;
 import dev.phenomena.combat.fights.FightRecord;
+import dev.phenomena.gui.pixel.Pixel;
 import dev.phenomena.gui.theme.Theme;
 import java.util.*;
 import java.util.function.*;
@@ -62,8 +63,7 @@ public final class FightList extends AbstractWidget {
                 Format.result(f.resolution()),
                 Integer.toString(s.hits),
                 Format.percent(Aggregate.trendValue(f, TrendMetric.ACCURACY)),
-                Format.meters(Aggregate.trendValue(f, TrendMetric.REACH)),
-                "Browser"
+                Format.meters(Aggregate.trendValue(f, TrendMetric.REACH))
               }));
     }
   }
@@ -74,27 +74,18 @@ public final class FightList extends AbstractWidget {
 
   /** Chooses visible columns for the current width: least important columns drop first. */
   private void layoutColumns(Font font) {
-    String[] titles = {"Date", "Duration", "Opponent", "Result", "Hits", "Accuracy", "Reach", ""};
+    String[] titles = {"Date", "Duration", "Opponent", "Result", "Hits", "Accuracy", "Reach"};
     String[] samples = {
-      "0000-00-00 00:00",
-      "00m 00s",
-      "Opponent",
-      "Loss (confirmed)",
-      "000",
-      "100.0%",
-      "0.00 m",
-      "Browser"
+      "0000-00-00 00:00", "00m 00s", "Opponent", "Loss (confirmed)", "000", "100.0%", "0.00 m"
     };
     int[] widths = new int[titles.length];
     for (int i = 0; i < titles.length; i++)
       widths[i] = Math.max(font.width(titles[i]), font.width(samples[i])) + (i >= 4 ? 12 : 8);
     widths[2] = Math.max(widths[2], 78);
-    if (onBrowser == null) widths[7] = 0;
-    boolean[] right = {false, true, false, false, true, true, true, true};
+    boolean[] right = {false, true, false, false, true, true, true};
     int[] dropOrder = {2, 1, 3, 6};
     shown = new boolean[titles.length];
     Arrays.fill(shown, true);
-    if (onBrowser == null) shown[7] = false;
     int total = 0;
     for (int i = 0; i < titles.length; i++) if (shown[i]) total += widths[i];
     for (int d : dropOrder) {
@@ -125,13 +116,6 @@ public final class FightList extends AbstractWidget {
     return i >= 0 && i < rows.size() ? i : -1;
   }
 
-  private boolean inBrowserColumn(double x) {
-    return onBrowser != null
-        && shown.length > 7
-        && shown[7]
-        && x >= getX() + width - columns.get(7).width - 2;
-  }
-
   @Override
   public boolean mouseClicked(MouseButtonEvent e, boolean doubleClick) {
     if (!Viewport.contains(e.x(), e.y()) || !isMouseOver(e.x(), e.y()) || e.button() != 0)
@@ -140,8 +124,7 @@ public final class FightList extends AbstractWidget {
     if (i < 0) return true;
     String id = rows.get(i).fight.id();
     setFocused(true);
-    if (inBrowserColumn(e.x())) onBrowser.accept(id);
-    else if (doubleClick || Objects.equals(selected.get(), id)) onOpen.accept(id);
+    if (doubleClick || Objects.equals(selected.get(), id)) onOpen.accept(id);
     else onSelect.accept(id);
     playDownSound(Minecraft.getInstance().getSoundManager());
     return true;
@@ -179,10 +162,10 @@ public final class FightList extends AbstractWidget {
     var font = Minecraft.getInstance().font;
     layoutColumns(font);
     int x = getX(), y = getY();
-    g.fill(x, y, x + width, y + HEADER - 1, Theme.SURFACE_2);
+    Pixel.fillLogical(g, x, y, x + width, y + HEADER - 1, Theme.SURFACE_2);
     drawCells(
         g, font, columns.stream().map(Column::title).toArray(String[]::new), y + 2, Theme.DIM);
-    g.fill(x, y + HEADER - 1, x + width, y + HEADER, Theme.BORDER_SOFT);
+    Pixel.fillLogical(g, x, y + HEADER - 1, x + width, y + HEADER, Theme.BORDER_SOFT);
     if (rows.isEmpty()) {
       g.drawString(
           font, "No fights match.", x + 4, y + HEADER + (rowHeight - 8) / 2, Theme.MUTED, false);
@@ -201,14 +184,15 @@ public final class FightList extends AbstractWidget {
       int ry = y + HEADER + i * rowHeight;
       boolean isSel = row.fight.id().equals(sel);
       if (isSel) {
-        g.fill(x, ry, x + width, ry + rowHeight, Theme.SURFACE_HOVER);
-        g.fill(x, ry, x + 2, ry + rowHeight, Theme.accent());
-      } else if (i == hovered) g.fill(x, ry, x + width, ry + rowHeight, Theme.SURFACE_2);
-      else if (i % 2 == 1) g.fill(x, ry, x + width, ry + rowHeight, 0x0CFFFFFF);
+        Pixel.rounded(g, x + 1, ry + 1, width - 2, rowHeight - 2, Theme.RADIUS_SMALL, Theme.SURFACE_HOVER);
+        Pixel.rounded(g, x + 1, ry + 2, 2, rowHeight - 4, 1, Theme.accent());
+      } else if (i == hovered)
+        Pixel.rounded(g, x + 1, ry + 1, width - 2, rowHeight - 2, Theme.RADIUS_SMALL, Theme.SURFACE_2);
+      else if (i % 2 == 1) Pixel.fillLogical(g, x + 1, ry, x + width - 1, ry + rowHeight, 0x0CFFFFFF);
       drawCells(g, font, row.cells, ry + (rowHeight - 8) / 2, -1);
     }
     if (KButton.keyboardFocus(this))
-      g.renderOutline(x, y, width, height, Theme.alpha(Theme.accent(), 0x90));
+      Pixel.outline(g, x, y, width, height, 2, 1, Theme.alpha(Theme.accent(), 0x90));
   }
 
   private void drawCells(GuiGraphics g, Font font, String[] cells, int ty, int color) {
@@ -218,7 +202,12 @@ public final class FightList extends AbstractWidget {
       if (col.width == 0) continue;
       String text = KButton.fit(font, cells[c], col.width - 6);
       int ink = color;
-      if (ink == -1) ink = c == 7 ? Theme.accent() : c == 0 || c >= 4 ? Theme.TEXT : Theme.MUTED;
+      if (ink == -1) {
+        ink = c == 0 || c >= 4 ? Theme.TEXT : Theme.MUTED;
+        // Result column: semantic status ink, never color alone — the word carries the meaning.
+        if (c == 3 && text.startsWith("Win")) ink = Theme.OK;
+        else if (c == 3 && text.startsWith("Loss")) ink = Theme.ERROR;
+      }
       int tx = col.right ? cx + col.width - 6 - font.width(text) : cx;
       g.drawString(font, text, tx, ty, ink, false);
       cx += col.width;
@@ -231,7 +220,7 @@ public final class FightList extends AbstractWidget {
     String text =
         i < 0
             ? rows.size() + " fights. Use arrow keys to select."
-            : String.join(", ", Arrays.copyOf(rows.get(i).cells, 7));
+            : String.join(", ", rows.get(i).cells);
     out.add(NarratedElementType.TITLE, Component.literal(text));
   }
 }

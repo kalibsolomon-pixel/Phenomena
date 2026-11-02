@@ -68,7 +68,7 @@ final class OverviewPage implements PhenomenaScreen.Page {
           new KButton(
                   "Hit sound settings",
                   () -> {
-                    s.state.settings = dev.phenomena.gui.ui.UiState.SettingsSection.FEEDBACK;
+                    s.state.settings = dev.phenomena.gui.ui.UiState.SettingsSection.AUDIO;
                     s.selectTab(UiState.Tab.SETTINGS);
                   })
               .content(),

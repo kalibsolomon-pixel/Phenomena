@@ -1,5 +1,6 @@
 package dev.phenomena.gui.components;
 
+import dev.phenomena.gui.pixel.Pixel;
 import dev.phenomena.gui.theme.Theme;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -48,9 +49,10 @@ public final class KTextField extends EditBox {
 
   @Override
   public void renderWidget(GuiGraphics g, int mx, int my, float d) {
-    int x = getX() - PAD, y = getY() - PAD, w = width + 2 * PAD, h = height + 2 * PAD;
-    g.fill(x, y, x + w, y + h, Theme.SURFACE_PRESSED);
-    g.renderOutline(x, y, w, h, isFocused() ? Theme.accent() : Theme.BORDER);
+    float x = getX() - PAD, y = getY() - PAD, w = width + 2 * PAD, h = height + 2 * PAD;
+    Pixel.rounded(g, x, y, w, h, Theme.RADIUS_SMALL, Theme.INSET);
+    Pixel.outline(g, x, y, w, h, Theme.RADIUS_SMALL, 1,
+        isFocused() ? Theme.accent() : Theme.BORDER_SOFT);
     super.renderWidget(g, mx, my, d);
   }
 }

@@ -3,6 +3,7 @@ package dev.phenomena.gui.components;
 import static dev.phenomena.gui.components.Blocks.*;
 
 import dev.phenomena.analytics.Format;
+import dev.phenomena.gui.pixel.Pixel;
 import dev.phenomena.gui.theme.Theme;
 import java.util.*;
 import net.minecraft.client.gui.GuiGraphics;
@@ -28,11 +29,11 @@ public final class FlowCharts {
     }
 
     public void render(GuiGraphics g, int x, int y, int w, int h, int mx, int my) {
-      g.fill(x, y + 5, x + w, y + 25, Theme.SURFACE_2);
+      Pixel.fillLogical(g, x, y + 5, x + w, y + 25, Theme.SURFACE_2);
       for (var ex : exchanges) {
         int from = x + (int) (w * Math.max(0, ex.start()) / duration);
         int to = x + (int) (w * Math.min(duration, ex.end()) / duration);
-        g.fill(from, y + 5, Math.max(from + 1, to), y + 25, LOCAL);
+        Pixel.fillLogical(g, from, y + 5, Math.max(from + 1, to), y + 25, LOCAL);
       }
       timeAxis(g, x, y + 30, w, duration);
     }
@@ -48,7 +49,7 @@ public final class FlowCharts {
   /** Time axis with start, middle and end labels in seconds. */
   static void timeAxis(GuiGraphics g, int px, int y, int pw, double duration) {
     var f = font();
-    g.fill(px, y, px + pw, y + 1, Theme.BORDER);
+    Pixel.fillLogical(g, px, y, px + pw, y + 1, Theme.BORDER);
     String a = "0 s", m = secs(duration / 2), b = secs(duration);
     g.drawString(f, a, px, y + 3, Theme.DIM, false);
     g.drawString(f, m, px + (pw - f.width(m)) / 2, y + 3, Theme.DIM, false);
@@ -59,8 +60,8 @@ public final class FlowCharts {
     var f = font();
     int lx = x;
     for (int i = 0; i < names.length; i++) {
-      if (hollow != null && hollow[i]) g.renderOutline(lx, y + 1, 6, 6, colors[i]);
-      else g.fill(lx, y + 1, lx + 6, y + 7, colors[i]);
+      if (hollow != null && hollow[i]) Pixel.outline(g, lx, y + 1, 6, 6, 2, 1, colors[i]);
+      else Pixel.fillLogical(g, lx, y + 1, lx + 6, y + 7, colors[i]);
       g.drawString(f, names[i], lx + 9, y, Theme.MUTED, false);
       lx += f.width(names[i]) + 20;
     }
@@ -118,13 +119,13 @@ public final class FlowCharts {
       int label = Math.max(f.width("Opponent"), f.width("You")) + 8;
       int px = x + label, pw = Math.max(20, w - label - 4);
       int laneH = 22, top = y + 4, bottom = top + laneH + 6;
-      g.fill(px, top, px + pw, top + laneH, Theme.alpha(Theme.SURFACE_2, 0x90));
-      g.fill(px, bottom, px + pw, bottom + laneH, Theme.alpha(Theme.SURFACE_2, 0x90));
+      Pixel.fillLogical(g, px, top, px + pw, top + laneH, Theme.alpha(Theme.SURFACE_2, 0x90));
+      Pixel.fillLogical(g, px, bottom, px + pw, bottom + laneH, Theme.alpha(Theme.SURFACE_2, 0x90));
       g.drawString(f, "You", x, top + 7, LOCAL, false);
       g.drawString(f, "Opponent", x, bottom + 7, OPPONENT, false);
       for (double b : boundaries) {
         int bx = sx(b, px, pw);
-        g.fill(bx, top, bx + 1, bottom + laneH, Theme.GRID);
+        Pixel.fillLogical(g, bx, top, bx + 1, bottom + laneH, Theme.GRID);
       }
       String hover = null;
       for (int i = 0; i < spans.size(); i++) {
@@ -132,8 +133,8 @@ public final class FlowCharts {
         int x0 = sx(s.start(), px, pw) - 2, x1 = Math.max(x0 + 5, sx(s.end(), px, pw) + 3);
         int ly = s.local() ? top : bottom;
         int color = s.local() ? LOCAL : OPPONENT;
-        g.fill(x0, ly + 3, x1, ly + laneH - 3, Theme.alpha(color, 0x55));
-        if (i == selected) g.renderOutline(x0 - 1, ly + 2, x1 - x0 + 2, laneH - 4, Theme.TEXT);
+        Pixel.fillLogical(g, x0, ly + 3, x1, ly + laneH - 3, Theme.alpha(color, 0x55));
+        if (i == selected) Pixel.outline(g, x0 - 1, ly + 2, x1 - x0 + 2, laneH - 4, 2, 1, Theme.TEXT);
         String n = "x" + s.length();
         int tx = Math.min(px + pw - f.width(n), Math.max(px, (x0 + x1 - f.width(n)) / 2));
         g.drawString(f, n, tx, s.local() ? ly - 1 : ly + laneH - 7, Theme.TEXT, false);
@@ -143,8 +144,8 @@ public final class FlowCharts {
         int cx = sx(m.time(), px, pw);
         int ly = m.local() ? top : bottom;
         int color = m.local() ? LOCAL : OPPONENT;
-        if (m.traded()) g.renderOutline(cx - 2, ly + laneH / 2 - 2, 5, 5, color);
-        else g.fill(cx - 1, ly + 6, cx + 1, ly + laneH - 6, color);
+        if (m.traded()) Pixel.outline(g, cx - 2, ly + laneH / 2 - 2, 5, 5, 2, 1, color);
+        else Pixel.fillLogical(g, cx - 1, ly + 6, cx + 1, ly + laneH - 6, color);
         if (Math.abs(mx - cx) <= 2 && my >= ly && my < ly + laneH && Viewport.contains(mx, my))
           hover = m.label();
       }
@@ -238,14 +239,14 @@ public final class FlowCharts {
       int gutter = Math.max(f.width(up), f.width(down)) + 6;
       int px = x + gutter, pw = Math.max(20, w - gutter - 4);
       int legendH = 24, py = y + 4, ph = Math.max(30, h - 26 - legendH);
-      g.fill(px, py, px + pw, py + ph, Theme.alpha(Theme.SURFACE_2, 0x90));
+      Pixel.fillLogical(g, px, py, px + pw, py + ph, Theme.alpha(Theme.SURFACE_2, 0x90));
       int zero = py + ph / 2;
       g.drawString(f, up, px - 4 - f.width(up), py, LOCAL, false);
       g.drawString(f, mid, px - 4 - f.width(mid), zero - 4, Theme.DIM, false);
       g.drawString(f, down, px - 4 - f.width(down), py + ph - 8, OPPONENT, false);
       for (double b : boundaries) {
         int bx = sx(b, px, pw);
-        for (int yy = py; yy < py + ph; yy += 4) g.fill(bx, yy, bx + 1, yy + 2, Theme.BORDER);
+        for (int yy = py; yy < py + ph; yy += 4) Pixel.fillLogical(g, bx, yy, bx + 1, yy + 2, Theme.BORDER);
       }
       boolean any = false;
       int prevY = 0;
@@ -264,9 +265,9 @@ public final class FlowCharts {
         int color = stateColor(s);
         if (s == 'C') {
           for (int yy = Math.min(vy, zero); yy <= Math.max(vy, zero); yy += 2)
-            if ((col + yy) % 4 == 0) g.fill(px + col, yy, px + col + 1, yy + 1, color);
+            if ((col + yy) % 4 == 0) Pixel.fillLogical(g, px + col, yy, px + col + 1, yy + 1, color);
         } else
-          g.fill(
+          Pixel.fillLogical(g, 
               px + col,
               Math.min(vy, zero),
               px + col + 1,
@@ -276,18 +277,18 @@ public final class FlowCharts {
         prevY = vy;
         pen = true;
       }
-      g.fill(px, zero, px + pw, zero + 1, Theme.alpha(Theme.TEXT, 0x80));
+      Pixel.fillLogical(g, px, zero, px + pw, zero + 1, Theme.alpha(Theme.TEXT, 0x80));
       for (var c : combos) {
         int x0 = sx(c[0], px, pw), x1 = Math.max(x0 + 2, sx(c[1], px, pw));
-        g.fill(x0, py + 4, x1, py + 6, Theme.alpha(LOCAL, 0xC0));
+        Pixel.fillLogical(g, x0, py + 4, x1, py + 6, Theme.alpha(LOCAL, 0xC0));
       }
       for (double t : localHits) {
         int cx = sx(t, px, pw);
-        g.fill(cx, py, cx + 1, py + 3, LOCAL);
+        Pixel.fillLogical(g, cx, py, cx + 1, py + 3, LOCAL);
       }
       for (double t : opponentHits) {
         int cx = sx(t, px, pw);
-        g.fill(cx, py + ph - 3, cx + 1, py + ph, OPPONENT);
+        Pixel.fillLogical(g, cx, py + ph - 3, cx + 1, py + ph, OPPONENT);
       }
       // State strip
       int sy = py + ph + 2;
@@ -295,7 +296,7 @@ public final class FlowCharts {
         double t = duration * col / Math.max(1, pw - 1);
         int k = Math.min(states.length - 1, Math.max(0, (int) Math.round(t / step)));
         int color = stateColor(states[k]);
-        if (color != 0) g.fill(px + col, sy, px + col + 1, sy + 3, color);
+        if (color != 0) Pixel.fillLogical(g, px + col, sy, px + col + 1, sy + 3, color);
       }
       timeAxis(g, px, sy + 5, pw, duration);
       legend(
@@ -310,7 +311,7 @@ public final class FlowCharts {
         double t = duration * (mx - px) / Math.max(1, pw - 1);
         int k = Math.min(values.length - 1, Math.max(0, (int) Math.round(t / step)));
         int cx = sx(t, px, pw);
-        g.fill(cx, py, cx + 1, py + ph, Theme.alpha(Theme.TEXT, 0x50));
+        Pixel.fillLogical(g, cx, py, cx + 1, py + ph, Theme.alpha(Theme.TEXT, 0x50));
         tooltip(
             g,
             secs(t)
@@ -376,8 +377,8 @@ public final class FlowCharts {
       // Shaded window
       double a = target - tolerance, b = target + tolerance;
       int wx0 = px + (int) Math.round(xOf(a) * slot), wx1 = px + (int) Math.round(xOf(b) * slot);
-      g.fill(wx0, py, Math.max(wx0 + 1, wx1), py + ph, Theme.alpha(GOOD, 0x30));
-      g.fill(px, py + ph, px + pw, py + ph + 1, Theme.BORDER);
+      Pixel.fillLogical(g, wx0, py, Math.max(wx0 + 1, wx1), py + ph, Theme.alpha(GOOD, 0x30));
+      Pixel.fillLogical(g, px, py + ph, px + pw, py + ph + 1, Theme.BORDER);
       g.drawString(f, top, px - 4 - f.width(top), py - 3, Theme.DIM, false);
       g.drawString(f, "0", px - 4 - f.width("0"), py + ph - 4, Theme.DIM, false);
       String hover = null;
@@ -386,12 +387,12 @@ public final class FlowCharts {
         int bh = max == 0 ? 0 : (int) Math.round((ph - 2) * bins[i] / (double) max);
         double mid = i == 0 ? LO - BIN : i == n - 1 ? HI + BIN : LO + (i - .5) * BIN;
         boolean in = Math.abs(mid - target) <= tolerance + 1e-9;
-        if (bins[i] > 0) g.fill(bx, py + ph - bh, bx + bw, py + ph, in ? GOOD : LOCAL);
+        if (bins[i] > 0) Pixel.fillLogical(g, bx, py + ph - bh, bx + bw, py + ph, in ? GOOD : LOCAL);
         if (hover(mx, my, bx, py, bw + 1, ph + 1))
           hover = range(i, n) + ": " + bins[i] + (in ? " (in target window)" : "");
       }
       int tx = px + (int) Math.round(xOf(target) * slot);
-      g.fill(tx, py, tx + 1, py + ph, Theme.TEXT);
+      Pixel.fillLogical(g, tx, py, tx + 1, py + ph, Theme.TEXT);
       // Axis labels every 0.5 blocks, in blocks.
       for (double v = LO; v <= HI + 1e-9; v += .5) {
         String l = Format.number(v, 1);
@@ -458,11 +459,11 @@ public final class FlowCharts {
           bottom = "-" + Format.number(range, 0) + " t";
       int gutter = Math.max(f.width(top), f.width(bottom)) + 6;
       int px = x + gutter, py = y + 4, pw = w - gutter - 4, ph = h - 32;
-      g.fill(px, py, px + pw, py + ph, Theme.alpha(Theme.SURFACE_2, 0x90));
+      Pixel.fillLogical(g, px, py, px + pw, py + ph, Theme.alpha(Theme.SURFACE_2, 0x90));
       int zero = py + ph / 2;
       int band = (int) Math.round(tolerance / range * (ph / 2.0));
-      g.fill(px, zero - band, px + pw, zero + band + 1, Theme.alpha(GOOD, 0x30));
-      g.fill(px, zero, px + pw, zero + 1, Theme.alpha(Theme.TEXT, 0x80));
+      Pixel.fillLogical(g, px, zero - band, px + pw, zero + band + 1, Theme.alpha(GOOD, 0x30));
+      Pixel.fillLogical(g, px, zero, px + pw, zero + 1, Theme.alpha(Theme.TEXT, 0x80));
       g.drawString(f, top, px - 4 - f.width(top), py, Theme.DIM, false);
       g.drawString(f, "0", px - 4 - f.width("0"), zero - 4, Theme.DIM, false);
       g.drawString(f, bottom, px - 4 - f.width(bottom), py + ph - 8, Theme.DIM, false);
@@ -472,7 +473,7 @@ public final class FlowCharts {
         var p = points.get(i);
         int cx = px + 3 + (int) Math.round((pw - 7) * (n == 1 ? .5 : i / (double) (n - 1)));
         if (p.reset() || !Double.isFinite(p.delta())) {
-          g.fill(cx, py + ph - 6, cx + 1, py + ph, Theme.MUTED);
+          Pixel.fillLogical(g, cx, py + ph - 6, cx + 1, py + ph, Theme.MUTED);
           if (Math.abs(mx - cx) <= 1 && hover(mx, my, px, py, pw, ph)) hover = p.label();
           continue;
         }
@@ -480,12 +481,12 @@ public final class FlowCharts {
         int cy = zero - (int) Math.round(v / range * (ph / 2.0 - 3));
         int color = gradeColor(p.grade());
         switch (p.outcome()) {
-          case "HIT" -> g.fill(cx - 1, cy - 1, cx + 2, cy + 2, color);
+          case "HIT" -> Pixel.fillLogical(g, cx - 1, cy - 1, cx + 2, cy + 2, color);
           case "SHIELD_BLOCK", "SHIELD_DISABLE" -> {
-            g.fill(cx, cy - 2, cx + 1, cy + 3, color);
-            g.fill(cx - 2, cy, cx + 3, cy + 1, color);
+            Pixel.fillLogical(g, cx, cy - 2, cx + 1, cy + 3, color);
+            Pixel.fillLogical(g, cx - 2, cy, cx + 3, cy + 1, color);
           }
-          default -> g.renderOutline(cx - 2, cy - 2, 5, 5, color);
+          default -> Pixel.outline(g, cx - 2, cy - 2, 5, 5, 2, 1, color);
         }
         if (Math.abs(mx - cx) <= 2 && Math.abs(my - cy) <= 3 && Viewport.contains(mx, my))
           hover = p.label();
@@ -534,10 +535,10 @@ public final class FlowCharts {
       double slot = pw / (double) counts.length;
       int w0 = px + (int) Math.round((RANGE - window) * slot);
       int w1 = px + (int) Math.round((RANGE + window + 1) * slot);
-      g.fill(w0, py, w1, py + ph, Theme.alpha(GOOD, 0x28));
+      Pixel.fillLogical(g, w0, py, w1, py + ph, Theme.alpha(GOOD, 0x28));
       int c0 = px + (int) Math.round(RANGE * slot);
-      g.renderOutline(c0, py, Math.max(2, (int) Math.round(slot)), ph, GOOD);
-      g.fill(px, py + ph, px + pw, py + ph + 1, Theme.BORDER);
+      Pixel.outline(g, c0, py, Math.max(2, (int) Math.round(slot)), ph, 2, 1, GOOD);
+      Pixel.fillLogical(g, px, py + ph, px + pw, py + ph + 1, Theme.BORDER);
       String hover = null;
       int dot = Math.max(2, Math.min(5, (int) (slot / 2)));
       for (int i = 0; i < counts.length; i++) {
@@ -547,7 +548,7 @@ public final class FlowCharts {
           int cy = py + ph - 2 - k * (dot + 1);
           int offset = i - RANGE;
           int color = offset == 0 ? GOOD : Math.abs(offset) <= window ? LOCAL : NEUTRAL;
-          g.fill(cx - dot / 2, cy - dot, cx - dot / 2 + dot, cy, color);
+          Pixel.fillLogical(g, cx - dot / 2, cy - dot, cx - dot / 2 + dot, cy, color);
         }
         if (hover(mx, my, px + (int) Math.round(i * slot), py, (int) Math.ceil(slot), ph + 1)) {
           int offset = i - RANGE;

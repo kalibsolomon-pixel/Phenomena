@@ -3,6 +3,7 @@ package dev.phenomena.gui.screens;
 import dev.phenomena.PhenomenaClient;
 import dev.phenomena.config.Config.Hud;
 import dev.phenomena.gui.components.ActionButton;
+import dev.phenomena.gui.pixel.Pixel;
 import dev.phenomena.gui.theme.Theme;
 import dev.phenomena.hud.CombatHud;
 import dev.phenomena.hud.layout.HudLayout;
@@ -130,12 +131,12 @@ public final class HudEditorScreen extends Screen {
 
   @Override
   public void render(GuiGraphics g, int mx, int my, float d) {
-    g.fill(0, 0, width, height, 0xA0111417);
+    Pixel.fillLogical(g, 0, 0, width, height, 0xA0111417);
     var h = items();
     var t = text();
     for (int i = 0; i < 3; i++) CombatHud.panel(g, h[i], t[i], PhenomenaClient.config.accent, true);
-    g.fill(0, 0, width, 56, Theme.BACKGROUND);
-    g.fill(0, height - 56, width, height, Theme.BACKGROUND);
+    Pixel.fillLogical(g, 0, 0, width, 56, Theme.BACKGROUND);
+    Pixel.fillLogical(g, 0, height - 56, width, height, Theme.BACKGROUND);
     g.drawString(font, "HUD editor / drag panels; arrows move; wheel scales", 16, 12, Theme.TEXT);
     super.render(g, mx, my, d);
     g.drawString(

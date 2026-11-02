@@ -1,5 +1,6 @@
 package dev.phenomena.gui.components;
 
+import dev.phenomena.gui.pixel.Pixel;
 import dev.phenomena.gui.theme.Theme;
 import java.util.function.*;
 import net.minecraft.client.Minecraft;
@@ -67,21 +68,32 @@ public final class KSlider extends AbstractSliderButton {
   @Override
   public void renderWidget(GuiGraphics g, int mx, int my, float d) {
     var font = Minecraft.getInstance().font;
-    int x = getX(), y = getY(), w = width, h = height;
+    float x = getX(), y = getY(), w = width, h = height;
     int accent = Theme.accent();
-    boolean hover = isHovered() || KButton.keyboardFocus(this);
-    g.fill(x, y, x + w, y + h, hover ? Theme.SURFACE_HOVER : Theme.SURFACE_2);
-    int track = y + h / 2;
-    g.fill(x + 4, track, x + w - 4, track + 1, Theme.BORDER);
-    int knob = x + 4 + (int) Math.round((w - 8) * value);
-    g.fill(x + 4, track, knob, track + 1, accent);
-    g.fill(knob - 2, y + 3, knob + 2, y + h - 3, hover ? Theme.TEXT : Theme.MUTED);
-    g.renderOutline(x, y, w, h, KButton.keyboardFocus(this) ? accent : Theme.BORDER);
+    boolean focus = KButton.keyboardFocus(this);
+    boolean hover = isHovered() || focus;
+    if (hover && hoverSince == 0L) hoverSince = System.nanoTime();
+    if (!hover) hoverSince = 0L;
+    float hv = Theme.ease(hoverSince);
+    Pixel.rounded(g, x, y, w, h, Theme.RADIUS_SMALL,
+        Theme.mix(Theme.SURFACE_2, Theme.SURFACE_HOVER, hv));
+    float trackY = y + h / 2f;
+    float trackL = x + 5, trackR = x + w - 5;
+    float knob = trackL + (trackR - trackL) * (float) value;
+    Pixel.line(g, trackL, trackY, trackR, trackY, 2, Theme.BORDER);
+    Pixel.line(g, trackL, trackY, knob, trackY, 2, accent);
+    float kr = 3.2f;
+    Pixel.circle(g, knob, trackY, kr, hover ? Theme.TEXT : Theme.MUTED);
+    Pixel.outline(g, x, y, w, h, Theme.RADIUS_SMALL, 1, Theme.BORDER_SOFT);
+    if (focus) KButton.focusRing(g, x, y, w, h);
     String text = format.apply(current());
     int tw = font.width(text);
     // Value sits on a small plate so it stays readable over the track.
-    int tx = x + w - tw - 6;
-    g.fill(tx - 2, y + (h - 10) / 2, tx + tw + 2, y + (h - 10) / 2 + 10, Theme.alpha(Theme.SURFACE, 0xE0));
-    g.drawString(font, text, tx, y + (h - 8) / 2, Theme.TEXT, false);
+    float tx = x + w - tw - 6;
+    Pixel.rounded(g, tx - 3, y + (h - 11) / 2f, tw + 6, 11, Theme.RADIUS_SMALL,
+        Theme.alpha(Theme.SURFACE, 0xE6));
+    g.drawString(font, text, Math.round(tx), Math.round(y + (h - 8) / 2f), Theme.TEXT, false);
   }
+
+  private long hoverSince;
 }

@@ -67,13 +67,17 @@ public final class UiState {
     }
   }
 
+  /** Functional settings groups; every setting appears in exactly one group. */
   public enum SettingsSection {
-    GENERAL("General"),
-    CONTROLS("Controls"),
-    FEEDBACK("Sounds"),
-    MEASUREMENT("Measurement"),
-    STORAGE("Recording & storage"),
-    INTERFACE("Interface");
+    RECORDING("Recording"),
+    SERVER_CAPTURE("Server capture"),
+    EXCHANGES("Combat exchanges"),
+    CLASSIFICATION("Attack classification"),
+    AUDIO("Audio feedback"),
+    APPEARANCE("Appearance"),
+    DATA("Data & exports"),
+    DIAGNOSTICS("Diagnostics"),
+    CONTROLS("Controls");
 
     public final String label;
 
@@ -116,7 +120,7 @@ public final class UiState {
   public OffenseSection offense = OffenseSection.ACCURACY;
   public DefenseSection defense = DefenseSection.INCOMING;
   public FlowSection flow = FlowSection.COMBOS;
-  public SettingsSection settings = SettingsSection.GENERAL;
+  public SettingsSection settings = SettingsSection.RECORDING;
   public Scope scope = Scope.LAST_25;
   public TrendMetric trend = TrendMetric.ACCURACY;
   public HistoryQuery.OutcomeFilter outcome = HistoryQuery.OutcomeFilter.ALL;

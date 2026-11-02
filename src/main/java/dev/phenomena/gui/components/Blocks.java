@@ -1,6 +1,7 @@
 package dev.phenomena.gui.components;
 
 import dev.phenomena.analytics.Format;
+import dev.phenomena.gui.pixel.Pixel;
 import dev.phenomena.gui.theme.Theme;
 import java.util.*;
 import net.minecraft.client.Minecraft;
@@ -33,27 +34,9 @@ public final class Blocks {
     g.setTooltipForNextFrame(font(), Component.literal(text), mx, my);
   }
 
-  /** One-pixel line by stepping; adequate for the few hundred segments a chart draws. */
-  static void line(GuiGraphics g, int x0, int y0, int x1, int y1, int color) {
-    int dx = x1 - x0, dy = y1 - y0;
-    int steps = Math.max(Math.abs(dx), Math.abs(dy));
-    if (steps == 0) {
-      g.fill(x0, y0, x0 + 1, y0 + 1, color);
-      return;
-    }
-    if (dy == 0) {
-      g.fill(Math.min(x0, x1), y0, Math.max(x0, x1) + 1, y0 + 1, color);
-      return;
-    }
-    if (dx == 0) {
-      g.fill(x0, Math.min(y0, y1), x0 + 1, Math.max(y0, y1) + 1, color);
-      return;
-    }
-    for (int i = 0; i <= steps; i++) {
-      int px = x0 + Math.round(dx * (float) i / steps),
-          py = y0 + Math.round(dy * (float) i / steps);
-      g.fill(px, py, px + 1, py + 1, color);
-    }
+  /** One-logical-pixel antialiased line at device resolution (chart segments). */
+  static void line(GuiGraphics g, float x0, float y0, float x1, float y1, int color) {
+    Pixel.line(g, x0, y0, x1, y1, 1, color);
   }
 
   // ---- text ----------------------------------------------------------------
@@ -95,8 +78,8 @@ public final class Blocks {
 
     @Override
     public void render(GuiGraphics g, int x, int y, int w, int h, int mx, int my) {
-      g.fill(x, y, x + w, y + h, Theme.alpha(Theme.SURFACE_2, 0xA0));
-      g.fill(x, y, x + 2, y + h, rule);
+      Pixel.rounded(g, x, y, w, h, Theme.RADIUS_SMALL, Theme.alpha(Theme.SURFACE_2, 0xA0));
+      Pixel.rounded(g, x, y, 2.5f, h, 1.25f, rule);
       for (int i = 0; i < lines.size(); i++)
         g.drawString(font(), lines.get(i), x + 8, y + 5 + i * 10, Theme.MUTED, false);
     }
@@ -120,8 +103,8 @@ public final class Blocks {
         String r = KButton.fit(f, right, Math.max(0, w - tw - 10));
         int rw = f.width(r);
         g.drawString(f, r, x + w - rw, y + 2, Theme.DIM, false);
-        g.fill(x + tw, y + 6, x + w - rw - 6, y + 7, Theme.BORDER_SOFT);
-      } else g.fill(x + tw, y + 6, x + w, y + 7, Theme.BORDER_SOFT);
+        Pixel.line(g, x + tw, y + 6.5f, x + w - rw - 6, y + 6.5f, 1, Theme.BORDER_SOFT);
+      } else Pixel.line(g, x + tw, y + 6.5f, x + w, y + 6.5f, 1, Theme.BORDER_SOFT);
     }
   }
 
@@ -159,8 +142,8 @@ public final class Blocks {
         int ch = cardH, step = cardH == 36 ? 11 : 9;
         int cx = x + (i % columns) * (cw + GAP), cy = y + (i / columns) * (ch + GAP);
         boolean hov = hover(mx, my, cx, cy, cw, ch);
-        g.fill(cx, cy, cx + cw, cy + ch, hov ? Theme.SURFACE_HOVER : Theme.SURFACE_2);
-        g.fill(cx, cy, cx + cw, cy + 1, Theme.BEVEL_LIGHT);
+        Pixel.rounded(g, cx, cy, cw, ch, Theme.RADIUS, hov ? Theme.SURFACE_HOVER : Theme.SURFACE_2);
+        Pixel.outline(g, cx, cy, cw, ch, Theme.RADIUS, 1, Theme.BORDER_SOFT);
         g.drawString(f, KButton.fit(f, s.label(), cw - 10), cx + 5, cy + 4, Theme.MUTED, false);
         g.drawString(
             f,
@@ -200,7 +183,7 @@ public final class Blocks {
     @Override
     public void render(GuiGraphics g, int x, int y, int w, int h, int mx, int my) {
       var f = font();
-      g.fill(x, y, x + w, y + 10, Theme.SURFACE_2);
+      Pixel.rounded(g, x, y, w, 10, 5, Theme.SURFACE_2);
       int cx = x;
       for (int i = 0; i < values.length; i++) {
         if (total == 0 || values[i] == 0) continue;
@@ -218,7 +201,7 @@ public final class Blocks {
       int lx = x;
       for (int i = 0; i < names.length; i++) {
         String label = names[i] + " " + values[i];
-        g.fill(lx, y + 17, lx + 6, y + 23, colors[i]);
+        Pixel.rounded(g, lx, y + 17, 6, 6, 2, colors[i]);
         g.drawString(f, label, lx + 9, y + 16, Theme.MUTED, false);
         lx += f.width(label) + 20;
       }
@@ -323,17 +306,19 @@ public final class Blocks {
           py = y + 4,
           pw = Math.max(10, w - gutter - 4),
           ph = Math.max(10, h - 18 - legendH);
-      g.fill(px, py, px + pw, py + ph, Theme.alpha(Theme.SURFACE_2, 0x90));
+      Pixel.rounded(g, px, py, pw, ph, Theme.RADIUS_SMALL, Theme.alpha(Theme.INSET, 0xB8));
       for (int i = 0; i <= 2; i++) {
         int gy = py + ph - i * ph / 2;
-        if (grid || i == 0) g.fill(px, gy, px + pw, gy + 1, i == 0 ? Theme.BORDER : Theme.GRID);
+        if (grid || i == 0)
+          Pixel.line(g, px + (i == 0 ? 0 : 2), gy - .5f, px + pw - (i == 0 ? 0 : 2), gy - .5f, 1,
+              i == 0 ? Theme.BORDER : Theme.GRID);
       }
       g.drawString(f, top, px - 4 - f.width(top), py - 3, Theme.DIM, false);
       g.drawString(f, mid, px - 4 - f.width(mid), py + ph / 2 - 4, Theme.DIM, false);
       g.drawString(f, bottom, px - 4 - f.width(bottom), py + ph - 4, Theme.DIM, false);
       if (zeroLine) {
         int zy = sy(0, py, ph);
-        g.fill(px, zy, px + pw, zy + 1, Theme.BORDER);
+        Pixel.line(g, px, zy - .5f, px + pw, zy - .5f, 1, Theme.BORDER);
       }
       if (xLabels != null && xLabels.length > 0) {
         String a = xLabels[0], b = xLabels[xLabels.length - 1];
@@ -367,9 +352,9 @@ public final class Blocks {
           int cx = sx(s.xs() == null ? i : s.xs()[i], px, pw), cy = sy(v, py, ph);
           if (s.mark() == Mark.LINE) {
             if (prev) line(g, prevX, prevY, cx, cy, s.color());
-            if (points && s.ys().length <= 120) g.fill(cx - 1, cy - 1, cx + 2, cy + 2, s.color());
-          } else if (s.mark() == Mark.POINTS) g.fill(cx - 1, cy - 1, cx + 2, cy + 2, s.color());
-          else g.renderOutline(cx - 2, cy - 2, 5, 5, s.color());
+            if (points && s.ys().length <= 120) Pixel.circle(g, cx + .5f, cy + .5f, 1.6f, s.color());
+          } else if (s.mark() == Mark.POINTS) Pixel.circle(g, cx + .5f, cy + .5f, 1.6f, s.color());
+          else Pixel.outline(g, cx - 2, cy - 2, 5, 5, 2, 1, s.color());
           if (inPlot) {
             double d = Math.abs(cx - mx) + (s.mark() == Mark.LINE ? 0 : Math.abs(cy - my) * .5);
             if (d < best) {
@@ -386,8 +371,8 @@ public final class Blocks {
       if (series.size() > 1) {
         int lx = px;
         for (var s : series) {
-          if (s.mark() == Mark.HOLLOW) g.renderOutline(lx, py + ph + 15, 6, 6, s.color());
-          else g.fill(lx, py + ph + 15, lx + 6, py + ph + 21, s.color());
+          if (s.mark() == Mark.HOLLOW) Pixel.outline(g, lx, py + ph + 15, 6, 6, 2, 1, s.color());
+          else Pixel.rounded(g, lx, py + ph + 15, 6, 6, 2, s.color());
           g.drawString(f, s.name(), lx + 9, py + ph + 14, Theme.MUTED, false);
           lx += f.width(s.name()) + 20;
         }
@@ -395,7 +380,7 @@ public final class Blocks {
       if (hs != null) {
         double xv = hs.xs() == null ? hi : hs.xs()[hi];
         int cx = sx(xv, px, pw);
-        g.fill(cx, py, cx + 1, py + ph, Theme.alpha(Theme.TEXT, 0x50));
+        Pixel.line(g, cx + .5f, py, cx + .5f, py + ph, 1, Theme.alpha(Theme.TEXT, 0x50));
         String where =
             hs.xs() == null && xLabels != null && hi < xLabels.length
                 ? xLabels[hi]
@@ -461,10 +446,10 @@ public final class Blocks {
       int gutter = f.width(top) + 6;
       int legendH = b != null ? 12 : 0;
       int px = x + gutter, py = y + 4, pw = w - gutter - 2, ph = h - 18 - legendH;
-      g.fill(px, py + ph, px + pw, py + ph + 1, Theme.BORDER);
+      Pixel.line(g, px, py + ph + .5f, px + pw, py + ph + .5f, 1, Theme.BORDER);
       g.drawString(f, top, px - 4 - f.width(top), py - 3, Theme.DIM, false);
       g.drawString(f, "0", px - 4 - f.width("0"), py + ph - 4, Theme.DIM, false);
-      if (grid()) g.fill(px, py, px + pw, py + 1, Theme.GRID);
+      if (grid()) Pixel.line(g, px, py - .5f, px + pw, py - .5f, 1, Theme.GRID);
       int n = labels.length;
       int slot = Math.max(1, pw / Math.max(1, n));
       int groups = b == null ? 1 : 2;
@@ -481,7 +466,10 @@ public final class Blocks {
           int bh = max == 0 ? 0 : (int) Math.round((ph - 2) * v / (double) max);
           int color = k == 1 ? colorB : barColors != null ? barColors[i] : colorA;
           int bx = sx0 + k * bw;
-          if (v > 0) g.fill(bx, py + ph - bh, bx + Math.max(1, bw - 1), py + ph, color);
+          if (v > 0)
+            Pixel.rounded(
+                g, bx, py + ph - bh, Math.max(1, bw - 1), Math.max(1, bh),
+                Math.min(2, (bw - 1) / 2f), color);
           if (hover(mx, my, bx, py, bw, ph + 1))
             tooltip(g, labels[i] + " / " + (k == 0 ? nameA : nameB) + ": " + v, mx, my);
         }
@@ -493,10 +481,10 @@ public final class Blocks {
       }
       if (b != null) {
         int lx = px;
-        g.fill(lx, py + ph + 15, lx + 6, py + ph + 21, colorA);
+        Pixel.rounded(g, lx, py + ph + 15, 6, 6, 2, colorA);
         g.drawString(f, nameA, lx + 9, py + ph + 14, Theme.MUTED, false);
         lx += f.width(nameA) + 20;
-        g.fill(lx, py + ph + 15, lx + 6, py + ph + 21, colorB);
+        Pixel.rounded(g, lx, py + ph + 15, 6, 6, 2, colorB);
         g.drawString(f, nameB, lx + 9, py + ph + 14, Theme.MUTED, false);
       }
     }
@@ -558,24 +546,24 @@ public final class Blocks {
           }
       }
       int q1 = by + bh / 4, q3 = by + bh * 3 / 4;
-      g.fill(bx, q1, bx + bw, q1 + 1, Theme.BORDER);
-      g.fill(bx, q3, bx + bw, q3 + 1, Theme.BORDER);
+      Pixel.line(g, bx, q1 + .5f, bx + bw, q1 + .5f, 1, Theme.BORDER);
+      Pixel.line(g, bx, q3 + .5f, bx + bw, q3 + .5f, 1, Theme.BORDER);
       int e1 = bx + (int) (bw * .15), e2 = bx + (int) Math.ceil(bw * .85);
-      g.fill(e1, q1, e1 + 1, q3, Theme.GRID);
-      g.fill(e2, q1, e2 + 1, q3, Theme.GRID);
-      g.renderOutline(bx - 1, by - 1, bw + 2, bh + 2, Theme.BORDER);
+      Pixel.line(g, e1 + .5f, q1, e1 + .5f, q3, 1, Theme.GRID);
+      Pixel.line(g, e2 + .5f, q1, e2 + .5f, q3, 1, Theme.GRID);
+      Pixel.outline(g, bx - 1, by - 1, bw + 2, bh + 2, Theme.RADIUS_SMALL, 1, Theme.BORDER);
       if (!heat) {
         for (var p : others) {
-          int cx = bx + (int) Math.round(p[0] * (bw - 1)),
-              cy = by + (int) Math.round((1 - p[1]) * (bh - 1));
-          g.renderOutline(cx - 2, cy - 2, 5, 5, Theme.SERIES_2);
+          float cx = bx + .5f + (float) (p[0] * (bw - 1)),
+              cy = by + .5f + (float) ((1 - p[1]) * (bh - 1));
+          Pixel.outline(g, cx - 2, cy - 2, 5, 5, 2, 1, Theme.SERIES_2);
         }
         for (var p : hits) {
-          int cx = bx + (int) Math.round(p[0] * (bw - 1)),
-              cy = by + (int) Math.round((1 - p[1]) * (bh - 1));
+          float cx = bx + .5f + (float) (p[0] * (bw - 1)),
+              cy = by + .5f + (float) ((1 - p[1]) * (bh - 1));
           int[] colors = {0xFF56B4E9, 0xFF009E73, 0xFFE69F00, 0xFFCC79A7};
           int color = p.length > 2 && p[2] >= 0 && p[2] < 4 ? colors[(int) p[2]] : Theme.SERIES_1;
-          g.fill(cx - 1, cy - 1, cx + 2, cy + 2, color);
+          Pixel.circle(g, cx, cy, 1.6f, color);
         }
       }
       int lx = bx + bw + 10;
@@ -585,11 +573,10 @@ public final class Blocks {
       String l1 = heat ? "Hit density" : "Correlated hit";
       int ly = by + bh - 20;
       int rx = x;
-      if (heat) g.fill(rx, ly, rx + 6, ly + 6, Theme.SEQ_HIGH);
-      else g.fill(rx, ly, rx + 6, ly + 6, Theme.SERIES_1);
+      Pixel.rounded(g, rx, ly, 6, 6, 2, heat ? Theme.SEQ_HIGH : Theme.SERIES_1);
       g.drawString(f, l1, rx + 9, ly - 1, Theme.MUTED, false);
       if (!heat) {
-        g.renderOutline(rx, ly + 12, 6, 6, Theme.SERIES_2);
+        Pixel.outline(g, rx, ly + 12, 6, 6, 2, 1, Theme.SERIES_2);
         g.drawString(f, "Contact, unconfirmed", rx + 9, ly + 11, Theme.MUTED, false);
       }
       if (hits.length == 0 && others.length == 0) {
@@ -627,9 +614,9 @@ public final class Blocks {
       for (float wt : weights) total += wt;
       int[] cw = new int[weights.length];
       for (int i = 0; i < cw.length; i++) cw[i] = (int) (w * weights[i] / total);
-      g.fill(x, y, x + w, y + ROW, Theme.SURFACE_2);
+      Pixel.rounded(g, x, y, w, ROW, Theme.RADIUS_SMALL, Theme.SURFACE_2);
       drawRow(g, f, headers, x, y + 2, cw, Theme.DIM);
-      g.fill(x, y + ROW, x + w, y + ROW + 1, Theme.BORDER_SOFT);
+      Pixel.line(g, x, y + ROW + .5f, x + w, y + ROW + .5f, 1, Theme.BORDER_SOFT);
       if (rows.isEmpty()) {
         g.drawString(f, "No rows", x + 4, y + ROW + 3, Theme.DIM, false);
         return;

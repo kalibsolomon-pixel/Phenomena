@@ -1,5 +1,6 @@
 package dev.phenomena.gui.components;
 
+import dev.phenomena.gui.pixel.Pixel;
 import dev.phenomena.gui.theme.Theme;
 import java.util.function.*;
 import net.minecraft.client.gui.GuiGraphics;
@@ -81,17 +82,17 @@ public final class ColorSwatches extends AbstractWidget {
   protected void renderWidget(GuiGraphics g, int mx, int my, float d) {
     int y = getY() + 2;
     int now = current.getAsInt() | 0xFF000000;
-    g.fill(getX(), y, getX() + CELL, y + CELL, now);
-    g.renderOutline(getX() - 1, y - 1, CELL + 2, CELL + 2, Theme.BORDER);
+    Pixel.fillLogical(g, getX(), y, getX() + CELL, y + CELL, now);
+    Pixel.outline(g, getX() - 1, y - 1, CELL + 2, CELL + 2, 2, 1, Theme.BORDER);
     for (int i = 0; i < PRESETS.length; i++) {
       int x = cellX(i);
       boolean hover = mx >= x && mx < x + CELL && my >= y && my < y + CELL;
-      g.fill(x, y, x + CELL, y + CELL, PRESETS[i]);
+      Pixel.fillLogical(g, x, y, x + CELL, y + CELL, PRESETS[i]);
       boolean chosen = (PRESETS[i] & 0xFFFFFF) == (now & 0xFFFFFF);
       if (chosen || hover || (isFocused() && i == cursor))
-        g.renderOutline(x - 1, y - 1, CELL + 2, CELL + 2, chosen ? Theme.TEXT : Theme.MUTED);
+        Pixel.outline(g, x - 1, y - 1, CELL + 2, CELL + 2, 2, 1, chosen ? Theme.TEXT : Theme.MUTED);
     }
-    if (KButton.keyboardFocus(this)) g.renderOutline(getX() - 3, getY(), width + 2, height, Theme.alpha(Theme.accent(), 0x80));
+    if (KButton.keyboardFocus(this)) Pixel.outline(g, getX() - 3, getY(), width + 2, height, 2, 1, Theme.alpha(Theme.accent(), 0x80));
   }
 
   @Override

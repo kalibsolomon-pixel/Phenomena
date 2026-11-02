@@ -1,5 +1,7 @@
 package dev.phenomena.hud;
 
+import dev.phenomena.gui.pixel.Pixel;
+
 import dev.phenomena.PhenomenaClient;
 import dev.phenomena.combat.metrics.*;
 import dev.phenomena.combat.tracking.ClientCapture;
@@ -117,8 +119,8 @@ public final class CombatHud {
     g.pose().translate(x, y);
     g.pose().scale((float) h.scale, (float) h.scale);
     int alpha = (int) (h.opacity * fade * 255) << 24;
-    if (h.background) g.fill(0, 0, w, height, alpha | 0x171C20);
-    g.fill(0, 0, 2, height, alpha | (accent & 0xFFFFFF));
+    if (h.background) Pixel.fillLogical(g, 0, 0, w, height, alpha | 0x171C20);
+    Pixel.fillLogical(g, 0, 0, 2, height, alpha | (accent & 0xFFFFFF));
     for (int i = 0; i < text.length; i++) {
       int tx = h.rightAligned ? w - 7 - Minecraft.getInstance().font.width(text[i]) : 8;
       g.drawString(
@@ -129,7 +131,7 @@ public final class CombatHud {
           alpha | ((i == 0 ? accent : 0xFFE6ECEA) & 0xFFFFFF),
           false);
     }
-    if (preview) g.renderOutline(0, 0, w, height, 0xFF88C8AA);
+    if (preview) Pixel.outline(g, 0, 0, w, height, 2, 1, 0xFF88C8AA);
     g.pose().popMatrix();
   }
 

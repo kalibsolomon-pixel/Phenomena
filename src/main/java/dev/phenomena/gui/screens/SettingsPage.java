@@ -73,23 +73,21 @@ final class SettingsPage implements PhenomenaScreen.Page {
   @Override
   public void build(Content c) {
     switch (s.state.settings) {
-      case GENERAL -> general(c);
+      case RECORDING -> recording(c);
+      case SERVER_CAPTURE -> serverCapture(c);
+      case EXCHANGES -> exchanges(c);
+      case CLASSIFICATION -> classification(c);
+      case AUDIO -> feedback(c);
+      case APPEARANCE -> ui(c);
+      case DATA -> data(c);
+      case DIAGNOSTICS -> diagnostics(c);
       case CONTROLS -> controls(c);
-      case FEEDBACK -> feedback(c);
-      case MEASUREMENT -> measurement(c);
-      case STORAGE -> storage(c);
-      case INTERFACE -> ui(c);
     }
   }
 
-  static KButton toggle(String id, BooleanSupplier get, Consumer<Boolean> set) {
-    return new KButton(
-            id,
-            KButton.Style.NORMAL,
-            () -> get.getAsBoolean() ? "On" : "Off",
-            () -> set.accept(!get.getAsBoolean()))
-        .selected(get)
-        .content();
+  /** Boolean settings use the real switch control; narration reads the label. */
+  static KToggle toggle(String id, BooleanSupplier get, Consumer<Boolean> set) {
+    return new KToggle(id, get, () -> set.accept(!get.getAsBoolean())).content();
   }
 
   private static KSlider slider(
@@ -103,7 +101,7 @@ final class SettingsPage implements PhenomenaScreen.Page {
     return new KSlider(id, v, min, max, step, fmt, set);
   }
 
-  private void general(Content c) {
+  private void recording(Content c) {
     var cfg = c();
     c.heading("Tracking");
     c.setting(
@@ -127,7 +125,7 @@ final class SettingsPage implements PhenomenaScreen.Page {
         "Fight summary in chat",
         "One local chat line when a fight ends. Never sent to the server.",
         toggle("Fight summary in chat", () -> cfg.chatSummary, v -> cfg.chatSummary = v));
-    c.heading("Data retention");
+    c.heading("Retention");
     c.setting(
         "Fights kept",
         "Maximum fights in session history; existing files are preserved.",
@@ -150,6 +148,32 @@ final class SettingsPage implements PhenomenaScreen.Page {
             1,
             v -> (int) v + " MiB",
             v -> cfg.maxStorageMb = v));
+    c.note(
+        "Configured matches and manual recordings never end because of inactivity. Manual recording"
+            + " is always available with /phenomena start and /phenomena end.");
+  }
+
+  private void serverCapture(Content c) {
+    var cfg = c();
+    c.heading("Capture environments", "how Phenomena decides what to record");
+    c.text(
+        "Six configured servers are recognized from their announcements and measured with"
+            + " server-specific adapters. Every other server uses generic combat capture: two"
+            + " players, nearby melee, and a clean inactivity timeout.");
+    c.setting(
+        "Diagnostic capture",
+        "Opt-in local evidence of server announcements; private chat is excluded by default. Export"
+            + " with /phenomena diagnostics export.",
+        toggle(
+            "Diagnostic capture",
+            () -> cfg.diagnosticCapture,
+            dev.phenomena.recording.RecordingCommands::diagnostics));
+    c.note(
+        "Compatibility inventory: phenomena/server-compatibility.json next to the game directory."
+            + " Server rules themselves are not configurable; they are part of the measurement.");
+  }
+
+  private void diagnostics(Content c) {
     c.heading("Reset");
     c.setting(
         "Reset all settings",
@@ -169,14 +193,19 @@ final class SettingsPage implements PhenomenaScreen.Page {
                           s.rebuild();
                         }))
             .content());
+    c.heading("Diagnostics");
+    c.text(
+        "Diagnostic capture and its export commands live in Server capture. Nothing is uploaded;"
+            + " every report path in this dashboard is local.");
   }
 
-  private void measurement(Content c) {
+  private void exchanges(Content c) {
     var cfg = c();
-    c.heading("Fight detection", "recording and combat measurement have separate timeouts");
+    c.heading("Two separate timeouts", "generic capture vs combat-exchange measurement");
     c.setting(
-        "Inactivity timeout",
-        "Applies only to generic combat capture on unconfigured servers.",
+        "Generic-capture inactivity timeout",
+        "Ends the whole recording when no combat is observed. Applies only to generic capture on"
+            + " unconfigured servers; configured matches are never cut by inactivity.",
         slider(
             "Inactivity timeout",
             cfg.inactivitySeconds,
@@ -186,8 +215,9 @@ final class SettingsPage implements PhenomenaScreen.Page {
             v -> Format.number(v, 1) + " s",
             v -> cfg.inactivitySeconds = v));
     c.setting(
-        "Combat-exchange timeout",
-        "Ends combat measurement after no qualifying interaction. The fight recording continues.",
+        "Combat-exchange inactivity timeout",
+        "Ends combat-exchange measurement after no qualifying interaction. The recording itself"
+            + " continues, so later exchanges reopen measurement.",
         slider(
             "Combat-exchange timeout",
             cfg.exchangeInactivitySeconds,
@@ -229,7 +259,13 @@ final class SettingsPage implements PhenomenaScreen.Page {
             1,
             v -> "±" + (int) v + " ticks",
             v -> cfg.jumpWindowTicks = (int) v));
-    c.note("Configured matches and manual recordings never end because of inactivity.");
+    c.note(
+        "The generic-capture timeout ends recordings; the exchange timeout only pauses combat"
+            + " measurement. Configured matches and manual recordings ignore both.");
+  }
+
+  private void classification(Content c) {
+    var cfg = c();
     c.heading("Reach and timing thresholds", "frozen into each new fight");
     c.setting(
         "Target reach",
@@ -437,43 +473,8 @@ final class SettingsPage implements PhenomenaScreen.Page {
             + " readiness thresholds are retained only for historical records.");
   }
 
-  private void storage(Content c) {
+  private void data(Content c) {
     var cfg = c();
-    c.heading("Recording");
-    c.setting(
-        "Diagnostic capture",
-        "Opt-in local server announcement evidence; private chat excluded by default.",
-        toggle(
-            "Diagnostic capture",
-            () -> cfg.diagnosticCapture,
-            dev.phenomena.recording.RecordingCommands::diagnostics));
-    c.setting(
-        "Record finished fights",
-        "Automatic JSON and HTML after finalization. Local folders include the known opponent"
-            + " name.",
-        toggle("Record finished fights", () -> cfg.recording, v -> cfg.recording = v));
-    c.setting(
-        "Fights kept",
-        null,
-        slider(
-            "Fights kept",
-            cfg.retention,
-            1,
-            1000,
-            1,
-            v -> Integer.toString((int) v),
-            v -> cfg.retention = (int) v));
-    c.setting(
-        "Storage budget",
-        null,
-        slider(
-            "Storage budget",
-            cfg.maxStorageMb,
-            1,
-            1024,
-            1,
-            v -> (int) v + " MiB",
-            v -> cfg.maxStorageMb = v));
     c.heading("Export and browser reports");
     c.setting(
         "Anonymize reports",

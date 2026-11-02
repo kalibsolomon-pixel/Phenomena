@@ -143,7 +143,7 @@ final class HistoryPage implements PhenomenaScreen.Page {
       c.note("No local recordings yet. Finished fights are saved to phenomena/fights.");
       return;
     }
-    int rowH = c.compact ? 12 : 14;
+    int rowH = c.compact ? 14 : 17;
     c.widget(
         new FightList(
             fights,
@@ -155,13 +155,13 @@ final class HistoryPage implements PhenomenaScreen.Page {
               if (changed) s.rebuild(); // enables the selection toolbar
             },
             this::open,
-            id -> FightActions.viewInBrowser(DataCache.summary(id)),
+            null, // no per-row action column; the toolbar owns contextual actions
             s::reveal),
         FightList.heightFor(fights.size(), rowH));
     c.text(
         fights.size()
-            + " shown. Click to select, click again or press Enter for details. Up/Down"
-            + " moves the selection when the list is focused.");
+            + " shown. Click a row to select it; click again or press Enter for details. The"
+            + " toolbar above acts on the selected fight.");
   }
 
   private void open(String id) {

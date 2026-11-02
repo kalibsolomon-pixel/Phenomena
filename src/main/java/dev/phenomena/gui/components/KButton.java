@@ -1,5 +1,6 @@
 package dev.phenomena.gui.components;
 
+import dev.phenomena.gui.pixel.Pixel;
 import dev.phenomena.gui.theme.Theme;
 import java.util.function.*;
 import net.minecraft.client.Minecraft;
@@ -10,8 +11,10 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
 /**
- * Compact vanilla-backed button (focus, keyboard activation and narration come from Button) with
- * a flat charcoal face and a one-pixel Minecraft-style bevel. Labels may be dynamic.
+ * Vanilla-backed button (focus, keyboard activation and narration come from Button) painted
+ * with the per-pixel renderer: rounded faces, short hover/press transitions, and a focus ring
+ * drawn one gap outside the control so it stays visible on selected peers. Labels may be
+ * dynamic.
  */
 public class KButton extends Button {
   public enum Style {
@@ -29,6 +32,7 @@ public class KButton extends Button {
   private BooleanSupplier selected = () -> false;
   private boolean content;
   private String shown = "";
+  private long hoverSince;
 
   public KButton(String id, Style style, Supplier<String> label, Runnable action) {
     super(0, 0, 60, 20, Component.literal(label.get()), b -> action.run(), DEFAULT_NARRATION);
@@ -105,61 +109,97 @@ public class KButton extends Button {
     var font = Minecraft.getInstance().font;
     boolean sel = isSelected();
     boolean ring = keyboardFocus(this);
-    boolean hover = active && (isHovered() || ring);
-    boolean pressed =
-        active && isHovered() && Minecraft.getInstance().mouseHandler.isLeftPressed();
-    int x = getX(), y = getY(), w = width, h = height;
+    boolean hovered = active && (isHovered() || ring);
+    boolean pressed = active && isHovered() && Minecraft.getInstance().mouseHandler.isLeftPressed();
+    if (hovered && hoverSince == 0L) hoverSince = System.nanoTime();
+    if (!hovered) hoverSince = 0L;
+    float hover = Theme.ease(hoverSince);
+    float x = getX(), y = getY(), w = width, h = height;
     int accent = Theme.accent();
     int text0 = active ? Theme.TEXT : Theme.DIM;
     switch (style) {
       case TAB -> {
-        if (sel) g.fill(x, y, x + w, y + h, Theme.SURFACE);
-        else if (hover) g.fill(x, y, x + w, y + h, Theme.SURFACE_2);
-        if (sel) g.fill(x, y + h - 2, x + w, y + h, accent);
-        text0 = sel ? Theme.TEXT : hover ? Theme.TEXT : Theme.MUTED;
+        // Flat at rest; a quiet face appears on hover. The screen draws the active-tab accent
+        // edge so it can animate between tabs — no static underline here.
+        if (sel)
+          Pixel.rounded(g, x, y, w, h, Theme.RADIUS_SMALL, Theme.alpha(Theme.SURFACE_HOVER, 0x70));
+        else if (hover > 0)
+          Pixel.rounded(
+              g, x, y, w, h, Theme.RADIUS_SMALL, Theme.alpha(Theme.SURFACE_HOVER, (int) (0x50 * hover)));
+        text0 = sel ? Theme.TEXT : hover > 0 ? Theme.MUTED : Theme.DIM;
       }
       case CHIP -> {
-        int face = sel ? Theme.SURFACE_HOVER : hover ? Theme.SURFACE_2 : Theme.SURFACE;
-        g.fill(x, y, x + w, y + h, face);
-        g.renderOutline(x, y, w, h, sel ? Theme.alpha(accent, 0xB0) : Theme.BORDER_SOFT);
+        int face =
+            sel ? Theme.mix(Theme.SURFACE_2, accent, 0.12)
+                : Theme.mix(Theme.SURFACE, Theme.SURFACE_HOVER, hover);
+        Pixel.rounded(g, x, y, w, h, h / 2f, face);
+        Pixel.outline(
+            g, x, y, w, h, h / 2f, 1,
+            sel ? Theme.alpha(accent, 0xB0) : Theme.alpha(Theme.BORDER_SOFT, 0xB0));
         text0 = sel ? Theme.TEXT : active ? Theme.MUTED : Theme.DIM;
-        if (sel) g.fill(x + 1, y + h - 2, x + w - 1, y + h - 1, accent);
       }
       case SUBTLE -> {
-        if (hover) g.fill(x, y, x + w, y + h, Theme.SURFACE_2);
-        if (hover) g.renderOutline(x, y, w, h, Theme.BORDER_SOFT);
-        text0 = active ? (hover ? Theme.TEXT : Theme.MUTED) : Theme.DIM;
+        if (hover > 0)
+          Pixel.rounded(
+              g, x, y, w, h, Theme.RADIUS_SMALL, Theme.alpha(Theme.SURFACE_2, (int) (255 * hover)));
+        text0 = active ? (hover > 0 ? Theme.TEXT : Theme.MUTED) : Theme.DIM;
+      }
+      case PRIMARY -> {
+        if (!active) {
+          Pixel.rounded(g, x, y, w, h, Theme.RADIUS_SMALL, Theme.SURFACE);
+          Pixel.outline(g, x, y, w, h, Theme.RADIUS_SMALL, 1, Theme.BORDER_SOFT);
+          text0 = Theme.DIM;
+        } else {
+          int face =
+              pressed ? Theme.accentPressed()
+                  : hover > 0 ? Theme.mix(accent, Theme.accentHover(), hover) : accent;
+          Pixel.rounded(g, x, y, w, h, Theme.RADIUS_SMALL, face);
+          text0 = onAccent(face);
+        }
+      }
+      case DANGER -> {
+        // Destructive: neutral face with a red label; commits to solid red on press.
+        int face = pressed ? Theme.SURFACE_PRESSED : Theme.mix(Theme.SURFACE_2, Theme.SURFACE_HOVER, hover);
+        Pixel.rounded(g, x, y, w, h, Theme.RADIUS_SMALL, face);
+        Pixel.outline(g, x, y, w, h, Theme.RADIUS_SMALL, 1, Theme.BORDER_SOFT);
+        if (active && pressed) {
+          Pixel.rounded(g, x, y, w, h, Theme.RADIUS_SMALL, Theme.ERROR);
+          text0 = 0xFF1A100E;
+        } else text0 = active ? Theme.ERROR : Theme.DIM;
       }
       default -> {
         int face =
-            pressed
-                ? Theme.SURFACE_PRESSED
-                : hover
-                    ? Theme.SURFACE_HOVER
-                    : style == Style.PRIMARY ? Theme.mix(Theme.SURFACE_2, accent, .16) : Theme.SURFACE_2;
-        g.fill(x, y, x + w, y + h, face);
-        if (!pressed) {
-          g.fill(x + 1, y + 1, x + w - 1, y + 2, Theme.BEVEL_LIGHT);
-          g.fill(x + 1, y + h - 2, x + w - 1, y + h - 1, Theme.BEVEL_DARK);
-        }
-        int border =
-            style == Style.DANGER && active
-                ? Theme.alpha(Theme.ERROR, 0x90)
-                : style == Style.PRIMARY && active ? Theme.alpha(accent, 0x90) : Theme.BORDER;
-        g.renderOutline(x, y, w, h, ring ? accent : border);
-        if (style == Style.DANGER && active) text0 = Theme.ERROR;
+            pressed ? Theme.SURFACE_PRESSED : Theme.mix(Theme.SURFACE_2, Theme.SURFACE_HOVER, hover);
+        Pixel.rounded(g, x, y, w, h, Theme.RADIUS_SMALL, face);
+        Pixel.outline(g, x, y, w, h, Theme.RADIUS_SMALL, 1, Theme.BORDER_SOFT);
+        if (!pressed) Pixel.fillLogical(g, x + 2, y + 1.5f, x + w - 2, y + 2, Theme.BEVEL_LIGHT);
       }
     }
-    String fitted = fit(font, text, w - 8);
-    g.drawString(
-        font,
-        fitted,
-        x + (w - font.width(fitted)) / 2,
-        y + (h - 8) / 2 + (pressed ? 1 : 0),
-        text0,
-        false);
-    if (ring && (style == Style.TAB || style == Style.CHIP || style == Style.SUBTLE))
-      g.renderOutline(x, y, w, h, Theme.alpha(accent, 0xC0));
+    if (ring) focusRing(g, x, y, w, h);
+    String fitted = fit(font, text, (int) (w - 8));
+    int fx = Math.round(x + (w - font.width(fitted)) / 2f);
+    int fy = Math.round(y + (h - 8) / 2f + (pressed ? 1 : 0));
+    g.drawString(font, fitted, fx, fy, text0, false);
+  }
+
+  /** Keyboard focus ring, one gap outside the face so it reads on selected/hovered peers. */
+  public static void focusRing(GuiGraphics g, float x, float y, float w, float h) {
+    Pixel.outline(
+        g,
+        x - Theme.FOCUS_GAP,
+        y - Theme.FOCUS_GAP,
+        w + 2 * Theme.FOCUS_GAP,
+        h + 2 * Theme.FOCUS_GAP,
+        Theme.RADIUS_SMALL + Theme.FOCUS_GAP,
+        1,
+        Theme.alpha(Theme.accent(), 0xD0));
+  }
+
+  /** Readable label color on an accent-colored fill. */
+  public static int onAccent(int argb) {
+    int r = (argb >>> 16) & 0xFF, gg = (argb >>> 8) & 0xFF, b = argb & 0xFF;
+    double luminance = 0.2126 * r + 0.7152 * gg + 0.0722 * b;
+    return luminance > 140 ? 0xFF101418 : 0xFFF2F6F4;
   }
 
   /** Focus rings follow keyboard navigation only, like vanilla; mouse clicks do not leave one. */

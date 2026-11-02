@@ -9,9 +9,10 @@
 <style>
 :root{
   color-scheme:dark;
-  --bg:#111417;--surface:#1b2025;--surface-2:#22282d;--hover:#2c3338;--pressed:#16191c;
-  --border:#3b434b;--border-soft:#2c3238;--grid:#2a3036;
-  --text:#e6ecea;--muted:#9aa6ac;--dim:#7d878d;
+  --bg:#101316;--surface:#171c21;--surface-2:#1d2329;--hover:#262d34;--pressed:#12161a;
+  --inset:#12161a;--border:#39424b;--border-soft:#2a3138;--grid:#252c33;
+  --text:#e8edeb;--muted:#9ba7ad;--dim:#6d777d;
+  --radius:4px;
   --accent:#88c8aa;--warn:#e4c46e;
   --you:#3987e5;--opp:#d95926;--good:#199e70;--neutral:#8a949a;--incomplete:#5e676d;
   --ideal:#56b4e9;--goodaim:#009e73;--peripheral:#e69f00;--poor:#cc79a7;
@@ -26,7 +27,7 @@ header.top .wrap{display:flex;align-items:center;gap:14px;padding-top:12px;paddi
 .brand{font-weight:700;letter-spacing:.14em;color:var(--accent)}
 .sub{color:var(--dim)}
 .badges{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
-.badge{border:1px solid var(--border);padding:1px 7px;color:var(--muted);font-size:12px}
+.badge{border:1px solid var(--border);border-radius:var(--radius);padding:1px 7px;color:var(--muted);font-size:12px}
 .ident{padding:16px 0 4px}
 .ident h1{font-size:18px;margin:0 0 4px;font-weight:700}
 .ident p{margin:0;color:var(--muted)}
@@ -35,7 +36,7 @@ nav.tabs button{background:transparent;border:0;border-bottom:2px solid transpar
 nav.tabs button:hover{background:var(--surface-2);color:var(--text)}
 nav.tabs button[aria-selected=true]{background:var(--surface);color:var(--text);border-bottom-color:var(--accent)}
 button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-main.panel{background:var(--surface);border:1px solid var(--border-soft);border-top:0;padding:16px}
+main.panel{background:var(--surface);border:1px solid var(--border-soft);border-top:0;border-radius:0 0 var(--radius) var(--radius);padding:16px}
 section[role=tabpanel]{display:none}
 section[role=tabpanel].on{display:block}
 nav.sections{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 6px}
